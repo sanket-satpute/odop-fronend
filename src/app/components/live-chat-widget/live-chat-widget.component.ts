@@ -2,12 +2,12 @@ import { Component, OnInit, OnDestroy, ElementRef, ViewChild, HostListener } fro
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { 
-  ChatService, 
-  ChatRoom, 
+import {
+  ChatService,
+  ChatRoom,
   ChatMessage as ServiceChatMessage,
   CreateChatRoomRequest,
-  SendMessageRequest 
+  SendMessageRequest
 } from '../../services/chat.service';
 
 interface ChatMessage {
@@ -26,23 +26,21 @@ interface QuickReply {
 
 @Component({
   selector: 'app-live-chat-widget',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
   templateUrl: './live-chat-widget.component.html',
   styleUrls: ['./live-chat-widget.component.css']
 })
 export class LiveChatWidgetComponent implements OnInit, OnDestroy {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
-  
+
   private destroy$ = new Subject<void>();
-  
+
   // UI State
   isOpen: boolean = false;
   isMinimized: boolean = false;
   isConnected: boolean = false;
   isConnecting: boolean = false;
   activeView: 'welcome' | 'rooms' | 'chat' = 'welcome';
-  
+
   // Chat Data
   newMessage: string = '';
   messages: ChatMessage[] = [];
@@ -52,7 +50,7 @@ export class LiveChatWidgetComponent implements OnInit, OnDestroy {
   unreadCount: number = 0;
   agentName: string = 'Support Agent';
   agentAvatar: string = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100';
-  
+
   quickReplies: QuickReply[] = [
     { text: 'Track my order', action: 'track_order', icon: '📦' },
     { text: 'Return/Refund', action: 'return_refund', icon: '🔄' },
@@ -71,7 +69,7 @@ export class LiveChatWidgetComponent implements OnInit, OnDestroy {
     'default': 'Thank you for your message. Let me help you with that.'
   };
 
-  constructor(private chatService: ChatService) {}
+  constructor(private chatService: ChatService) { }
 
   ngOnInit(): void {
     // Subscribe to chat service observables
@@ -128,7 +126,7 @@ export class LiveChatWidgetComponent implements OnInit, OnDestroy {
           timestamp: new Date(message.timestamp)
         };
         this.messages.push(localMessage);
-        
+
         if (!this.isOpen) {
           this.unreadCount++;
           this.playNotificationSound();
@@ -141,8 +139,8 @@ export class LiveChatWidgetComponent implements OnInit, OnDestroy {
     try {
       const audio = new Audio('assets/sounds/notification.mp3');
       audio.volume = 0.3;
-      audio.play().catch(() => {});
-    } catch {}
+      audio.play().catch(() => { });
+    } catch { }
   }
 
   toggleChat(): void {
@@ -243,7 +241,7 @@ export class LiveChatWidgetComponent implements OnInit, OnDestroy {
     if (!this.newMessage.trim()) return;
 
     const messageText = this.newMessage.trim();
-    
+
     // If connected to service and have active room, send via service
     if (this.isConnected && this.activeRoom) {
       // sendMessage is void, so no subscription needed
@@ -291,9 +289,9 @@ export class LiveChatWidgetComponent implements OnInit, OnDestroy {
     // Simulate typing delay
     setTimeout(() => {
       this.isAgentTyping = false;
-      
+
       const response = customResponse || this.getAutoResponse(userMessage);
-      
+
       const agentMessage: ChatMessage = {
         id: this.generateId(),
         text: response,
@@ -302,18 +300,18 @@ export class LiveChatWidgetComponent implements OnInit, OnDestroy {
       };
 
       this.messages.push(agentMessage);
-      
+
       if (!this.isOpen) {
         this.unreadCount++;
       }
-      
+
       this.scrollToBottom();
     }, 1500);
   }
 
   private getAutoResponse(message: string): string {
     const lowerMessage = message.toLowerCase();
-    
+
     if (lowerMessage.includes('order') && lowerMessage.includes('track')) {
       return this.autoResponses['track_order'];
     } else if (lowerMessage.includes('return') || lowerMessage.includes('refund')) {
@@ -325,7 +323,7 @@ export class LiveChatWidgetComponent implements OnInit, OnDestroy {
     } else if (lowerMessage.includes('thank')) {
       return 'You are welcome! Is there anything else I can help you with?';
     }
-    
+
     return this.autoResponses['default'];
   }
 

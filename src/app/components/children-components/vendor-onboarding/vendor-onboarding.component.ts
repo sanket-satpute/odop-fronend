@@ -23,9 +23,6 @@ export interface OnboardingStep {
   selector: 'app-vendor-onboarding',
   templateUrl: './vendor-onboarding.component.html',
   styleUrls: ['./vendor-onboarding.component.css']
-  ,
-  standalone: true,
-  imports: [CommonModule]
 })
 export class VendorOnboardingComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -47,7 +44,7 @@ export class VendorOnboardingComponent implements OnInit, OnDestroy {
     public userState: UserStateService,
     private productService: ProductServiceService,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.showOnboarding = localStorage.getItem('vendor_onboarding_dismissed') !== 'true';

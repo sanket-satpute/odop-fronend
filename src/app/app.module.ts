@@ -1,8 +1,11 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatTabsModule } from '@angular/material/tabs';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatTabsModule } from '@angular/material/tabs';
+
+
 import { Observable } from 'rxjs';
 
 import { HttpErrorInterceptor } from './project/interceptors/http-error.interceptor';
@@ -27,7 +30,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -137,33 +140,8 @@ import { CompareSelectDialogComponent } from './components/dialogs/compare-selec
 import { SafeUrlPipe } from './project/pipes/safe-url.pipe';
 
 @NgModule({
-  declarations: [],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatTabsModule,
-    HttpClientModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatSnackBarModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatNativeDateModule,
-    MatDatepickerModule,
-    MatCheckboxModule,
-    MatRadioModule,
-    MatDividerModule,
-    MatProgressBarModule,
-    BrowserAnimationsModule,
-    LiveChatWidgetComponent,
-    SafeUrlPipe,
+  declarations: [
     AppComponent,
-    HomePageComponentComponent,
     ProductListingPageComponentComponent,
     ShoppingCartPageComponent,
     CheckoutPageComponent,
@@ -196,7 +174,7 @@ import { SafeUrlPipe } from './project/pipes/safe-url.pipe';
     ProductsComponentComponent,
     DashboardComponentComponent,
     CustUpdateProfileDialComponent,
-    MainStarterComponent,
+
     CustomerProfileComponent,
     CustomerSupportComponent,
     CustomerWalletComponent,
@@ -216,7 +194,7 @@ import { SafeUrlPipe } from './project/pipes/safe-url.pipe';
     VendorDashboardCertificationsComponent,
     VendorDashboardStoreSettingsComponent,
     VendorDashboardVerificationComponent,
-    VendorOnboardingComponent,
+
     AdminDashboardUserManagementComponent,
     AdminDashboardProductsComponent,
     AdminDashboardOrdersComponent,
@@ -264,7 +242,36 @@ import { SafeUrlPipe } from './project/pipes/safe-url.pipe';
     QuickViewDialogComponent,
     VendorDiscoveryCardComponent,
     CompareDialogComponent,
-    CompareSelectDialogComponent
+    CompareSelectDialogComponent,
+    HomePageComponentComponent,
+    MainStarterComponent,
+    VendorOnboardingComponent,
+    LiveChatWidgetComponent,
+    SafeUrlPipe
+
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatTabsModule,
+    HttpClientModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatSnackBarModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatNativeDateModule,
+    MatDatepickerModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatDividerModule,
+    MatProgressBarModule,
+    BrowserAnimationsModule
   ],
   providers: [
     {
@@ -281,6 +288,6 @@ import { SafeUrlPipe } from './project/pipes/safe-url.pipe';
     LoadingService,
     DataHandlerService
   ],
-  // No bootstrap array for standalone components
+  bootstrap: [AppComponent]
 })
 export class AppModule { }

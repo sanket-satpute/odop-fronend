@@ -15,19 +15,12 @@ import { VendorDiscoveryCardComponent } from '../vendor-discovery-card/vendor-di
 @Component({
   selector: 'app-home-page-component',
   templateUrl: './home-page-component.component.html',
-  styleUrls: ['./home-page-component.component.css'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    SkeletonLoaderComponent,
-    RecentlyViewedComponent,
-    VendorDiscoveryCardComponent
-  ]
+  styleUrls: ['./home-page-component.component.css']
 })
 export class HomePageComponentComponent implements OnInit, AfterViewInit {
 
   products: any;
-  
+
   // Featured products from backend
   featuredProducts: Product[] = [];
   isLoadingFeatured: boolean = true;
@@ -38,7 +31,7 @@ export class HomePageComponentComponent implements OnInit, AfterViewInit {
     private uservice: CustomerServiceService,
     private productService: ProductServiceService,
     public userState: UserStateService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Load featured products dynamically

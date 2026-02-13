@@ -34,9 +34,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 @Component({
   selector: 'app-main-starter',
   templateUrl: './main-starter.component.html',
-  styleUrls: ['./main-starter.component.css'],
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatProgressSpinnerModule]
+  styleUrls: ['./main-starter.component.css']
 })
 export class MainStarterComponent implements OnInit, OnDestroy {
 
@@ -73,7 +71,7 @@ export class MainStarterComponent implements OnInit, OnDestroy {
   title = 'odop-project';
 
   product_name = 'all'
-  name:string[] = []
+  name: string[] = []
 
   // Profile image loading states
   isLoadingImage = false;
@@ -101,7 +99,7 @@ export class MainStarterComponent implements OnInit, OnDestroy {
     private viewportScroller: ViewportScroller,
     private searchService: SearchService,
     private locationService: LocationService
-    ) {}
+  ) { }
 
   ngOnInit(): void {
     // Check initial screen size
@@ -397,10 +395,10 @@ export class MainStarterComponent implements OnInit, OnDestroy {
     }
   }
 
-    extractDriveFileId(url: string): string | null {
-      const match = url.match(/id=([^&]+)/);
-      return match ? match[1] : null;
-    }
+  extractDriveFileId(url: string): string | null {
+    const match = url.match(/id=([^&]+)/);
+    return match ? match[1] : null;
+  }
 
   // UI Part
   openRegisterDialog(): void {
@@ -546,49 +544,49 @@ export class MainStarterComponent implements OnInit, OnDestroy {
     return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`;
   }
 
-    searchThing() {
-      if (!this.GLOBAL_SEARCH.trim()) {
-        alert("Search input cannot be empty");
-        return;
+  searchThing() {
+    if (!this.GLOBAL_SEARCH.trim()) {
+      alert("Search input cannot be empty");
+      return;
+    }
+    this.closeMobileMenu();
+    this.startSearchAnimation();
+
+    // Short animation delay, then navigate
+    setTimeout(() => {
+      if (this.isVendorOnlySession()) {
+        this.router.navigate(['/vendor-dashboard/vendor-products'], {
+          queryParams: { search: this.GLOBAL_SEARCH.trim() }
+        });
+      } else {
+        this.router.navigate(['/products'], {
+          queryParams: { search: this.GLOBAL_SEARCH.trim() }
+        });
       }
-      this.closeMobileMenu();
-      this.startSearchAnimation();
+      this.completeSearchAnimation();
+    }, 500);
+  }
 
-      // Short animation delay, then navigate
-      setTimeout(() => {
-        if (this.isVendorOnlySession()) {
-          this.router.navigate(['/vendor-dashboard/vendor-products'], {
-            queryParams: { search: this.GLOBAL_SEARCH.trim() }
-          });
-        } else {
-          this.router.navigate(['/products'], {
-            queryParams: { search: this.GLOBAL_SEARCH.trim() }
-          });
-        }
-        this.completeSearchAnimation();
-      }, 500);
-    }
+  private startSearchAnimation() {
+    this.isSearching = true;
+    this.progressValue = 0;
 
-    private startSearchAnimation() {
-      this.isSearching = true;
-      this.progressValue = 0;
-
-      this.progressInterval = setInterval(() => {
-        this.progressValue += Math.random() * 15 + 5;
-        if (this.progressValue > 100) {
-          this.progressValue = 100;
-          clearInterval(this.progressInterval);
-        }
-      }, 100);
-    }
-
-    private completeSearchAnimation() {
-      this.isSearching = false;
-      this.progressValue = 0;
-      if (this.progressInterval) {
+    this.progressInterval = setInterval(() => {
+      this.progressValue += Math.random() * 15 + 5;
+      if (this.progressValue > 100) {
+        this.progressValue = 100;
         clearInterval(this.progressInterval);
       }
+    }, 100);
+  }
+
+  private completeSearchAnimation() {
+    this.isSearching = false;
+    this.progressValue = 0;
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
     }
+  }
 
   // ============== AUTOCOMPLETE METHODS ==============
 
@@ -799,7 +797,7 @@ export class MainStarterComponent implements OnInit, OnDestroy {
   }
 
   tabChanged() {
-    if(this.GLOBAL_SEARCH.trim() != '') {
+    if (this.GLOBAL_SEARCH.trim() != '') {
       this.GLOBAL_SEARCH = ''; // Clear search input after initiating search
       this.isSearching = false; // Reset search state
       this.progressValue = 0; // Reset progress bar
