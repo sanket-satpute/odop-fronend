@@ -1,9 +1,9 @@
 // Production environment configuration
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://api.odop-marketplace.gov.in/odop/',
-  apiUrl: 'https://api.odop-marketplace.gov.in',  // Base API URL without path
-  authUrl: 'https://api.odop-marketplace.gov.in/authenticate',
+  apiBaseUrl: 'https://odop-backend.onrender.com/',
+  apiUrl: 'https://odop-backend.onrender.com',  // Base API URL without path
+  authUrl: 'https://odop-backend.onrender.com/authenticate',
   
   // Feature flags
   enableDebugMode: false,
