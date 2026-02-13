@@ -248,7 +248,6 @@ import { SafeUrlPipe } from './project/pipes/safe-url.pipe';
     VendorOnboardingComponent,
     LiveChatWidgetComponent,
     SafeUrlPipe
-
   ],
   imports: [
     BrowserModule,
