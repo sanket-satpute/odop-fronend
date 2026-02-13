@@ -1,0 +1,224 @@
+<div class="confirmation-page">
+  <!-- Confetti Animation -->
+  <div class="confetti-container" *ngIf="showConfetti">
+    <div class="confetti" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]"></div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="loader"></div>
+    <p>Loading order details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="loadError && !isLoading">
+    <span class="material-icons error-icon">error_outline</span>
+    <h2>Oops! Something went wrong</h2>
+    <p>{{ loadError }}</p>
+    <button class="btn-primary" (click)="continueShopping()">Continue Shopping</button>
+  </div>
+
+  <!-- Success Content -->
+  <div class="confirmation-content" *ngIf="!isLoading && !loadError">
+    <!-- Success Header -->
+    <div class="success-header">
+      <div class="success-icon-wrapper">
+        <div class="success-circle">
+          <span class="material-icons success-icon">check</span>
+        </div>
+        <div class="success-rings">
+          <div class="ring ring-1"></div>
+          <div class="ring ring-2"></div>
+          <div class="ring ring-3"></div>
+        </div>
+      </div>
+      <h1 class="success-title">Order Confirmed!</h1>
+      <p class="success-subtitle">Thank you for shopping with ODOP</p>
+      <p class="order-number">Order #{{ order?.orderId || orderId }}</p>
+    </div>
+
+    <!-- Order Timeline -->
+    <div class="order-timeline">
+      <div class="timeline-track">
+        <div class="timeline-progress" [style.width]="'25%'"></div>
+      </div>
+      <div class="timeline-steps">
+        <div class="timeline-step" *ngFor="let step of orderSteps" [class.completed]="step.completed">
+          <div class="step-icon">
+            <span class="material-icons">{{ step.icon }}</span>
+          </div>
+          <span class="step-label">{{ step.label }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+      <!-- Order Details Card -->
+      <div class="detail-card order-details-card">
+        <div class="card-header">
+          <span class="material-icons">receipt_long</span>
+          <h3>Order Details</h3>
+        </div>
+        <div class="card-body">
+          <div class="detail-row">
+            <span class="label">Order Date</span>
+            <span class="value">{{ getOrderDate() }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Order Status</span>
+            <span class="value status-badge" [ngClass]="getOrderStatusClass()">
+              {{ order?.orderStatus || 'Confirmed' }}
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Payment Method</span>
+            <span class="value">{{ getPaymentMethodLabel() }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Payment Status</span>
+            <span class="value status-badge" [ngClass]="getPaymentStatusClass()">
+              {{ order?.paymentStatus || 'Pending' }}
+            </span>
+          </div>
+          <div class="detail-row" *ngIf="order?.paymentTransactionId">
+            <span class="label">Transaction ID</span>
+            <span class="value transaction-id">{{ order?.paymentTransactionId }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Details Card -->
+      <div class="detail-card shipping-card">
+        <div class="card-header">
+          <span class="material-icons">local_shipping</span>
+          <h3>Shipping Details</h3>
+        </div>
+        <div class="card-body">
+          <div class="shipping-address">
+            <span class="material-icons address-icon">location_on</span>
+            <div class="address-text">
+              <p class="customer-name">{{ userState.customer?.fullName || 'Customer' }}</p>
+              <p>{{ order?.shippingAddress || 'Address not available' }}</p>
+            </div>
+          </div>
+          <div class="delivery-estimate">
+            <span class="material-icons">schedule</span>
+            <div>
+              <span class="estimate-label">Estimated Delivery</span>
+              <span class="estimate-date">{{ getEstimatedDelivery() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items Card -->
+      <div class="detail-card items-card">
+        <div class="card-header">
+          <span class="material-icons">inventory_2</span>
+          <h3>Order Items</h3>
+        </div>
+        <div class="card-body">
+          <div class="order-items" *ngIf="order?.orderItems?.length; else noItems">
+            <div class="order-item" *ngFor="let item of order?.orderItems">
+              <div class="item-image">
+                <img [src]="item.productImageURL || 'assets/images/placeholder.png'" 
+                     [alt]="item.productName"
+                     onerror="this.src='assets/images/placeholder.png'">
+              </div>
+              <div class="item-details">
+                <h4 class="item-name">{{ item.productName }}</h4>
+                <p class="item-quantity">Qty: {{ item.quantity }}</p>
+              </div>
+              <div class="item-price">
+                <span class="price">₹{{ item.totalPrice || (item.unitPrice || 0) * (item.quantity || 1) | number:'1.0-0' }}</span>
+              </div>
+            </div>
+          </div>
+          <ng-template #noItems>
+            <p class="no-items">Order items details will be available soon</p>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Price Summary Card -->
+      <div class="detail-card summary-card">
+        <div class="card-header">
+          <span class="material-icons">payments</span>
+          <h3>Price Summary</h3>
+        </div>
+        <div class="card-body">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>₹{{ order?.totalAmount || 0 | number:'1.0-0' }}</span>
+          </div>
+          <div class="summary-row" *ngIf="order?.deliveryCharges">
+            <span>Delivery Charges</span>
+            <span>₹{{ order?.deliveryCharges | number:'1.0-0' }}</span>
+          </div>
+          <div class="summary-row discount" *ngIf="order?.discountAmount">
+            <span>Discount</span>
+            <span>-₹{{ order?.discountAmount | number:'1.0-0' }}</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span class="total-amount">₹{{ order?.finalAmount || order?.totalAmount || 0 | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What's Next Section -->
+    <div class="whats-next-section">
+      <h3>What happens next?</h3>
+      <div class="next-steps">
+        <div class="next-step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Order Processing</h4>
+            <p>We're preparing your order for shipment</p>
+          </div>
+        </div>
+        <div class="next-step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Email Confirmation</h4>
+            <p>You'll receive an email with tracking details</p>
+          </div>
+        </div>
+        <div class="next-step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Delivery</h4>
+            <p>Your order will arrive within 5-7 business days</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn-secondary" (click)="viewOrders()">
+        <span class="material-icons">list_alt</span>
+        View My Orders
+      </button>
+      <button class="btn-secondary" (click)="printOrder()">
+        <span class="material-icons">print</span>
+        Print Order
+      </button>
+      <button class="btn-primary continue-shopping" (click)="continueShopping()">
+        <span class="material-icons">shopping_bag</span>
+        Continue Shopping
+      </button>
+    </div>
+
+    <!-- Support Section -->
+    <div class="support-section">
+      <span class="material-icons">support_agent</span>
+      <div class="support-text">
+        <p>Need help with your order?</p>
+        <a href="/contact">Contact our support team</a>
+      </div>
+    </div>
+  </div>
+</div>

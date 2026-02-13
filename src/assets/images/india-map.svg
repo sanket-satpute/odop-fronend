@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" id="india-odop-map">
+  <style>
+    .state-path {
+      fill: #e5e7eb;
+      stroke: #fff;
+      stroke-width: 1;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .state-path:hover {
+      fill: #FFA500;
+      transform: scale(1.02);
+    }
+    .state-path.selected {
+      fill: #FFA500;
+    }
+    .state-path.highlighted {
+      fill: #fcd34d;
+    }
+    .state-label {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 8px;
+      font-weight: 600;
+      fill: #374151;
+      pointer-events: none;
+      text-anchor: middle;
+    }
+    .state-label.small {
+      font-size: 6px;
+    }
+    /* Product count badges */
+    .high-products { fill: #16a34a; }
+    .medium-products { fill: #f59e0b; }
+    .low-products { fill: #94a3b8; }
+  </style>
+  
+  <!-- Background -->
+  <rect width="600" height="700" fill="#f8fafc"/>
+  
+  <!-- Title -->
+  <text x="300" y="30" text-anchor="middle" font-family="'Segoe UI', Arial" font-size="16" font-weight="bold" fill="#1f2937">
+    ODOP India - One District One Product
+  </text>
+  
+  <!-- Simplified India Map States -->
+  <!-- Note: These are simplified representations for visualization -->
+  
+  <!-- Jammu & Kashmir -->
+  <path id="JK" class="state-path" d="M180,80 L220,70 L260,75 L270,95 L260,120 L230,130 L190,125 L170,100 Z" data-state="JK"/>
+  <text x="220" y="100" class="state-label">J&K</text>
+  
+  <!-- Himachal Pradesh -->
+  <path id="HP" class="state-path" d="M210,130 L250,125 L270,140 L260,165 L230,170 L205,155 Z" data-state="HP"/>
+  <text x="235" y="150" class="state-label small">HP</text>
+  
+  <!-- Punjab -->
+  <path id="PB" class="state-path" d="M185,155 L205,155 L230,170 L225,195 L200,200 L175,185 Z" data-state="PB"/>
+  <text x="200" y="180" class="state-label small">PB</text>
+  
+  <!-- Uttarakhand -->
+  <path id="UK" class="state-path" d="M265,150 L290,145 L310,165 L305,190 L275,200 L260,180 Z" data-state="UK"/>
+  <text x="285" y="175" class="state-label small">UK</text>
+  
+  <!-- Haryana -->
+  <path id="HR" class="state-path" d="M200,200 L225,195 L240,215 L230,245 L205,250 L190,230 Z" data-state="HR"/>
+  <text x="215" y="225" class="state-label small">HR</text>
+  
+  <!-- Delhi (NCT) -->
+  <path id="DL" class="state-path" d="M220,230 L235,228 L238,242 L225,248 Z" data-state="DL"/>
+  <text x="228" y="240" class="state-label small">DL</text>
+  
+  <!-- Rajasthan -->
+  <path id="RAJ" class="state-path" d="M120,210 L190,230 L205,250 L230,280 L225,340 L180,380 L100,370 L80,300 L90,240 Z" data-state="RAJ"/>
+  <text x="155" y="300" class="state-label">Rajasthan</text>
+  
+  <!-- Uttar Pradesh -->
+  <path id="UP" class="state-path" d="M240,215 L275,200 L320,210 L380,230 L420,265 L405,310 L360,320 L300,330 L250,320 L230,280 Z" data-state="UP"/>
+  <text x="320" y="270" class="state-label">Uttar Pradesh</text>
+  
+  <!-- Bihar -->
+  <path id="BH" class="state-path" d="M405,280 L450,270 L475,290 L470,325 L435,340 L405,330 Z" data-state="BH"/>
+  <text x="435" y="305" class="state-label small">Bihar</text>
+  
+  <!-- West Bengal -->
+  <path id="WB" class="state-path" d="M460,290 L485,280 L500,310 L490,370 L475,430 L455,415 L450,360 L445,320 Z" data-state="WB"/>
+  <text x="470" y="360" class="state-label small">WB</text>
+  
+  <!-- Jharkhand -->
+  <path id="JH" class="state-path" d="M405,330 L450,320 L465,350 L455,380 L420,390 L395,370 Z" data-state="JH"/>
+  <text x="430" y="360" class="state-label small">JH</text>
+  
+  <!-- Odisha -->
+  <path id="OR" class="state-path" d="M395,380 L455,385 L475,430 L460,480 L410,490 L370,470 L365,420 Z" data-state="OR"/>
+  <text x="415" y="440" class="state-label">Odisha</text>
+  
+  <!-- Chhattisgarh -->
+  <path id="CG" class="state-path" d="M340,350 L395,370 L395,420 L370,470 L320,460 L300,410 L310,370 Z" data-state="CG"/>
+  <text x="345" y="410" class="state-label small">CG</text>
+  
+  <!-- Madhya Pradesh -->
+  <path id="MP" class="state-path" d="M200,320 L250,320 L300,330 L340,350 L320,390 L290,430 L220,440 L180,410 L170,360 Z" data-state="MP"/>
+  <text x="250" y="380" class="state-label">Madhya Pradesh</text>
+  
+  <!-- Gujarat -->
+  <path id="GUJ" class="state-path" d="M60,340 L100,370 L130,380 L140,420 L110,460 L70,480 L40,450 L50,400 L35,370 Z" data-state="GUJ"/>
+  <text x="85" y="420" class="state-label">Gujarat</text>
+  
+  <!-- Maharashtra -->
+  <path id="MH" class="state-path" d="M100,420 L170,410 L220,440 L290,450 L310,500 L280,540 L210,560 L140,530 L100,490 Z" data-state="MH"/>
+  <text x="200" y="485" class="state-label">Maharashtra</text>
+  
+  <!-- Telangana -->
+  <path id="TS" class="state-path" d="M290,460 L340,455 L380,480 L375,530 L330,550 L285,540 Z" data-state="TS"/>
+  <text x="330" y="500" class="state-label small">TS</text>
+  
+  <!-- Andhra Pradesh -->
+  <path id="AP" class="state-path" d="M330,550 L375,530 L420,540 L440,590 L400,640 L340,640 L300,600 Z" data-state="AP"/>
+  <text x="370" y="590" class="state-label">AP</text>
+  
+  <!-- Karnataka -->
+  <path id="KA" class="state-path" d="M180,530 L280,540 L300,600 L280,650 L220,660 L160,640 L150,580 Z" data-state="KA"/>
+  <text x="220" y="600" class="state-label">Karnataka</text>
+  
+  <!-- Goa -->
+  <path id="GA" class="state-path" d="M140,530 L155,530 L155,555 L140,555 Z" data-state="GA"/>
+  <text x="148" y="545" class="state-label small">GA</text>
+  
+  <!-- Kerala -->
+  <path id="KL" class="state-path" d="M200,640 L225,665 L215,700 L180,700 L175,670 Z" data-state="KL"/>
+  <text x="200" y="680" class="state-label small">KL</text>
+  
+  <!-- Tamil Nadu -->
+  <path id="TN" class="state-path" d="M230,640 L300,620 L340,640 L350,680 L300,700 L250,700 L230,670 Z" data-state="TN"/>
+  <text x="290" y="670" class="state-label">Tamil Nadu</text>
+  
+  <!-- Assam & NE States (Simplified) -->
+  <path id="AS" class="state-path" d="M500,220 L550,200 L580,220 L575,260 L540,280 L500,270 Z" data-state="AS"/>
+  <text x="540" y="240" class="state-label small">NE</text>
+  
+  <!-- Legend -->
+  <g transform="translate(480, 550)">
+    <text x="0" y="0" font-family="'Segoe UI', Arial" font-size="10" font-weight="bold" fill="#374151">Legend</text>
+    <rect x="0" y="10" width="12" height="12" fill="#16a34a" rx="2"/>
+    <text x="18" y="20" font-family="'Segoe UI', Arial" font-size="8" fill="#6b7280">40+ Products</text>
+    <rect x="0" y="28" width="12" height="12" fill="#f59e0b" rx="2"/>
+    <text x="18" y="38" font-family="'Segoe UI', Arial" font-size="8" fill="#6b7280">25-40 Products</text>
+    <rect x="0" y="46" width="12" height="12" fill="#94a3b8" rx="2"/>
+    <text x="18" y="56" font-family="'Segoe UI', Arial" font-size="8" fill="#6b7280">&lt;25 Products</text>
+  </g>
+  
+  <!-- ODOP Badge -->
+  <g transform="translate(30, 600)">
+    <rect width="100" height="50" fill="#FFA500" rx="8"/>
+    <text x="50" y="22" text-anchor="middle" font-family="'Segoe UI', Arial" font-size="10" font-weight="bold" fill="white">ODOP India</text>
+    <text x="50" y="38" text-anchor="middle" font-family="'Segoe UI', Arial" font-size="8" fill="white">761 Districts</text>
+  </g>
+</svg>

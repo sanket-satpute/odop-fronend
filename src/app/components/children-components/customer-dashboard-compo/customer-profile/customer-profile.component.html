@@ -1,0 +1,279 @@
+  <!-- Dashboard Content -->
+  <div class="dashboard-content">
+    <!-- Dashboard Grid Layout -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Panel - User Profile & Quick Links -->
+      <section class="left-panel">
+        <div class="user-profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar">
+              <img [src]="userState.customer?.profilePicturePath || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'" alt="Profile">
+              <div class="edit-avatar-btn">
+                <i class="fas fa-camera"></i>
+              </div>
+            </div>
+            <div class="profile-info">
+              <h3>{{ this.userState.customer?.fullName || 'Guest' }}</h3>
+              <p class="user-role">{{ userRoleLabel }}</p>
+              <div class="membership-badge">
+                <i class="fas fa-crown"></i>
+                <span>{{ membershipTierLabel }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="profile-details">
+            <div class="detail-item">
+              <i class="fas fa-envelope"></i>
+              <span>{{ this.userState.customer?.emailAddress || 'Email not set' }}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-phone"></i>
+              <span>{{ this.userState.customer?.contactNumber || 'Phone not set' }}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ this.userState.customer?.billingAddress || 'N/A' }}</span>
+            </div>
+          </div>
+          <button class="edit-profile-btn" (click)="editProfileClicked()">
+            <i class="fas fa-edit"></i>
+            Edit Profile
+          </button>
+        </div>
+
+        <div class="quick-links-card">
+          <h4>Quick Actions</h4>
+          <div class="quick-links-list">
+            <div class="quick-link-item" *ngFor="let link of quickLinks" (click)="select(link.key)">
+              <div class="quick-link-icon" [style.background-color]="link.color + '20'">
+                <i [class]="link.icon" [style.color]="link.color"></i>
+              </div>
+              <div class="quick-link-content">
+                <span class="quick-link-title">{{ link.title }}</span>
+                <span class="quick-link-count" *ngIf="link.count">{{ link.count }}</span>
+              </div>
+              <i class="fas fa-chevron-right quick-link-arrow"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center Panel - Stats & Main Content -->
+      <section class="center-panel">
+        <!-- Enhanced Stats Cards -->
+        <div class="stats-container">
+          <h2 class="section-title">
+            <i class="fas fa-chart-line"></i>
+            Overview
+          </h2>
+          <div class="stats-grid">
+            <div class="stat-card" *ngFor="let stat of dashboardStats" [@cardAnimation]>
+              <div class="stat-card-inner">
+                <div class="stat-header">
+                  <div class="stat-icon-container">
+                    <div class="stat-icon" [style.background]="'linear-gradient(135deg, ' + stat.color + '20, ' + stat.color + '40)'">
+                      <i [class]="stat.icon" [style.color]="stat.color"></i>
+                    </div>
+                  </div>
+                  <div class="stat-trend" [class.positive]="stat.trend > 0" [class.negative]="stat.trend < 0">
+                    <i class="fas" [ngClass]="stat.trend > 0 ? 'fa-trending-up' : (stat.trend < 0 ? 'fa-trending-down' : 'fa-minus')"></i>
+                    <span>{{ stat.trend > 0 ? '↑ ' : (stat.trend < 0 ? '↓ ' : '') }}{{ Math.abs(stat.trend) | number : '1.2-2' }}%</span>
+                  </div>
+                </div>
+                <div class="stat-content">
+                  <h3 class="stat-number">{{ stat.value }}</h3>
+                  <p class="stat-label">{{ stat.label }}</p>
+                  <div class="stat-progress" *ngIf="stat.progress">
+                    <div class="progress-bar">
+                      <div class="progress-fill" [ngClass]="{'text-green': trend === 'up', 'text-red': trend === 'down'}" [style.width]="stat.progress + '%'" [style.background]="stat.color"></div>
+                    </div>
+                    <span class="progress-text">{{ stat.progress }}% of goal</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wishlist Preview Section -->
+        <div class="wishlist-section" *ngIf="wishlistItems.length > 0">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-heart"></i>
+              Your Wishlist
+            </h2>
+            <button class="view-all-btn" (click)="select('wishlist')">
+              View All ({{ wishlistItems.length }})
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+          <div class="wishlist-grid">
+            <div class="wishlist-card" *ngFor="let item of wishlistItems.slice(0, 3)" [@fadeInUp]>
+              <div class="wishlist-image">
+                <img [src]="item.image" [alt]="item.name">
+                <div class="wishlist-overlay">
+                  <button class="quick-view-btn" (click)="quickView(+item.id)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="remove-wishlist-btn" (click)="removeFromWishlist(+item.id)">
+                    <i class="fas fa-heart-broken"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="wishlist-content">
+                <h4 class="wishlist-title">{{ item.name }}</h4>
+                <div class="wishlist-price">
+                  <span class="current-price">₹{{ item.price }}</span>
+                  <span class="original-price" *ngIf="item.originalPrice">₹{{ item.originalPrice }}</span>
+                  <span class="discount" *ngIf="item.discount">{{ item.discount }}% OFF</span>
+                </div>
+                <div class="wishlist-actions">
+                  <button class="add-to-cart-btn" (click)="addToCart(+item.id)">
+                    <i class="fas fa-shopping-cart"></i>
+                    Add to Cart
+                  </button>
+                  <button class="buy-now-btn" (click)="buyNow(+item.id)">
+                    Buy Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Orders Preview -->
+        <div class="orders-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-box"></i>
+              Recent Orders
+            </h2>
+            <button class="view-all-btn" (click)="select('orders')" *ngIf="recentOrders.length > 0">
+              View All Orders
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+          
+          <!-- Empty State -->
+          <div class="empty-state" *ngIf="recentOrders.length === 0">
+            <div class="empty-icon">
+              <i class="fas fa-shopping-bag"></i>
+            </div>
+            <h4>No Orders Yet</h4>
+            <p>Start shopping to see your orders here!</p>
+            <button class="explore-btn" (click)="quickActionsSelected('orders')">
+              <i class="fas fa-store"></i>
+              Browse Products
+            </button>
+          </div>
+          
+          <!-- Orders List -->
+          <div class="orders-list" *ngIf="recentOrders.length > 0">
+            <div class="order-card" *ngFor="let order of recentOrders" [@slideInLeft]>
+              <div class="order-header">
+                <div class="order-id">
+                  <span class="order-label">Order #</span>
+                  <span class="order-number">{{ order.id }}</span>
+                </div>
+                <div class="order-status" [ngClass]="order.status.toLowerCase()">
+                  {{ order.statusText }}
+                </div>
+              </div>
+              <div class="order-content">
+                <div class="order-items">
+                  <img [src]="order.image" [alt]="order.itemName" class="order-item-image">
+                  <div class="order-item-details">
+                    <h5>{{ order.itemName }}</h5>
+                    <p>{{ order.quantity }} items • ₹{{ order.amount }}</p>
+                  </div>
+                </div>
+                <div class="order-actions">
+                  <button class="track-order-btn" (click)="trackOrder(order.id)">
+                    <i class="fas fa-truck"></i>
+                    Track
+                  </button>
+                </div>
+              </div>
+              <div class="order-footer">
+                <span class="order-date">{{ order.date }}</span>
+                <div class="order-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" [style.width]="order.progress + '%'"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel - Activity & Insights -->
+      <section class="right-panel">
+        <!-- Activity Feed -->
+        <div class="activity-card">
+          <div class="card-header">
+            <h3>
+              <i class="fas fa-history"></i>
+              Recent Activity
+            </h3>
+            <button class="refresh-btn" (click)="refreshActivity()" *ngIf="recentActivities.length > 0">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </div>
+          
+          <!-- Empty Activity State -->
+          <div class="empty-state small" *ngIf="recentActivities.length === 0">
+            <div class="empty-icon small">
+              <i class="fas fa-clock"></i>
+            </div>
+            <p>No recent activity</p>
+          </div>
+          
+          <div class="activity-list" *ngIf="recentActivities.length > 0">
+            <div class="activity-item" *ngFor="let activity of recentActivities" [@fadeIn]>
+              <div class="activity-timeline">
+                <div class="timeline-dot" [style.background-color]="activity.color"></div>
+                <div class="timeline-line" *ngIf="!activity.isLast"></div>
+              </div>
+              <div class="activity-content">
+                <div class="activity-header">
+                  <h5>{{ activity.title }}</h5>
+                  <span class="activity-time">{{ activity.time }}</span>
+                </div>
+                <p class="activity-description">{{ activity.description }}</p>
+                <div class="activity-meta" *ngIf="activity.meta">
+                  <span class="activity-tag">{{ activity.meta }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insights Card -->
+        <div class="insights-card">
+          <div class="card-header">
+            <h3>
+              <i class="fas fa-lightbulb"></i>
+              Insights
+            </h3>
+          </div>
+          <div class="insights-list">
+            <div class="insight-item" *ngFor="let insight of insights">
+              <div class="insight-icon" [style.background-color]="insight.color + '20'">
+                <i [class]="insight.icon" [style.color]="insight.color"></i>
+              </div>
+              <div class="insight-content">
+                <h5>{{ insight.title }}</h5>
+                <p>{{ insight.description }}</p>
+                <button class="insight-action" (click)="handleInsight(insight.action)">
+                  {{ insight.actionText }}
+                  <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>

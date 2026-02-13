@@ -1,0 +1,413 @@
+<!-- Reports Dashboard Page -->
+<div class="reports-dashboard">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="header-info">
+          <h1><i class="fas fa-chart-bar"></i> Reports Center</h1>
+          <p>Generate, download, and manage your business reports</p>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="header-stats">
+          <div class="stat-box">
+            <i class="fas fa-file-alt"></i>
+            <div class="stat-info">
+              <span class="value">{{ reportStats.totalGenerated }}</span>
+              <span class="label">Total Generated</span>
+            </div>
+          </div>
+          <div class="stat-box">
+            <i class="fas fa-calendar-alt"></i>
+            <div class="stat-info">
+              <span class="value">{{ reportStats.thisMonth }}</span>
+              <span class="label">This Month</span>
+            </div>
+          </div>
+          <div class="stat-box">
+            <i class="fas fa-star"></i>
+            <div class="stat-info">
+              <span class="value">{{ reportStats.mostPopular }}</span>
+              <span class="label">Most Popular</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    <div class="container">
+      <div class="dashboard-layout">
+        <!-- Left Panel - Report Generator -->
+        <div class="generator-panel">
+          <!-- Step 1: Select Report Type -->
+          <div class="panel-section" *ngIf="currentStep === 'select'">
+            <div class="section-header">
+              <h2><i class="fas fa-plus-circle"></i> Generate New Report</h2>
+              <p>Select a report type to get started</p>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="category-tabs">
+              <button 
+                class="category-tab"
+                [class.active]="selectedCategory === 'all'"
+                (click)="filterByCategory('all')"
+              >
+                <i class="fas fa-th-large"></i>
+                All Reports
+              </button>
+              <button 
+                *ngFor="let category of reportCategories"
+                class="category-tab"
+                [class.active]="selectedCategory === category.id"
+                (click)="filterByCategory(category.id)"
+              >
+                <i class="fas" [ngClass]="category.icon"></i>
+                {{ category.name }}
+              </button>
+            </div>
+
+            <!-- Report Types Grid -->
+            <div class="report-types-grid">
+              <div 
+                *ngFor="let report of filteredReportTypes"
+                class="report-type-card"
+                (click)="selectReport(report)"
+              >
+                <div class="card-icon">
+                  <i class="fas" [ngClass]="report.icon"></i>
+                </div>
+                <div class="card-content">
+                  <h3>{{ report.name }}</h3>
+                  <p>{{ report.description }}</p>
+                  <div class="card-meta">
+                    <span class="time">
+                      <i class="fas fa-clock"></i>
+                      {{ report.estimatedTime }}
+                    </span>
+                    <div class="formats">
+                      <span *ngFor="let format of report.formats" class="format-badge">
+                        {{ format }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <i class="fas fa-chevron-right card-arrow"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Configure Report -->
+          <div class="panel-section" *ngIf="currentStep === 'configure' && selectedReportType">
+            <button class="back-btn" (click)="goBack()">
+              <i class="fas fa-arrow-left"></i> Back to Reports
+            </button>
+
+            <div class="section-header">
+              <div class="selected-report">
+                <div class="report-icon">
+                  <i class="fas" [ngClass]="selectedReportType.icon"></i>
+                </div>
+                <div>
+                  <h2>{{ selectedReportType.name }}</h2>
+                  <p>{{ selectedReportType.description }}</p>
+                </div>
+              </div>
+            </div>
+
+            <form [formGroup]="reportForm" class="report-config-form">
+              <!-- Date Range -->
+              <div class="form-section">
+                <h3><i class="fas fa-calendar"></i> Date Range</h3>
+                <div class="date-range-options">
+                  <label class="radio-card" [class.selected]="reportForm.get('dateRange')?.value === 'last7days'">
+                    <input type="radio" formControlName="dateRange" value="last7days">
+                    <span>Last 7 Days</span>
+                  </label>
+                  <label class="radio-card" [class.selected]="reportForm.get('dateRange')?.value === 'last30days'">
+                    <input type="radio" formControlName="dateRange" value="last30days">
+                    <span>Last 30 Days</span>
+                  </label>
+                  <label class="radio-card" [class.selected]="reportForm.get('dateRange')?.value === 'last90days'">
+                    <input type="radio" formControlName="dateRange" value="last90days">
+                    <span>Last 90 Days</span>
+                  </label>
+                  <label class="radio-card" [class.selected]="reportForm.get('dateRange')?.value === 'thisMonth'">
+                    <input type="radio" formControlName="dateRange" value="thisMonth">
+                    <span>This Month</span>
+                  </label>
+                  <label class="radio-card" [class.selected]="reportForm.get('dateRange')?.value === 'lastMonth'">
+                    <input type="radio" formControlName="dateRange" value="lastMonth">
+                    <span>Last Month</span>
+                  </label>
+                  <label class="radio-card" [class.selected]="reportForm.get('dateRange')?.value === 'thisQuarter'">
+                    <input type="radio" formControlName="dateRange" value="thisQuarter">
+                    <span>This Quarter</span>
+                  </label>
+                  <label class="radio-card" [class.selected]="reportForm.get('dateRange')?.value === 'thisYear'">
+                    <input type="radio" formControlName="dateRange" value="thisYear">
+                    <span>This Year</span>
+                  </label>
+                  <label class="radio-card" [class.selected]="reportForm.get('dateRange')?.value === 'custom'">
+                    <input type="radio" formControlName="dateRange" value="custom">
+                    <span>Custom Range</span>
+                  </label>
+                </div>
+
+                <div class="custom-date-inputs" *ngIf="reportForm.get('dateRange')?.value === 'custom'">
+                  <div class="date-input">
+                    <label>Start Date</label>
+                    <input type="date" formControlName="customStartDate">
+                  </div>
+                  <div class="date-input">
+                    <label>End Date</label>
+                    <input type="date" formControlName="customEndDate">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Format Selection -->
+              <div class="form-section">
+                <h3><i class="fas fa-file-export"></i> Export Format</h3>
+                <div class="format-options">
+                  <label 
+                    *ngFor="let format of selectedReportType.formats"
+                    class="format-option"
+                    [class.selected]="reportForm.get('format')?.value === format"
+                  >
+                    <input type="radio" formControlName="format" [value]="format">
+                    <i class="fas" [ngClass]="getFormatIcon(format)"></i>
+                    <span>{{ format }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Additional Options -->
+              <div class="form-section">
+                <h3><i class="fas fa-cog"></i> Options</h3>
+                <div class="checkbox-options">
+                  <label class="checkbox-option">
+                    <input type="checkbox" formControlName="includeCharts">
+                    <span class="checkmark"></span>
+                    <div class="option-text">
+                      <strong>Include Charts & Graphs</strong>
+                      <span>Visual representations of data</span>
+                    </div>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" formControlName="includeSummary">
+                    <span class="checkmark"></span>
+                    <div class="option-text">
+                      <strong>Include Executive Summary</strong>
+                      <span>High-level overview at the beginning</span>
+                    </div>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" formControlName="emailCopy">
+                    <span class="checkmark"></span>
+                    <div class="option-text">
+                      <strong>Email a Copy</strong>
+                      <span>Send report to email after generation</span>
+                    </div>
+                  </label>
+                </div>
+
+                <div class="email-input" *ngIf="reportForm.get('emailCopy')?.value">
+                  <input type="email" formControlName="emailAddress" placeholder="Enter email address">
+                </div>
+              </div>
+
+              <!-- Filters (Optional) -->
+              <div class="form-section">
+                <h3><i class="fas fa-filter"></i> Filters (Optional)</h3>
+                <div class="filter-row">
+                  <div class="filter-input">
+                    <label>Region</label>
+                    <select formControlName="region">
+                      <option value="all">All Regions</option>
+                      <option value="north">North India</option>
+                      <option value="south">South India</option>
+                      <option value="east">East India</option>
+                      <option value="west">West India</option>
+                      <option value="central">Central India</option>
+                    </select>
+                  </div>
+                  <div class="filter-input">
+                    <label>Category</label>
+                    <select formControlName="category">
+                      <option value="all">All Categories</option>
+                      <option value="textiles">Textiles & Handloom</option>
+                      <option value="handicrafts">Handicrafts</option>
+                      <option value="food">Food Products</option>
+                      <option value="pottery">Pottery & Ceramics</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Generate Button -->
+              <div class="form-actions">
+                <button 
+                  type="button" 
+                  class="btn btn-primary btn-lg"
+                  (click)="generateReport()"
+                  [disabled]="!reportForm.valid"
+                >
+                  <i class="fas fa-file-download"></i>
+                  Generate Report
+                </button>
+                <p class="estimate">
+                  <i class="fas fa-clock"></i>
+                  Estimated time: {{ selectedReportType.estimatedTime }}
+                </p>
+              </div>
+            </form>
+          </div>
+
+          <!-- Step 3: Generating -->
+          <div class="panel-section generating-section" *ngIf="currentStep === 'generate'">
+            <div class="generating-content">
+              <div class="progress-circle">
+                <svg viewBox="0 0 100 100">
+                  <circle class="progress-bg" cx="50" cy="50" r="45" />
+                  <circle 
+                    class="progress-bar" 
+                    cx="50" cy="50" r="45"
+                    [style.strokeDasharray]="generationProgress * 2.83 + ', 283'"
+                  />
+                </svg>
+                <span class="progress-value">{{ generationProgress }}%</span>
+              </div>
+              <h2>Generating Your Report</h2>
+              <p>Please wait while we compile your {{ selectedReportType?.name }}</p>
+              <div class="progress-steps">
+                <div class="step" [class.active]="generationProgress >= 20" [class.completed]="generationProgress > 20">
+                  <i class="fas fa-database"></i>
+                  <span>Fetching Data</span>
+                </div>
+                <div class="step" [class.active]="generationProgress >= 40" [class.completed]="generationProgress > 40">
+                  <i class="fas fa-cogs"></i>
+                  <span>Processing</span>
+                </div>
+                <div class="step" [class.active]="generationProgress >= 60" [class.completed]="generationProgress > 60">
+                  <i class="fas fa-chart-pie"></i>
+                  <span>Charts</span>
+                </div>
+                <div class="step" [class.active]="generationProgress >= 80" [class.completed]="generationProgress > 80">
+                  <i class="fas fa-file-alt"></i>
+                  <span>Compiling</span>
+                </div>
+                <div class="step" [class.active]="generationProgress >= 100">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Complete</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Complete -->
+          <div class="panel-section complete-section" *ngIf="currentStep === 'complete'">
+            <div class="complete-content">
+              <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <h2>Report Ready!</h2>
+              <p>Your {{ selectedReportType?.name }} has been generated successfully</p>
+              
+              <div class="report-preview">
+                <div class="preview-icon">
+                  <i class="fas" [ngClass]="getFormatIcon(reportForm.get('format')?.value)"></i>
+                </div>
+                <div class="preview-info">
+                  <h4>{{ selectedReportType?.name }}</h4>
+                  <p>{{ getDateRangeLabel() }} • {{ reportForm.get('format')?.value }} format</p>
+                </div>
+              </div>
+              
+              <div class="complete-actions">
+                <button class="btn btn-primary btn-lg" (click)="downloadReport(generatedReportUrl!)">
+                  <i class="fas fa-download"></i>
+                  Download Report
+                </button>
+                <button class="btn btn-secondary" (click)="resetGenerator()">
+                  <i class="fas fa-plus"></i>
+                  Generate Another
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel - History -->
+        <div class="history-panel">
+          <div class="panel-header">
+            <h3><i class="fas fa-history"></i> Recent Reports</h3>
+          </div>
+
+          <div class="loading-state" *ngIf="isLoading">
+            <div class="spinner"></div>
+            <p>Loading history...</p>
+          </div>
+
+          <div class="history-list" *ngIf="!isLoading">
+            <div 
+              *ngFor="let report of reportHistory"
+              class="history-item"
+              [class.failed]="report.status === 'failed'"
+            >
+              <div class="item-icon" [ngClass]="report.status">
+                <i class="fas" [ngClass]="getFormatIcon(report.format)" *ngIf="report.status === 'completed'"></i>
+                <i class="fas fa-exclamation-circle" *ngIf="report.status === 'failed'"></i>
+                <i class="fas fa-spinner fa-spin" *ngIf="report.status === 'processing'"></i>
+              </div>
+              
+              <div class="item-info">
+                <h4>{{ report.reportType }}</h4>
+                <p>{{ formatDate(report.generatedAt) }}</p>
+                <div class="item-meta">
+                  <span class="format">{{ report.format }}</span>
+                  <span class="size" *ngIf="report.status === 'completed'">{{ report.size }}</span>
+                  <span class="status-badge" [ngClass]="report.status">{{ report.status }}</span>
+                </div>
+              </div>
+              
+              <div class="item-actions">
+                <button 
+                  class="action-btn download"
+                  *ngIf="report.status === 'completed'"
+                  (click)="downloadReport(report.downloadUrl!)"
+                  title="Download"
+                >
+                  <i class="fas fa-download"></i>
+                </button>
+                <button 
+                  class="action-btn retry"
+                  *ngIf="report.status === 'failed'"
+                  (click)="retryReport(report)"
+                  title="Retry"
+                >
+                  <i class="fas fa-redo"></i>
+                </button>
+                <button 
+                  class="action-btn delete"
+                  (click)="deleteReport(report.id)"
+                  title="Delete"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="empty-history" *ngIf="reportHistory.length === 0">
+              <i class="fas fa-folder-open"></i>
+              <p>No reports generated yet</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

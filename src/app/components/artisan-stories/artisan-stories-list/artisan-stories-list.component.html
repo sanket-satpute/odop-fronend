@@ -1,0 +1,355 @@
+<!-- Artisan Stories Listing Page -->
+<div class="artisan-stories-page">
+  
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="title-accent">Meet the</span>
+        <span class="title-main">Master Artisans</span>
+      </h1>
+      <p class="hero-subtitle">
+        Discover the inspiring stories of India's traditional craftspeople who 
+        preserve centuries of heritage through their art
+      </p>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">{{ totalArtisans }}+</span>
+          <span class="stat-label">Artisan Stories</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ states.length }}+</span>
+          <span class="stat-label">States</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ crafts.length }}+</span>
+          <span class="stat-label">Craft Forms</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Featured Artisans Carousel -->
+  <section class="featured-section" *ngIf="featuredArtisans.length > 0">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-star"></i>
+          Featured Artisans
+        </h2>
+        <p class="section-subtitle">Award-winning craftspeople you should know</p>
+      </div>
+      
+      <div class="featured-carousel">
+        <div class="featured-card" *ngFor="let artisan of featuredArtisans; trackBy: trackByArtisan">
+          <div class="featured-image" (click)="viewArtisan(artisan)">
+            <img [src]="artisan.profileImageUrl || 'assets/images/artisan-placeholder.jpg'" 
+                 [alt]="artisan.artisanName"
+                 loading="lazy">
+            <div class="featured-overlay">
+              <span class="view-story">View Story</span>
+            </div>
+            <div class="featured-badges">
+              <span class="badge badge-verified" *ngIf="artisan.verified">
+                <i class="fas fa-check-circle"></i> Verified
+              </span>
+              <span class="badge badge-award" *ngIf="artisan.nationalAwardee">
+                <i class="fas fa-award"></i> National Awardee
+              </span>
+              <span class="badge badge-gi" *ngIf="artisan.giTagHolder">
+                <i class="fas fa-certificate"></i> GI Tag
+              </span>
+            </div>
+          </div>
+          <div class="featured-info">
+            <h3 class="artisan-name">{{ artisan.artisanName }}</h3>
+            <p class="artisan-craft">{{ artisan.primaryCraft }}</p>
+            <p class="artisan-location">
+              <i class="fas fa-map-marker-alt"></i>
+              {{ artisan.district }}, {{ artisan.state }}
+            </p>
+            <p class="artisan-experience">
+              <i class="fas fa-history"></i>
+              {{ getExperienceText(artisan.yearsOfExperience) }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Search and Filters -->
+  <section class="filters-section">
+    <div class="container">
+      <div class="filters-bar">
+        <!-- Search -->
+        <div class="search-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input 
+            type="text" 
+            class="search-input"
+            placeholder="Search artisans by name, craft, or location..."
+            [value]="searchQuery"
+            (input)="onSearchInput($event)">
+        </div>
+        
+        <!-- Filter Toggle (Mobile) -->
+        <button class="filter-toggle-btn" (click)="toggleFilters()">
+          <i class="fas fa-sliders-h"></i>
+          Filters
+          <span class="filter-count" *ngIf="selectedState || selectedCraft">
+            {{ (selectedState ? 1 : 0) + (selectedCraft ? 1 : 0) }}
+          </span>
+        </button>
+        
+        <!-- Desktop Filters -->
+        <div class="desktop-filters">
+          <select class="filter-select" [(ngModel)]="selectedState" (change)="onFilterChange()">
+            <option value="">All States</option>
+            <option *ngFor="let state of states" [value]="state">{{ state }}</option>
+          </select>
+          
+          <select class="filter-select" [(ngModel)]="selectedCraft" (change)="onFilterChange()">
+            <option value="">All Crafts</option>
+            <option *ngFor="let craft of crafts" [value]="craft">{{ craft }}</option>
+          </select>
+          
+          <select class="filter-select" [(ngModel)]="selectedSort" (change)="onSortChange()">
+            <option *ngFor="let option of sortOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+        
+        <!-- View Toggle -->
+        <div class="view-toggle">
+          <button 
+            class="view-btn" 
+            [class.active]="viewMode === 'grid'"
+            (click)="viewMode = 'grid'">
+            <i class="fas fa-th-large"></i>
+          </button>
+          <button 
+            class="view-btn" 
+            [class.active]="viewMode === 'list'"
+            (click)="viewMode = 'list'">
+            <i class="fas fa-list"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Mobile Filters Panel -->
+      <div class="mobile-filters" [class.open]="showFilters">
+        <div class="mobile-filters-header">
+          <h3>Filter Stories</h3>
+          <button class="close-btn" (click)="toggleFilters()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div class="mobile-filter-group">
+          <label>State</label>
+          <select [(ngModel)]="selectedState">
+            <option value="">All States</option>
+            <option *ngFor="let state of states" [value]="state">{{ state }}</option>
+          </select>
+        </div>
+        
+        <div class="mobile-filter-group">
+          <label>Craft Type</label>
+          <select [(ngModel)]="selectedCraft">
+            <option value="">All Crafts</option>
+            <option *ngFor="let craft of crafts" [value]="craft">{{ craft }}</option>
+          </select>
+        </div>
+        
+        <div class="mobile-filter-group">
+          <label>Sort By</label>
+          <select [(ngModel)]="selectedSort">
+            <option *ngFor="let option of sortOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="mobile-filter-actions">
+          <button class="btn btn-outline" (click)="clearFilters()">Clear All</button>
+          <button class="btn btn-primary" (click)="toggleFilters(); onFilterChange()">Apply Filters</button>
+        </div>
+      </div>
+      
+      <!-- Active Filters -->
+      <div class="active-filters" *ngIf="selectedState || selectedCraft || searchQuery">
+        <span class="active-filters-label">Active Filters:</span>
+        <span class="filter-tag" *ngIf="searchQuery">
+          "{{ searchQuery }}"
+          <i class="fas fa-times" (click)="searchQuery = ''; onFilterChange()"></i>
+        </span>
+        <span class="filter-tag" *ngIf="selectedState">
+          {{ selectedState }}
+          <i class="fas fa-times" (click)="selectedState = ''; onFilterChange()"></i>
+        </span>
+        <span class="filter-tag" *ngIf="selectedCraft">
+          {{ selectedCraft }}
+          <i class="fas fa-times" (click)="selectedCraft = ''; onFilterChange()"></i>
+        </span>
+        <button class="clear-all-btn" (click)="clearFilters()">Clear All</button>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Artisans Grid/List -->
+  <section class="artisans-section">
+    <div class="container">
+      
+      <!-- Results Count -->
+      <div class="results-info" *ngIf="!isLoading">
+        <span>Showing {{ artisans.length }} of {{ totalArtisans }} artisan stories</span>
+      </div>
+      
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="isLoading">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Discovering artisan stories...</p>
+        </div>
+      </div>
+      
+      <!-- No Results -->
+      <div class="no-results" *ngIf="!isLoading && artisans.length === 0">
+        <i class="fas fa-search"></i>
+        <h3>No artisan stories found</h3>
+        <p>Try adjusting your search or filters</p>
+        <button class="btn btn-primary" (click)="clearFilters()">Clear Filters</button>
+      </div>
+      
+      <!-- Grid View -->
+      <div class="artisans-grid" *ngIf="!isLoading && artisans.length > 0 && viewMode === 'grid'">
+        <article 
+          class="artisan-card" 
+          *ngFor="let artisan of artisans; trackBy: trackByArtisan"
+          (click)="viewArtisan(artisan)">
+          
+          <div class="card-image">
+            <img [src]="artisan.profileImageUrl || 'assets/images/artisan-placeholder.jpg'" 
+                 [alt]="artisan.artisanName"
+                 loading="lazy">
+            <div class="card-overlay">
+              <span class="read-story">Read Story</span>
+            </div>
+            <div class="card-badges">
+              <span class="badge badge-verified" *ngIf="artisan.verified">
+                <i class="fas fa-check-circle"></i>
+              </span>
+              <span class="badge badge-featured" *ngIf="artisan.featured">
+                <i class="fas fa-star"></i>
+              </span>
+            </div>
+          </div>
+          
+          <div class="card-content">
+            <div class="card-header">
+              <h3 class="artisan-name">{{ artisan.artisanName }}</h3>
+              <span class="generation-badge" *ngIf="artisan.generationsInCraft > 1">
+                {{ getGenerationText(artisan.generationsInCraft) }}
+              </span>
+            </div>
+            
+            <p class="artisan-craft">{{ artisan.primaryCraft }}</p>
+            
+            <p class="artisan-bio" *ngIf="artisan.shortBio">
+              {{ artisan.shortBio | slice:0:100 }}{{ artisan.shortBio.length > 100 ? '...' : '' }}
+            </p>
+            
+            <div class="card-meta">
+              <span class="meta-item location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ artisan.district }}, {{ artisan.state }}
+              </span>
+              <span class="meta-item experience">
+                <i class="fas fa-clock"></i>
+                {{ artisan.yearsOfExperience }} yrs
+              </span>
+            </div>
+            
+            <div class="card-tags" *ngIf="artisan.nationalAwardee || artisan.stateAwardee || artisan.giTagHolder">
+              <span class="tag tag-award" *ngIf="artisan.nationalAwardee">National Award</span>
+              <span class="tag tag-award" *ngIf="artisan.stateAwardee">State Award</span>
+              <span class="tag tag-gi" *ngIf="artisan.giTagHolder">GI Tag Holder</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      
+      <!-- List View -->
+      <div class="artisans-list" *ngIf="!isLoading && artisans.length > 0 && viewMode === 'list'">
+        <article 
+          class="artisan-list-item" 
+          *ngFor="let artisan of artisans; trackBy: trackByArtisan"
+          (click)="viewArtisan(artisan)">
+          
+          <div class="list-image">
+            <img [src]="artisan.profileImageUrl || 'assets/images/artisan-placeholder.jpg'" 
+                 [alt]="artisan.artisanName"
+                 loading="lazy">
+          </div>
+          
+          <div class="list-content">
+            <div class="list-header">
+              <h3 class="artisan-name">{{ artisan.artisanName }}</h3>
+              <div class="list-badges">
+                <span class="badge badge-verified" *ngIf="artisan.verified">
+                  <i class="fas fa-check-circle"></i> Verified
+                </span>
+                <span class="badge badge-award" *ngIf="artisan.nationalAwardee">
+                  <i class="fas fa-award"></i> National Awardee
+                </span>
+              </div>
+            </div>
+            
+            <p class="artisan-craft">{{ artisan.primaryCraft }}</p>
+            <p class="artisan-bio">{{ artisan.shortBio }}</p>
+            
+            <div class="list-meta">
+              <span class="meta-item">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ artisan.district }}, {{ artisan.state }}
+              </span>
+              <span class="meta-item">
+                <i class="fas fa-history"></i>
+                {{ getExperienceText(artisan.yearsOfExperience) }}
+              </span>
+              <span class="meta-item" *ngIf="artisan.generationsInCraft > 1">
+                <i class="fas fa-users"></i>
+                {{ getGenerationText(artisan.generationsInCraft) }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="list-action">
+            <button class="btn-read-story">
+              Read Story
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </article>
+      </div>
+      
+      <!-- Load More -->
+      <div class="load-more-section" *ngIf="hasMore && !isLoading">
+        <button 
+          class="btn btn-load-more" 
+          (click)="loadMore()"
+          [disabled]="isLoadingMore">
+          <span *ngIf="!isLoadingMore">Load More Stories</span>
+          <span *ngIf="isLoadingMore">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
+          </span>
+        </button>
+      </div>
+      
+    </div>
+  </section>
+  
+</div>

@@ -1,0 +1,92 @@
+  .container {
+      margin: 2rem auto;
+      max-width: 800px;
+      padding: 2em;
+      border-radius: 10px;
+      background-color: bisque;
+    }
+    
+    form {
+      margin-top: 1em;
+    }
+  
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    input,
+    select {
+      width: 100%;
+      padding: 15px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    
+    .form-group button {
+      width: 100%;
+      padding: 15px;
+      background-color: #FFA500;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .form-group button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .login-link {
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .login-link a {
+      color: #FFA500;
+      text-decoration: none;
+    }
+  
+    #second-part {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  
+    input {
+      border-radius: 5px;
+      padding: 15px;
+      border: none;
+      font-size: 16px;
+    }
+  
+    #second-part-second {
+      width: 25%;
+    }
+  
+    #second-part-first {
+      width: 70%;
+    }
+  
+    /* customer */
+  
+    .row-two {
+      width: 100%;
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 15px;
+    }
+  
+    .row-three {
+      width: 100%;
+      display: grid;
+      grid-template-columns: auto 0.3fr auto;
+      gap: 15px;
+    }

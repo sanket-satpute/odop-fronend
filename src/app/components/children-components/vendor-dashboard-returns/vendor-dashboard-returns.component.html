@@ -1,0 +1,254 @@
+<div class="returns-container">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner-ring"></div>
+      <span>Loading returns...</span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="loadError && !isLoading">
+    <div class="error-content">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <h2>Unable to Load Returns</h2>
+      <p>{{ loadError }}</p>
+      <div class="error-actions">
+        <button class="btn btn-primary" (click)="refreshData()">
+          <i class="fas fa-sync-alt"></i> Retry
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content (only show when not loading and no error) -->
+  <ng-container *ngIf="!isLoading && !loadError">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">
+          <i class="fas fa-undo-alt"></i>
+          Returns & Refunds
+        </h1>
+        <p class="page-subtitle">Manage return requests and process refunds efficiently</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline" (click)="refreshData()">
+          <i class="fas fa-sync-alt"></i>
+          Refresh
+        </button>
+        <button class="btn btn-outline">
+          <i class="fas fa-download"></i>
+          Export Report
+        </button>
+        <button class="btn btn-outline">
+          <i class="fas fa-cog"></i>
+          Return Policy
+        </button>
+      </div>
+    </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-cards">
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <i class="fas fa-box-open"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ totalReturns }}</span>
+        <span class="stat-label">Total Returns</span>
+      </div>
+    </div>
+    <div class="stat-card highlight">
+      <div class="stat-icon pending">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ pendingReturns }}</span>
+        <span class="stat-label">Pending Approval</span>
+      </div>
+      <span class="urgent-badge">Needs Action</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon rate">
+        <i class="fas fa-percentage"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ returnRate }}%</span>
+        <span class="stat-label">Return Rate</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon time">
+        <i class="fas fa-stopwatch"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ avgProcessingTime }}</span>
+        <span class="stat-label">Avg. Processing</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Returns List -->
+    <div class="returns-section">
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search returns..." [(ngModel)]="searchQuery">
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab" [class.active]="filterStatus === 'all'" (click)="filterStatus = 'all'">
+            All <span class="count">{{ returnRequests.length }}</span>
+          </button>
+          <button class="filter-tab" [class.active]="filterStatus === 'pending'" (click)="filterStatus = 'pending'">
+            Pending <span class="count warning">2</span>
+          </button>
+          <button class="filter-tab" [class.active]="filterStatus === 'approved'" (click)="filterStatus = 'approved'">
+            Approved
+          </button>
+          <button class="filter-tab" [class.active]="filterStatus === 'in-transit'" (click)="filterStatus = 'in-transit'">
+            In Transit
+          </button>
+          <button class="filter-tab" [class.active]="filterStatus === 'completed'" (click)="filterStatus = 'completed'">
+            Completed
+          </button>
+        </div>
+      </div>
+
+      <!-- Returns Table -->
+      <div class="returns-list">
+        <div class="return-card" *ngFor="let request of filteredReturns">
+          <div class="return-header">
+            <div class="return-ids">
+              <span class="return-id">{{ request.id }}</span>
+              <span class="order-id">Order: {{ request.orderId }}</span>
+            </div>
+            <span class="return-status" [ngClass]="getStatusClass(request.status)">
+              <i class="fas" [ngClass]="getStatusIcon(request.status)"></i>
+              {{ request.status | titlecase }}
+            </span>
+          </div>
+
+          <div class="return-body">
+            <div class="product-info">
+              <div class="product-image">
+                <i class="fas fa-image"></i>
+              </div>
+              <div class="product-details">
+                <h4 class="product-name">{{ request.productName }}</h4>
+                <p class="customer-name">
+                  <i class="fas fa-user"></i>
+                  {{ request.customerName }}
+                </p>
+              </div>
+            </div>
+
+            <div class="return-meta">
+              <div class="meta-item">
+                <span class="meta-label">Request Date</span>
+                <span class="meta-value">{{ formatDate(request.requestDate) }}</span>
+                <span class="meta-sub">{{ getDaysAgo(request.requestDate) }} days ago</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Reason</span>
+                <span class="meta-value reason">{{ request.reason }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Refund Amount</span>
+                <span class="meta-value amount">₹{{ request.refundAmount | number }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="return-actions">
+            <button class="btn-action view" (click)="viewDetails(request)">
+              <i class="fas fa-eye"></i>
+              View Details
+            </button>
+            <ng-container *ngIf="request.status === 'pending'">
+              <button class="btn-action approve" (click)="approveReturn(request)">
+                <i class="fas fa-check"></i>
+                Approve
+              </button>
+              <button class="btn-action reject" (click)="rejectReturn(request)">
+                <i class="fas fa-times"></i>
+                Reject
+              </button>
+            </ng-container>
+            <ng-container *ngIf="request.status === 'approved'">
+              <button class="btn-action refund" (click)="processRefund(request)">
+                <i class="fas fa-rupee-sign"></i>
+                Process Refund
+              </button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-section">
+      <!-- Return Reasons -->
+      <div class="reasons-card">
+        <h3>
+          <i class="fas fa-chart-pie"></i>
+          Return Reasons
+        </h3>
+        <div class="reasons-list">
+          <div class="reason-item" *ngFor="let item of returnReasons">
+            <div class="reason-header">
+              <span class="reason-text">{{ item.reason }}</span>
+              <span class="reason-count">{{ item.count }}</span>
+            </div>
+            <div class="reason-bar">
+              <div class="reason-fill" [style.width.%]="item.percentage"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions-card">
+        <h3>Quick Actions</h3>
+        <button class="quick-action-btn">
+          <i class="fas fa-file-alt"></i>
+          Generate Monthly Report
+        </button>
+        <button class="quick-action-btn">
+          <i class="fas fa-envelope"></i>
+          Send Bulk Notifications
+        </button>
+        <button class="quick-action-btn">
+          <i class="fas fa-edit"></i>
+          Update Return Policy
+        </button>
+        <button class="quick-action-btn">
+          <i class="fas fa-question-circle"></i>
+          Return FAQs
+        </button>
+      </div>
+
+      <!-- Tips -->
+      <div class="tips-card">
+        <div class="tips-header">
+          <i class="fas fa-lightbulb"></i>
+          <span>Reduce Returns</span>
+        </div>
+        <ul class="tips-list">
+          <li>Add detailed product descriptions and measurements</li>
+          <li>Include multiple high-quality images</li>
+          <li>Respond to customer queries promptly</li>
+          <li>Ensure proper packaging for fragile items</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  </ng-container>
+</div>

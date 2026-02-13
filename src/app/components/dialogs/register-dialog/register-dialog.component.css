@@ -1,0 +1,1324 @@
+.dialog-container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    min-height: 200px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    position: relative;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+ .dialog-container::-webkit-scrollbar {
+	 width: 6px;
+}
+ .dialog-container::-webkit-scrollbar-track {
+	 background: #f8f9fa;
+	 border-radius: 3px;
+}
+ .dialog-container::-webkit-scrollbar-thumb {
+	 background: #ffc966;
+	 border-radius: 3px;
+}
+ .dialog-header {
+	 display: flex;
+	 justify-content: space-between;
+	 align-items: flex-start;
+	 padding: 2rem 2rem 1rem;
+	 border-bottom: 1px solid #e9ecef;
+}
+ .dialog-header .header-content {
+	 flex: 1;
+}
+ .dialog-header .header-content .dialog-title {
+	 font-size: 1.5rem;
+	 font-weight: 700;
+	 color: #2c3e50;
+	 margin: 0 0 0.25rem;
+	 letter-spacing: -0.025em;
+	 text-align: left;
+}
+ .dialog-header .header-content .dialog-subtitle {
+	 font-size: 0.9rem;
+	 color: #6c757d;
+	 margin: 0;
+	 line-height: 1.4;
+	 text-align: left;
+}
+ .dialog-header .close-btn {
+	 background: none;
+	 border: none;
+	 color: #6c757d;
+	 cursor: pointer;
+	 padding: 0.5rem;
+	 border-radius: 50%;
+	 transition: all 0.2s ease;
+	 display: flex;
+	 align-items: center;
+	 justify-content: center;
+	 width: 36px;
+	 height: 36px;
+	 min-width: unset;
+	 flex-shrink: 0;
+}
+ .dialog-header .close-btn:hover {
+	 background: #f8f9fa;
+	 color: #2c3e50;
+}
+ .dialog-header .close-btn mat-icon {
+	 font-size: 1.25rem;
+}
+ .role-selection {
+	 padding: 1.5rem 2rem;
+	 background: #f8f9fa;
+}
+ .role-selection .role-tabs {
+	 display: flex;
+	 gap: 0.5rem;
+	 background: #fff;
+	 padding: 0.25rem;
+	 border-radius: 12px;
+	 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+ .role-selection .role-tabs .role-tab {
+	 flex: 1;
+	 display: flex;
+	 align-items: center;
+	 justify-content: center;
+	 gap: 0.5rem;
+	 padding: 0.75rem 1rem;
+	 border: none;
+	 background: transparent;
+	 border-radius: 8px;
+	 cursor: pointer;
+	 transition: all 0.3s ease;
+	 color: #6c757d;
+	 font-weight: 500;
+	 font-size: 0.9rem;
+}
+ .role-selection .role-tabs .role-tab mat-icon {
+	 font-size: 1.1rem;
+}
+ .role-selection .role-tabs .role-tab:hover {
+	 background: #fff6e6;
+	 color: #cc8400;
+}
+ .role-selection .role-tabs .role-tab.active {
+	 background: #ffa500;
+	 color: #fff;
+	 box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
+}
+ .role-selection .role-tabs .role-tab.active:hover {
+	 background: #e69500;
+}
+ .register-form {
+	 padding: 1.5rem 2rem 2rem;
+}
+ .form-section {
+	 margin-bottom: 1.5rem;
+}
+ .form-section.password-section {
+	 border-top: 1px solid #e9ecef;
+	 padding-top: 1.5rem;
+	 margin-top: 2rem;
+}
+ .form-row {
+	 margin-bottom: 1.25rem;
+}
+.form-row {
+    position: relative;
+    margin-bottom: 1.25rem;
+    width: 100%;
+}
+
+.form-row.two-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 599px) {
+    .form-row.two-columns {
+        grid-template-columns: 1fr;
+    }
+}
+/* Form Field Styles */
+::ng-deep .mat-mdc-form-field {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+::ng-deep .mat-mdc-form-field.full-width {
+    width: 100%;
+}
+
+::ng-deep .mat-mdc-form-field-wrapper {
+    padding-bottom: 0;
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+    background: #fff;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper:hover {
+    background: #f8f9fa;
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex {
+    padding: 0.5rem 0.75rem;
+    min-height: 48px;
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-form-field-infix {
+    padding: 0.5em 0;
+    width: auto;
+}
+
+::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+    background: #fff;
+}
+
+/* Input Text Styling */
+::ng-deep .mat-mdc-input-element {
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    padding: 0.25rem 0;
+}
+
+/* Placeholder Styling */
+::ng-deep .mat-mdc-form-field .mat-mdc-form-field-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+ ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-outline .mat-mdc-notched-outline-start, ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-outline .mat-mdc-notched-outline-middle, ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-outline .mat-mdc-notched-outline-end {
+	 border-color: #e9ecef;
+	 border-width: 1px;
+}
+ ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline .mat-mdc-notched-outline-start, ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline .mat-mdc-notched-outline-middle, ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline .mat-mdc-notched-outline-end {
+	 border-color: #ffa500;
+	 border-width: 2px;
+}
+ ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-label {
+	 color: #6c757d;
+	 font-weight: 500;
+}
+ ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
+	 color: #ffa500;
+}
+ ::ng-deep .mat-mdc-form-field .mat-mdc-input-element, ::ng-deep .mat-mdc-form-field .mat-mdc-select-value {
+	 color: #2c3e50;
+	 font-size: 0.95rem;
+}
+ ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-suffix {
+	 color: #6c757d;
+}
+ ::ng-deep .mat-mdc-select-panel {
+	 border-radius: 8px;
+	 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+ ::ng-deep .mat-mdc-option:hover {
+	 background: #fff6e6;
+}
+ ::ng-deep .mat-mdc-option.mat-mdc-option-active {
+	 background: #ffa500;
+	 color: #fff;
+}
+ .file-upload {
+	 margin-bottom: 1rem;
+}
+ .file-upload mat-label {
+	 display: block;
+	 font-size: 0.875rem;
+	 font-weight: 500;
+	 color: #6c757d;
+	 margin-bottom: 0.5rem;
+}
+ .file-upload .file-input-wrapper {
+	 border: 2px dashed #e9ecef;
+	 border-radius: 8px;
+	 padding: 1.5rem;
+	 text-align: center;
+	 transition: all 0.3s ease;
+}
+ .file-upload .file-input-wrapper:hover {
+	 border-color: #ffa500;
+	 background: #fff;
+}
+ .file-upload .file-input-wrapper .file-upload-btn {
+	 background: none;
+	 border: none;
+	 color: #6c757d;
+	 cursor: pointer;
+	 display: flex;
+	 align-items: center;
+	 gap: 0.5rem;
+	 font-size: 0.9rem;
+	 font-weight: 500;
+	 margin: 0 auto;
+}
+ .file-upload .file-input-wrapper .file-upload-btn:hover {
+	 color: #ffa500;
+}
+ .file-upload .file-input-wrapper .file-upload-btn mat-icon {
+	 font-size: 1.25rem;
+}
+ .form-actions {
+	 margin: 2rem 0 1rem;
+}
+ .form-actions .submit-btn {
+	 width: 100%;
+	 background: linear-gradient(135deg, #ffa500, #cc8400);
+	 color: #fff;
+	 border: none;
+	 padding: 1rem 1.5rem;
+	 border-radius: 12px;
+	 font-size: 1rem;
+	 font-weight: 600;
+	 cursor: pointer;
+	 transition: all 0.3s ease;
+	 box-shadow: 0 4px 16px rgba(255, 165, 0, 0.3);
+	 position: relative;
+	 overflow: hidden;
+}
+ .form-actions .submit-btn .btn-content {
+	 display: flex;
+	 align-items: center;
+	 justify-content: center;
+	 gap: 0.5rem;
+}
+ .form-actions .submit-btn .btn-content mat-icon {
+	 font-size: 1.1rem;
+}
+ .form-actions .submit-btn:hover:not(:disabled) {
+	 transform: translateY(-2px);
+	 box-shadow: 0 8px 24px rgba(255, 165, 0, 0.4);
+	 background: linear-gradient(135deg, #ffae1a, #ffa500);
+}
+ .form-actions .submit-btn:active:not(:disabled) {
+	 transform: translateY(0);
+}
+ .form-actions .submit-btn:disabled {
+	 opacity: 0.6;
+	 cursor: not-allowed;
+	 transform: none;
+	 box-shadow: 0 4px 16px rgba(255, 165, 0, 0.15);
+}
+ .form-actions .submit-btn mat-spinner {
+	 margin: 0 auto;
+}
+ .form-actions .submit-btn mat-spinner ::ng-deep circle {
+	 stroke: #fff;
+}
+ .terms-section {
+	 text-align: center;
+	 padding-top: 1rem;
+	 border-top: 1px solid #e9ecef;
+}
+ .terms-section .terms-text {
+	 font-size: 0.85rem;
+	 color: #6c757d;
+	 line-height: 1.5;
+	 margin: 0;
+}
+ .terms-section .terms-text .terms-link {
+	 color: #ffa500;
+	 text-decoration: none;
+	 font-weight: 500;
+}
+ .terms-section .terms-text .terms-link:hover {
+	 text-decoration: underline;
+}
+/* Responsive Design */
+@media (max-width: 960px) {
+    .dialog-container {
+        max-width: 90vw;
+        margin: 20px;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .dialog-container {
+        max-width: 100vw;
+        margin: 0;
+        min-height: 100vh;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+
+    .dialog-header {
+        position: sticky;
+        top: 0;
+        background: #fff;
+        z-index: 1000;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .dialog-header .header-content .dialog-title {
+        font-size: 1.25rem;
+    }
+
+    .dialog-header .header-content .dialog-subtitle {
+        font-size: 0.875rem;
+    }
+
+    .role-selection {
+        padding: 0.75rem 1rem;
+        position: sticky;
+        top: 64px;
+        background: #fff;
+        z-index: 999;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .role-selection .role-tabs {
+        gap: 0.5rem;
+    }
+
+    .role-selection .role-tabs .role-tab {
+        padding: 0.5rem;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .role-selection .role-tabs .role-tab mat-icon {
+        font-size: 1.25rem;
+    }
+
+    .role-selection .role-tabs .role-tab span {
+        font-size: 0.75rem;
+    }
+
+    .register-form {
+        padding: 1rem;
+    }
+
+    .form-section {
+        margin-bottom: 1rem;
+    }
+
+    .section-header {
+        margin: 1rem 0 0.5rem;
+    }
+
+    .section-title {
+        font-size: 1rem;
+    }
+
+    .form-actions {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        padding: 1rem;
+        margin: 0 -1rem;
+        box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+    }
+
+    .submit-btn {
+        border-radius: 8px;
+    }
+}
+
+/* Small phones */
+@media (max-width: 360px) {
+    .dialog-header .header-content .dialog-title {
+        font-size: 1.1rem;
+    }
+
+    .role-selection .role-tabs .role-tab span {
+        display: none;
+    }
+
+    .section-title {
+        font-size: 0.9rem;
+    }
+}
+ @media (max-width: 600px) and (min-width: 400px) {
+	 .role-selection .role-tabs .role-tab span {
+		 display: inline;
+	}
+}
+ .form-section {
+	 animation: slideIn 0.3s ease-out;
+}
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.dialog-container {
+    animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-section {
+    animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dialog-header {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Smooth transitions */
+.form-row,
+.section-header,
+.checkbox-row,
+.file-upload,
+.advanced-content {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effects */
+.role-tab,
+.submit-btn,
+.file-upload-btn,
+.checkbox-row,
+.section-header.expandable {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.role-tab:hover,
+.submit-btn:hover:not(:disabled),
+.file-upload-btn:hover,
+.checkbox-row:hover {
+    transform: translateY(-1px);
+}
+ .loading-overlay {
+	 position: absolute;
+	 top: 0;
+	 left: 0;
+	 right: 0;
+	 bottom: 0;
+	 background: rgba(255, 255, 255, 0.9);
+	 display: flex;
+	 align-items: center;
+	 justify-content: center;
+	 z-index: 1000;
+	 border-radius: 16px;
+}
+ ::ng-deep .mat-mdc-form-field-error {
+	 color: #dc3545;
+	 font-size: 0.8rem;
+	 margin-top: 0.25rem;
+}
+ .success-message {
+	 background: #d4edda;
+	 color: #155724;
+	 border: 1px solid #c3e6cb;
+	 border-radius: 8px;
+	 padding: 0.75rem 1rem;
+	 margin-bottom: 1rem;
+	 display: flex;
+	 align-items: center;
+	 gap: 0.5rem;
+}
+ .success-message mat-icon {
+	 color: #28a745;
+}
+ 
+
+
+.register-section {
+	 text-align: center;
+	 padding: 1rem 0;
+	 border-top: 1px solid #e9ecef;
+	 margin-bottom: 1rem;
+}
+ .register-section .register-text {
+	 font-size: 0.9rem;
+	 color: #6c757d;
+	 margin: 0;
+}
+ .register-section .register-text .register-link {
+	 background: none;
+	 border: none;
+	 color: #ffa500;
+	 font-weight: 600;
+	 cursor: pointer;
+	 text-decoration: none;
+	 font-size: 0.9rem;
+}
+ .register-section .register-text .register-link:hover {
+	 color: #cc8400;
+	 text-decoration: underline;
+}
+
+
+
+
+
+
+
+
+/* ai */
+/* Additional CSS for enhanced customer registration - Add to your existing CSS */
+
+/* Section Headers */
+.section-header {
+  margin: 1.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.section-header:first-child {
+  margin-top: 0;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Expandable Advanced Section */
+.advanced-section {
+  margin-top: 2rem;
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+}
+
+.section-header.expandable {
+  cursor: pointer;
+  border-bottom: 1px solid #e9ecef;
+  padding: 0.75rem 0;
+  transition: all 0.3s ease;
+}
+
+.section-header.expandable:hover {
+  background: #f8f9fa;
+  margin: 0 -1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.expand-icon {
+  transition: transform 0.3s ease;
+  color: #ffa500;
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.advanced-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  opacity: 0;
+}
+
+.advanced-content.show {
+  max-height: 800px;
+  opacity: 1;
+  margin-top: 1rem;
+}
+
+/* Checkbox Styles */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+::ng-deep .mat-mdc-checkbox {
+  margin-right: 0.5rem;
+}
+
+::ng-deep .mat-mdc-checkbox .mat-mdc-checkbox-frame {
+  border-color: #e9ecef;
+  border-width: 2px;
+}
+
+::ng-deep .mat-mdc-checkbox.mat-mdc-checkbox-checked .mat-mdc-checkbox-background {
+  background-color: #ffa500;
+  border-color: #ffa500;
+}
+
+::ng-deep .mat-mdc-checkbox .mat-mdc-checkbox-label {
+  color: #2c3e50;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Billing Address Section */
+.billing-address-section {
+  width: 100%;
+}
+
+.billing-address-section .checkbox-row {
+  margin-bottom: 0.5rem;
+}
+
+/* Datepicker Styles */
+::ng-deep .mat-mdc-form-field .mat-datepicker-toggle {
+  color: #6c757d;
+}
+
+::ng-deep .mat-mdc-form-field.mat-focused .mat-datepicker-toggle {
+  color: #ffa500;
+}
+
+::ng-deep .mat-datepicker-popup {
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+::ng-deep .mat-calendar-header {
+  background: #ffa500;
+  color: white;
+}
+
+::ng-deep .mat-calendar-body-selected {
+  background-color: #ffa500;
+  color: white;
+}
+
+::ng-deep .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: #ffa500;
+}
+
+/* Responsive Design Updates */
+@media (max-width: 600px) {
+  .section-header {
+    margin: 1rem 0 0.75rem 0;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .advanced-section {
+    margin-top: 1.5rem;
+  }
+
+  .section-header.expandable:hover {
+    margin: 0;
+    padding: 0.75rem 0;
+    background: transparent;
+  }
+}
+
+/* Animation for form sections */
+.form-section {
+  animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced Dialog Container for larger content */
+.dialog-container {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Smooth scrolling */
+.dialog-container {
+  scroll-behavior: smooth;
+}
+
+/* Loading state for advanced section */
+.advanced-content.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+
+
+
+
+
+
+
+/* vendor changed form style */
+/* Enhanced Checkbox Styles */
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.checkbox-row:hover {
+  background-color: #f8f9fa;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.checkbox-icon {
+  font-size: 1.1rem;
+  color: #ffa500;
+}
+
+.terms-checkbox .checkbox-label {
+  font-size: 0.85rem;
+}
+
+.terms-link {
+  color: #ffa500;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
+/* Social Media Section Styles */
+.advanced-section {
+  margin-top: 2rem;
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+}
+
+.section-header.expandable {
+  cursor: pointer;
+  border-bottom: 1px solid #e9ecef;
+  padding: 0.75rem 0;
+  transition: all 0.3s ease;
+}
+
+.section-header.expandable:hover {
+  background: #f8f9fa;
+  margin: 0 -1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.expand-icon {
+  transition: transform 0.3s ease;
+  color: #ffa500;
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.advanced-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  opacity: 0;
+}
+
+.advanced-content.show {
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 1rem;
+}
+
+/* Enhanced Form Field Icons */
+::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-suffix {
+  color: #6c757d;
+  transition: color 0.3s ease;
+}
+
+::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-icon-suffix {
+  color: #ffa500;
+}
+
+/* Delivery Section Animation */
+.form-row {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .checkbox-row {
+    padding: 0.5rem;
+  }
+  
+  .checkbox-label {
+    font-size: 0.85rem;
+  }
+  
+  .advanced-content.show {
+    max-height: 800px;
+  }
+}
+
+
+
+
+
+
+
+/* admin specific code */
+/* Admin Registration Specific Styles - Add these to your existing CSS */
+
+/* Admin Section Styling */
+.form-section.admin-registration-form {
+  background: linear-gradient(135deg, #f8f9fa, #ffffff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Admin Section Headers with Icons */
+.admin-registration-form .section-title {
+  color: #2c3e50;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-registration-form .section-title mat-icon {
+  color: #ffa500;
+  font-size: 1.2rem;
+}
+
+/* Enhanced Security Section */
+.admin-registration-form .section-header:nth-child(5) {
+  background: linear-gradient(135deg, #fff6e6, #ffffff);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1.5rem 0 1rem 0;
+  border-left: 4px solid #ffa500;
+}
+
+/* Admin Role Tab Enhancement */
+.role-tab[class*="admin"] {
+  background: linear-gradient(135deg, #ffa500, #cc8400);
+  color: white;
+  font-weight: 600;
+}
+
+.role-tab[class*="admin"]:hover {
+  background: linear-gradient(135deg, #ffae1a, #ffa500);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+}
+
+/* Admin Authorization Field Styling */
+::ng-deep .admin-registration-form .mat-mdc-form-field:has(input[formControlName="authorizationKey"]) {
+  position: relative;
+}
+
+::ng-deep .admin-registration-form .mat-mdc-form-field:has(input[formControlName="authorizationKey"])::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.05), rgba(255, 165, 0, 0.02));
+  border-radius: 8px;
+  z-index: -1;
+}
+
+/* Admin Advanced Section */
+.admin-registration-form .advanced-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Enhanced Checkbox Styling for Admin */
+.admin-registration-form .checkbox-row {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.75rem 0;
+  transition: all 0.3s ease;
+}
+
+.admin-registration-form .checkbox-row:hover {
+  border-color: #ffa500;
+  box-shadow: 0 2px 8px rgba(255, 165, 0, 0.1);
+}
+
+.admin-registration-form .checkbox-label {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.admin-registration-form .checkbox-icon {
+  color: #ffa500;
+  font-size: 1.1rem;
+}
+
+/* Admin Submit Button Enhancement */
+.admin-registration-form ~ .form-actions .submit-btn {
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  box-shadow: 0 4px 16px rgba(44, 62, 80, 0.3);
+}
+
+.admin-registration-form ~ .form-actions .submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #34495e, #2c3e50);
+  box-shadow: 0 8px 24px rgba(44, 62, 80, 0.4);
+}
+
+/* Admin Profile Upload Styling */
+.admin-registration-form .file-upload .file-input-wrapper {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border: 2px dashed #ffa500;
+}
+
+.admin-registration-form .file-upload .file-input-wrapper:hover {
+  background: linear-gradient(135deg, #fff6e6, #ffffff);
+  border-color: #cc8400;
+}
+
+.admin-registration-form .file-upload .file-upload-btn {
+  color: #ffa500;
+  font-weight: 600;
+}
+
+.admin-registration-form .file-upload .file-upload-btn:hover {
+  color: #cc8400;
+}
+
+/* Responsive Design for Admin Section */
+@media (max-width: 600px) {
+  .admin-registration-form {
+    padding: 1rem;
+  }
+  
+  .admin-registration-form .section-title {
+    font-size: 0.95rem;
+  }
+  
+  .admin-registration-form .checkbox-row {
+    padding: 0.75rem;
+  }
+}
+
+/* Animation for Admin Section */
+.admin-registration-form {
+  animation: adminSlideIn 0.5s ease-out;
+}
+
+@keyframes adminSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Special styling for admin role indicator */
+.role-tab.active[class*="admin"] {
+  position: relative;
+  overflow: hidden;
+}
+
+.role-tab.active[class*="admin"]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
+  pointer-events: none;
+}
+
+/* ============== OTP Verification Styles ============== */
+
+.phone-verification-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+}
+
+.phone-verification-container .phone-field {
+  flex: 1;
+}
+
+.phone-verification-container .verify-btn {
+  margin-top: 8px;
+  min-width: 80px;
+  height: 40px;
+}
+
+.phone-verification-container .verified-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 20px;
+  color: #2e7d32;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.phone-verification-container .verified-badge mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #2e7d32;
+}
+
+.verified-icon {
+  color: #2e7d32 !important;
+}
+
+.otp-verification-section {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  border: 1px solid #ffc107;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 0.5rem 0 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.otp-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+  color: #f57c00;
+  font-weight: 600;
+}
+
+.otp-header mat-icon {
+  color: #f57c00;
+}
+
+.otp-input-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.otp-input-row .otp-field {
+  flex: 1;
+  max-width: 200px;
+}
+
+.otp-input-row .otp-field input {
+  letter-spacing: 8px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.otp-input-row .verify-otp-btn {
+  margin-top: 8px;
+  min-width: 120px;
+  height: 40px;
+}
+
+.otp-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #ffcc80;
+}
+
+/* Responsive adjustments for OTP */
+@media (max-width: 600px) {
+  .phone-verification-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .phone-verification-container .verify-btn {
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .phone-verification-container .verified-badge {
+    margin-top: 8px;
+    justify-content: center;
+  }
+
+  .otp-input-row {
+    flex-direction: column;
+  }
+
+  .otp-input-row .otp-field {
+    max-width: 100%;
+  }
+
+  .otp-input-row .verify-otp-btn {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .otp-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* Social Sign-Up Styles */
+.social-signup-section {
+  margin-bottom: 1.25rem;
+  text-align: left;
+  padding: 0;
+}
+
+.social-signup-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.75rem;
+  text-align: left;
+}
+
+.social-buttons-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.google-btn-container {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+  width: auto;
+  min-width: unset;
+}
+
+.social-btn:hover:not(:disabled) {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.social-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.facebook-btn {
+  background: #1877f2;
+  color: white;
+  border-color: #1877f2;
+}
+
+.facebook-btn:hover:not(:disabled) {
+  background: #166fe5;
+}
+
+.social-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.social-btn span {
+  white-space: nowrap;
+}
+
+.divider-with-text {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.divider-with-text::before,
+.divider-with-text::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider-with-text span {
+  padding: 0 0.75rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}

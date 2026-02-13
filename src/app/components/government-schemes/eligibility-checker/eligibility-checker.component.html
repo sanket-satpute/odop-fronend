@@ -1,0 +1,320 @@
+<!-- Eligibility Checker Page -->
+<div class="eligibility-checker-page">
+  <!-- Header -->
+  <header class="checker-header">
+    <div class="container">
+      <button class="back-btn" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i>
+        Back
+      </button>
+      
+      <div class="header-content">
+        <div class="header-icon">
+          <i class="fas fa-clipboard-check"></i>
+        </div>
+        <h1>Eligibility Checker</h1>
+        <p *ngIf="schemeName">Check your eligibility for {{ schemeName }}</p>
+        <p *ngIf="!schemeName">Find government schemes you're eligible for</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="checker-main" *ngIf="!showResults">
+    <div class="container">
+      <!-- Progress Bar -->
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="progress"></div>
+        </div>
+        <span class="progress-text">Step {{ currentStep + 1 }} of {{ totalSteps }}</span>
+      </div>
+
+      <!-- Step Indicators -->
+      <div class="step-indicators">
+        <div 
+          *ngFor="let step of steps; let i = index"
+          class="step-indicator"
+          [class.active]="i === currentStep"
+          [class.completed]="i < currentStep"
+          (click)="goToStep(i)"
+        >
+          <div class="step-icon">
+            <i class="fas" [ngClass]="step.icon" *ngIf="i >= currentStep"></i>
+            <i class="fas fa-check" *ngIf="i < currentStep"></i>
+          </div>
+          <span class="step-title">{{ step.title }}</span>
+        </div>
+      </div>
+
+      <!-- Question Form -->
+      <div class="question-form">
+        <h2 class="step-heading">
+          <i class="fas" [ngClass]="steps[currentStep].icon"></i>
+          {{ steps[currentStep].title }}
+        </h2>
+
+        <form [formGroup]="eligibilityForm">
+          <div class="questions-list">
+            <div 
+              *ngFor="let question of currentStepQuestions; let i = index"
+              class="question-card"
+              [@fadeIn]
+            >
+              <div class="question-header">
+                <div class="question-icon">
+                  <i class="fas" [ngClass]="question.icon"></i>
+                </div>
+                <div class="question-text">
+                  <h3>{{ question.question }}</h3>
+                  <p *ngIf="question.helpText" class="help-text">
+                    <i class="fas fa-info-circle"></i>
+                    {{ question.helpText }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="answer-section">
+                <!-- Number Input -->
+                <div *ngIf="question.type === 'number'" class="number-input">
+                  <input 
+                    type="number" 
+                    [formControlName]="question.id"
+                    [placeholder]="question.placeholder || ''"
+                    [attr.min]="question.validation?.min ?? null"
+                    [attr.max]="question.validation?.max ?? null"
+                  >
+                </div>
+
+                <!-- Text Input -->
+                <div *ngIf="question.type === 'text'" class="text-input">
+                  <input 
+                    type="text" 
+                    [formControlName]="question.id"
+                    [placeholder]="question.placeholder || ''"
+                  >
+                </div>
+
+                <!-- Radio Options -->
+                <div *ngIf="question.type === 'radio'" class="radio-options">
+                  <label 
+                    *ngFor="let option of question.options"
+                    class="radio-option"
+                    [class.selected]="eligibilityForm.get(question.id)?.value === option.value"
+                  >
+                    <input 
+                      type="radio" 
+                      [formControlName]="question.id" 
+                      [value]="option.value"
+                    >
+                    <span class="radio-label">{{ option.label }}</span>
+                  </label>
+                </div>
+
+                <!-- Select Dropdown -->
+                <div *ngIf="question.type === 'select'" class="select-input">
+                  <select [formControlName]="question.id">
+                    <option value="">Select an option</option>
+                    <option *ngFor="let option of question.options" [value]="option.value">
+                      {{ option.label }}
+                    </option>
+                  </select>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+
+                <!-- Checkbox Options -->
+                <div *ngIf="question.type === 'checkbox'" class="checkbox-options">
+                  <label 
+                    *ngFor="let option of question.options"
+                    class="checkbox-option"
+                    [class.selected]="isChecked(question.id, option.value)"
+                  >
+                    <input 
+                      type="checkbox" 
+                      [checked]="isChecked(question.id, option.value)"
+                      (change)="toggleCheckbox(question.id, option.value)"
+                    >
+                    <span class="checkbox-label">{{ option.label }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Navigation Buttons -->
+        <div class="form-navigation">
+          <button 
+            class="btn btn-secondary"
+            (click)="prevStep()"
+            [disabled]="currentStep === 0"
+          >
+            <i class="fas fa-arrow-left"></i>
+            Previous
+          </button>
+
+          <button 
+            *ngIf="currentStep < totalSteps - 1"
+            class="btn btn-primary"
+            (click)="nextStep()"
+            [disabled]="!isStepValid()"
+          >
+            Next
+            <i class="fas fa-arrow-right"></i>
+          </button>
+
+          <button 
+            *ngIf="currentStep === totalSteps - 1"
+            class="btn btn-success"
+            (click)="checkEligibility()"
+            [disabled]="!eligibilityForm.valid || isSubmitting"
+          >
+            <span *ngIf="!isSubmitting">
+              <i class="fas fa-search"></i>
+              Check Eligibility
+            </span>
+            <span *ngIf="isSubmitting" class="loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              Checking...
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Results Section -->
+  <section class="results-section" *ngIf="showResults && eligibilityResult">
+    <div class="container">
+      <!-- Results Header -->
+      <div class="results-header" [class.eligible]="eligibilityResult.isEligible" [class.not-eligible]="!eligibilityResult.isEligible">
+        <div class="result-icon">
+          <i class="fas" [ngClass]="eligibilityResult.isEligible ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+        </div>
+        <h2 *ngIf="eligibilityResult.isEligible">🎉 Great News! You're Eligible!</h2>
+        <h2 *ngIf="!eligibilityResult.isEligible">Limited Eligibility</h2>
+        <p>Eligibility Score: <strong>{{ eligibilityResult.eligibilityScore }}%</strong></p>
+      </div>
+
+      <!-- Score Visualization -->
+      <div class="score-card">
+        <div class="score-circle">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-bg" cx="50" cy="50" r="45" />
+            <circle 
+              class="score-progress" 
+              cx="50" cy="50" r="45"
+              [style.strokeDasharray]="eligibilityResult.eligibilityScore * 2.83 + ', 283'"
+              [class.high]="eligibilityResult.eligibilityScore >= 70"
+              [class.medium]="eligibilityResult.eligibilityScore >= 50 && eligibilityResult.eligibilityScore < 70"
+              [class.low]="eligibilityResult.eligibilityScore < 50"
+            />
+          </svg>
+          <div class="score-text">
+            <span class="score-value">{{ eligibilityResult.eligibilityScore }}</span>
+            <span class="score-label">Score</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Criteria Match -->
+      <div class="criteria-section">
+        <div class="criteria-column matched">
+          <h3><i class="fas fa-check-circle"></i> Matched Criteria</h3>
+          <ul>
+            <li *ngFor="let criteria of eligibilityResult.matchedCriteria">
+              <i class="fas fa-check"></i>
+              {{ criteria }}
+            </li>
+          </ul>
+        </div>
+        <div class="criteria-column unmatched" *ngIf="eligibilityResult.unmatchedCriteria.length > 0">
+          <h3><i class="fas fa-times-circle"></i> Areas to Improve</h3>
+          <ul>
+            <li *ngFor="let criteria of eligibilityResult.unmatchedCriteria">
+              <i class="fas fa-times"></i>
+              {{ criteria }}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Matched Schemes -->
+      <div class="matched-schemes" *ngIf="eligibilityResult.matchedSchemes.length > 0">
+        <h3><i class="fas fa-hand-holding-heart"></i> Schemes You Can Apply For</h3>
+        <div class="schemes-grid">
+          <div 
+            *ngFor="let scheme of eligibilityResult.matchedSchemes"
+            class="scheme-card"
+            (click)="navigateToScheme(scheme.id)"
+          >
+            <div class="scheme-header">
+              <span class="match-badge">{{ scheme.eligibilityScore }}% Match</span>
+              <span class="type-badge">{{ scheme.schemeType }}</span>
+            </div>
+            <h4>{{ scheme.name }}</h4>
+            <p>{{ scheme.description }}</p>
+            <div class="scheme-meta">
+              <span class="benefit">
+                <i class="fas fa-rupee-sign"></i>
+                Up to {{ formatAmount(scheme.maxBenefit) }}
+              </span>
+              <span class="ministry">{{ scheme.ministry }}</span>
+            </div>
+            <button class="btn btn-outline btn-sm">
+              View Details <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="recommendations" *ngIf="eligibilityResult.recommendations.length > 0">
+        <h3><i class="fas fa-lightbulb"></i> Recommendations to Improve Eligibility</h3>
+        <div class="recommendation-list">
+          <div *ngFor="let rec of eligibilityResult.recommendations" class="recommendation-item">
+            <i class="fas fa-arrow-right"></i>
+            {{ rec }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="result-actions">
+        <button class="btn btn-primary" (click)="resetChecker()">
+          <i class="fas fa-redo"></i>
+          Check Again
+        </button>
+        <button class="btn btn-secondary" routerLink="/government-schemes">
+          <i class="fas fa-list"></i>
+          Browse All Schemes
+        </button>
+        <button class="btn btn-outline">
+          <i class="fas fa-download"></i>
+          Download Report
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Help Section -->
+  <section class="help-section">
+    <div class="container">
+      <div class="help-content">
+        <div class="help-icon">
+          <i class="fas fa-question-circle"></i>
+        </div>
+        <div class="help-text">
+          <h3>Need Help?</h3>
+          <p>Contact our helpline for assistance with eligibility queries</p>
+        </div>
+        <div class="help-actions">
+          <a href="tel:1800-11-2221" class="helpline">
+            <i class="fas fa-phone"></i>
+            1800-11-2221 (Toll Free)
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,55 @@
+<!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>ODOP India</h4>
+                    <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 30px;">Empowering local artisans and preserving India's rich cultural heritage through the One District One Product initiative.</p>
+                    <div class="social-links">
+                        <a href="https://facebook.com/ODOPIndia" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://twitter.com/ODOPIndia" target="_blank" rel="noopener"><i class="fab fa-twitter"></i></a>
+                        <a href="https://instagram.com/ODOPIndia" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
+                        <a href="https://linkedin.com/company/ODOPIndia" target="_blank" rel="noopener"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a routerLink="/">Home</a></li>
+                        <li><a routerLink="/products">Products</a></li>
+                        <li><a (click)="scrollToSection('about')" style="cursor: pointer;">About ODOP</a></li>
+                        <li><a (click)="scrollToSection('impact')" style="cursor: pointer;">Our Impact</a></li>
+                        <li><a routerLink="/contact_us">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Categories</h4>
+                    <ul>
+                        <li><a (click)="navigateToCategory('Handicrafts')" style="cursor: pointer;">Handicrafts</a></li>
+                        <li><a (click)="navigateToCategory('Textiles')" style="cursor: pointer;">Textiles</a></li>
+                        <li><a (click)="navigateToCategory('Food Products')" style="cursor: pointer;">Food Products</a></li>
+                        <li><a (click)="navigateToCategory('Art & Paintings')" style="cursor: pointer;">Art & Paintings</a></li>
+                        <li><a (click)="navigateToCategory('Musical Instruments')" style="cursor: pointer;">Musical Instruments</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a routerLink="/seller-support">Seller Support</a></li>
+                        <li><a routerLink="/buyer-support">Buyer Support</a></li>
+                        <li><a routerLink="/shipping-info">Shipping Info</a></li>
+                        <li><a routerLink="/returns-and-refunds">Returns & Refunds</a></li>
+                        <li><a routerLink="/privacy-policy">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; {{ currentYear }} ODOP India - Government of India Initiative. All rights reserved.</p>
+                <p style="margin-top: 10px; font-size: 0.9rem;">Made with <i class="fas fa-heart" style="color: #FFA500;"></i> for India's Artisans</p>
+            </div>
+        </div>
+    </footer>

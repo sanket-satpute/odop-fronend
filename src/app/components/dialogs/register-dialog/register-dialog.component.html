@@ -1,0 +1,852 @@
+<div class="dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <h2 class="dialog-title">Create Account</h2>
+      <p class="dialog-subtitle">Join our platform and start your journey</p>
+    </div>
+    <button class="close-btn" (click)="closeDialog()" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Role Selection -->
+  <div class="role-selection">
+    <div class="role-tabs">
+      <button 
+        type="button"
+        class="role-tab"
+        [class.active]="selectedRole === 'customer'"
+        (click)="selectedRole = 'customer'; onRoleChange()">
+        <mat-icon>person</mat-icon>
+        <span>Customer</span>
+      </button>
+      <button 
+        type="button"
+        class="role-tab"
+        [class.active]="selectedRole === 'vendor'"
+        (click)="selectedRole = 'vendor'; onRoleChange()">
+        <mat-icon>store</mat-icon>
+        <span>Vendor</span>
+      </button>
+      <button 
+        type="button"
+        class="role-tab"
+        [class.active]="selectedRole === 'admin'"
+        (click)="selectedRole = 'admin'; onRoleChange()">
+        <mat-icon>admin_panel_settings</mat-icon>
+        <span>Admin</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Registration Form -->
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+    
+  <!-- Customer Fields -->
+  <div *ngIf="selectedRole === 'customer'" class="form-section">
+    
+    <!-- Social Sign-Up Section -->
+    <div class="social-signup-section">
+      <p class="social-signup-label">Quick sign up with</p>
+      
+      <div class="social-buttons-row">
+        <!-- Google Sign-In Button Container -->
+        <div id="google-signup-dialog-btn" class="google-btn-container"></div>
+        
+        <!-- Facebook Sign-Up Button -->
+        <button 
+          type="button" 
+          class="social-btn facebook-btn"
+          (click)="signUpWithFacebook()"
+          [disabled]="socialLoginLoading || isLoading">
+          <svg class="social-icon" viewBox="0 0 24 24" width="18" height="18">
+            <path fill="currentColor" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
+          </svg>
+          <span>Facebook</span>
+        </button>
+      </div>
+
+      <div class="divider-with-text">
+        <span>or sign up with email</span>
+      </div>
+    </div>
+
+    <!-- Basic Information Section -->
+    <div class="section-header">
+      <h3 class="section-title">Basic Information</h3>
+    </div>
+    
+    <div class="form-row two-columns">
+      <mat-form-field appearance="outline">
+        <mat-label>Full Name</mat-label>
+        <input matInput formControlName="fullName" placeholder="Enter your full name">
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error>{{ getErrorMessage('fullName') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date of Birth</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="dateOfBirth" placeholder="Select date of birth">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error>{{ getErrorMessage('dateOfBirth') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row two-columns">
+      <mat-form-field appearance="outline">
+        <mat-label>Email Address</mat-label>
+        <input matInput type="email" formControlName="emailAddress" placeholder="Enter your email">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error>{{ getErrorMessage('emailAddress') }}</mat-error>
+      </mat-form-field>
+
+      <!-- Phone Number with OTP Verification -->
+      <div class="phone-verification-container">
+        <mat-form-field appearance="outline" class="phone-field">
+          <mat-label>Contact Number</mat-label>
+          <input matInput formControlName="contactNumber" 
+                 placeholder="Enter 10-digit phone number"
+                 (input)="onContactNumberChange()"
+                 [readonly]="isPhoneVerified">
+          <mat-icon matSuffix *ngIf="!isPhoneVerified">phone</mat-icon>
+          <mat-icon matSuffix *ngIf="isPhoneVerified" class="verified-icon">verified</mat-icon>
+          <mat-error>{{ getErrorMessage('contactNumber') }}</mat-error>
+        </mat-form-field>
+        
+        <!-- Verify Button (when not verified) -->
+        <button type="button" mat-stroked-button color="primary" 
+                class="verify-btn"
+                *ngIf="!isPhoneVerified && !showOtpInput && registerForm.get('contactNumber')?.valid"
+                (click)="sendOtp()"
+                [disabled]="isOtpLoading">
+          <mat-icon *ngIf="isOtpLoading">
+            <mat-spinner diameter="18"></mat-spinner>
+          </mat-icon>
+          <span *ngIf="!isOtpLoading">Verify</span>
+        </button>
+        
+        <!-- Verified Badge -->
+        <span class="verified-badge" *ngIf="isPhoneVerified">
+          <mat-icon>check_circle</mat-icon> Verified
+        </span>
+      </div>
+    </div>
+
+    <!-- OTP Input Section (shown after clicking Verify) -->
+    <div class="otp-verification-section" *ngIf="showOtpInput && !isPhoneVerified">
+      <div class="otp-header">
+        <mat-icon>sms</mat-icon>
+        <span>Enter OTP sent to your phone</span>
+      </div>
+      
+      <div class="otp-input-row">
+        <mat-form-field appearance="outline" class="otp-field">
+          <mat-label>Enter 6-digit OTP</mat-label>
+          <input matInput 
+                 [value]="otpValue"
+                 (input)="onOtpChange($any($event.target).value)"
+                 placeholder="000000"
+                 maxlength="6"
+                 pattern="[0-9]*"
+                 inputmode="numeric">
+          <mat-icon matSuffix>lock</mat-icon>
+        </mat-form-field>
+        
+        <button type="button" mat-flat-button color="primary"
+                class="verify-otp-btn"
+                (click)="verifyOtp()"
+                [disabled]="isOtpLoading || otpValue.length !== 6">
+          <mat-icon *ngIf="isOtpLoading">
+            <mat-spinner diameter="18"></mat-spinner>
+          </mat-icon>
+          <span *ngIf="!isOtpLoading">Verify OTP</span>
+        </button>
+      </div>
+      
+      <div class="otp-actions">
+        <button type="button" mat-button color="warn" (click)="cancelOtpVerification()">
+          Cancel
+        </button>
+        <button type="button" mat-button color="primary" 
+                (click)="resendOtp()"
+                [disabled]="!canResend">
+          <span *ngIf="canResend">Resend OTP</span>
+          <span *ngIf="!canResend">Resend in {{ resendTimer }}s</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Gender</mat-label>
+        <mat-select formControlName="gender">
+          <mat-option value="male">Male</mat-option>
+          <mat-option value="female">Female</mat-option>
+          <mat-option value="other">Other</mat-option>
+          <mat-option value="prefer-not-to-say">Prefer not to say</mat-option>
+        </mat-select>
+        <mat-icon matSuffix>person_outline</mat-icon>
+        <mat-error>{{ getErrorMessage('gender') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Address Information Section -->
+    <div class="section-header">
+      <h3 class="section-title">Address Information</h3>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Address</mat-label>
+        <textarea matInput formControlName="address" placeholder="Enter your complete address" rows="3"></textarea>
+        <mat-icon matSuffix>home</mat-icon>
+        <mat-error>{{ getErrorMessage('address') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row three-columns">
+      <mat-form-field appearance="outline">
+        <mat-label>City</mat-label>
+        <input matInput formControlName="city" placeholder="Enter your city">
+        <mat-icon matSuffix>location_city</mat-icon>
+        <mat-error>{{ getErrorMessage('city') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>State</mat-label>
+        <mat-select formControlName="state">
+          <mat-option value="maharashtra">Maharashtra</mat-option>
+          <mat-option value="gujarat">Gujarat</mat-option>
+          <mat-option value="rajasthan">Rajasthan</mat-option>
+          <mat-option value="madhya-pradesh">Madhya Pradesh</mat-option>
+          <mat-option value="uttar-pradesh">Uttar Pradesh</mat-option>
+          <mat-option value="bihar">Bihar</mat-option>
+          <mat-option value="west-bengal">West Bengal</mat-option>
+          <mat-option value="tamil-nadu">Tamil Nadu</mat-option>
+          <mat-option value="karnataka">Karnataka</mat-option>
+          <mat-option value="kerala">Kerala</mat-option>
+          <mat-option value="andhra-pradesh">Andhra Pradesh</mat-option>
+          <mat-option value="telangana">Telangana</mat-option>
+        </mat-select>
+        <mat-icon matSuffix>map</mat-icon>
+        <mat-error>{{ getErrorMessage('state') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Pin Code</mat-label>
+        <input matInput formControlName="pinCode" placeholder="Enter 6-digit pincode">
+        <mat-icon matSuffix>pin_drop</mat-icon>
+        <mat-error>{{ getErrorMessage('pinCode') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Advanced/Optional Information Section -->
+    <div class="advanced-section">
+      <div class="section-header expandable" (click)="toggleAdvancedSection()">
+        <h3 class="section-title">
+          <mat-icon class="expand-icon" [class.expanded]="showAdvancedSection">expand_more</mat-icon>
+          Additional Information (Optional)
+        </h3>
+      </div>
+
+      <div class="advanced-content" [class.show]="showAdvancedSection">
+        <div class="form-row two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Preferred Language</mat-label>
+            <mat-select formControlName="preferredLanguage">
+              <mat-option value="english">English</mat-option>
+              <mat-option value="hindi">Hindi</mat-option>
+              <mat-option value="marathi">Marathi</mat-option>
+              <mat-option value="gujarati">Gujarati</mat-option>
+              <mat-option value="tamil">Tamil</mat-option>
+              <mat-option value="bengali">Bengali</mat-option>
+            </mat-select>
+            <mat-icon matSuffix>language</mat-icon>
+            <mat-error>{{ getErrorMessage('preferredLanguage') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Communication Preference</mat-label>
+            <mat-select formControlName="communicationPreference">
+              <mat-option value="email">Email Only</mat-option>
+              <mat-option value="sms">SMS Only</mat-option>
+              <mat-option value="both">Both Email & SMS</mat-option>
+              <mat-option value="none">No Communications</mat-option>
+            </mat-select>
+            <mat-icon matSuffix>notifications</mat-icon>
+            <mat-error>{{ getErrorMessage('communicationPreference') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="newsletterSubscribed">
+              Subscribe to newsletter for updates and offers
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="file-upload">
+            <mat-label>Profile Picture (Optional)</mat-label>
+            <div class="file-input-wrapper">
+              <input type="file" #profileFileInput (change)="onProfilePictureSelected($event)" accept="image/*" hidden>
+              <button type="button" class="file-upload-btn" (click)="profileFileInput.click()">
+                <mat-icon>account_circle</mat-icon>
+                <span>Choose Profile Picture</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendor Fields -->
+  <div *ngIf="selectedRole === 'vendor'" class="form-section">
+    <!-- Basic Business Information Section -->
+    <div class="section-header">
+      <h3 class="section-title">Basic Business Information</h3>
+    </div>
+    
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Shop Name</mat-label>
+        <input matInput formControlName="shoppeeName" placeholder="Enter your shop name">
+        <mat-icon matSuffix>store</mat-icon>
+        <mat-error>{{ getErrorMessage('shoppeeName') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Owner Name</mat-label>
+        <input matInput formControlName="shopkeeperName" placeholder="Enter owner's full name">
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error>{{ getErrorMessage('shopkeeperName') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row two-columns">
+      <mat-form-field appearance="outline">
+        <mat-label>Email Address</mat-label>
+        <input matInput type="email" formControlName="emailAddress" placeholder="Enter business email">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error>{{ getErrorMessage('emailAddress') }}</mat-error>
+      </mat-form-field>
+
+      <!-- Phone Number with OTP Verification (Vendor) -->
+      <div class="phone-verification-container">
+        <mat-form-field appearance="outline" class="phone-field">
+          <mat-label>Contact Number</mat-label>
+          <input matInput formControlName="contactNumber" 
+                 placeholder="Enter contact number"
+                 (input)="onContactNumberChange()"
+                 [readonly]="isPhoneVerified">
+          <mat-icon matSuffix *ngIf="!isPhoneVerified">phone</mat-icon>
+          <mat-icon matSuffix *ngIf="isPhoneVerified" class="verified-icon">verified</mat-icon>
+          <mat-error>{{ getErrorMessage('contactNumber') }}</mat-error>
+        </mat-form-field>
+        
+        <!-- Verify Button (when not verified) -->
+        <button type="button" mat-stroked-button color="primary" 
+                class="verify-btn"
+                *ngIf="!isPhoneVerified && !showOtpInput && registerForm.get('contactNumber')?.valid"
+                (click)="sendOtp()"
+                [disabled]="isOtpLoading">
+          <mat-icon *ngIf="isOtpLoading">
+            <mat-spinner diameter="18"></mat-spinner>
+          </mat-icon>
+          <span *ngIf="!isOtpLoading">Verify</span>
+        </button>
+        
+        <!-- Verified Badge -->
+        <span class="verified-badge" *ngIf="isPhoneVerified">
+          <mat-icon>check_circle</mat-icon> Verified
+        </span>
+      </div>
+    </div>
+
+    <!-- OTP Input Section for Vendor -->
+    <div class="otp-verification-section" *ngIf="showOtpInput && !isPhoneVerified">
+      <div class="otp-header">
+        <mat-icon>sms</mat-icon>
+        <span>Enter OTP sent to your phone</span>
+      </div>
+      
+      <div class="otp-input-row">
+        <mat-form-field appearance="outline" class="otp-field">
+          <mat-label>Enter 6-digit OTP</mat-label>
+          <input matInput 
+                 [value]="otpValue"
+                 (input)="onOtpChange($any($event.target).value)"
+                 placeholder="000000"
+                 maxlength="6"
+                 pattern="[0-9]*"
+                 inputmode="numeric">
+          <mat-icon matSuffix>lock</mat-icon>
+        </mat-form-field>
+        
+        <button type="button" mat-flat-button color="primary"
+                class="verify-otp-btn"
+                (click)="verifyOtp()"
+                [disabled]="isOtpLoading || otpValue.length !== 6">
+          <mat-icon *ngIf="isOtpLoading">
+            <mat-spinner diameter="18"></mat-spinner>
+          </mat-icon>
+          <span *ngIf="!isOtpLoading">Verify OTP</span>
+        </button>
+      </div>
+      
+      <div class="otp-actions">
+        <button type="button" mat-button color="warn" (click)="cancelOtpVerification()">
+          Cancel
+        </button>
+        <button type="button" mat-button color="primary" 
+                (click)="resendOtp()"
+                [disabled]="!canResend">
+          <span *ngIf="canResend">Resend OTP</span>
+          <span *ngIf="!canResend">Resend in {{ resendTimer }}s</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="form-row two-columns">
+      <mat-form-field appearance="outline">
+        <mat-label>Product Category</mat-label>
+        <mat-select formControlName="productCategories">
+          <mat-option *ngFor="let category of productCategories" [value]="category">
+            {{ category }}
+          </mat-option>
+        </mat-select>
+        <mat-icon matSuffix>category</mat-icon>
+        <mat-error>{{ getErrorMessage('productCategories') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Website URL</mat-label>
+        <input matInput formControlName="websiteUrl" placeholder="https://yourwebsite.com">
+        <mat-icon matSuffix>language</mat-icon>
+        <mat-error>{{ getErrorMessage('websiteUrl') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Business Description</mat-label>
+        <textarea matInput formControlName="businessDescription" placeholder="Describe your business, products, and services" rows="4"></textarea>
+        <mat-icon matSuffix>description</mat-icon>
+        <mat-error>{{ getErrorMessage('businessDescription') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Location Information Section -->
+    <div class="section-header">
+      <h3 class="section-title">Location Information</h3>
+    </div>
+
+    <div class="form-row two-columns">
+      <mat-form-field appearance="outline">
+        <mat-label>State</mat-label>
+        <mat-select formControlName="locationState">
+          <mat-option value="maharashtra">Maharashtra</mat-option>
+          <mat-option value="gujarat">Gujarat</mat-option>
+          <mat-option value="karnataka">Karnataka</mat-option>
+          <mat-option value="tamil-nadu">Tamil Nadu</mat-option>
+          <mat-option value="rajasthan">Rajasthan</mat-option>
+          <mat-option value="uttar-pradesh">Uttar Pradesh</mat-option>
+          <mat-option value="west-bengal">West Bengal</mat-option>
+          <mat-option value="other">Other</mat-option>
+        </mat-select>
+        <mat-icon matSuffix>location_on</mat-icon>
+        <mat-error>{{ getErrorMessage('locationState') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>District</mat-label>
+        <input matInput formControlName="locationDistrict" placeholder="Enter district">
+        <mat-icon matSuffix>location_city</mat-icon>
+        <mat-error>{{ getErrorMessage('locationDistrict') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Pincode</mat-label>
+        <input matInput formControlName="pinCode" placeholder="Enter 6-digit pincode">
+        <mat-icon matSuffix>pin_drop</mat-icon>
+        <mat-error>{{ getErrorMessage('pinCode') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Complete Shop Address</mat-label>
+        <textarea matInput formControlName="shoppeeAddress" placeholder="Enter your complete shop address with landmarks" rows="3"></textarea>
+        <mat-icon matSuffix>home</mat-icon>
+        <mat-error>{{ getErrorMessage('shoppeeAddress') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Business Operations Section -->
+    <div class="section-header">
+      <h3 class="section-title">Business Operations</h3>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Operating Hours</mat-label>
+        <input matInput formControlName="operatingHours" placeholder="e.g., Mon-Sat: 9:00 AM - 8:00 PM, Sun: Closed">
+        <mat-icon matSuffix>schedule</mat-icon>
+        <mat-error>{{ getErrorMessage('operatingHours') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <div class="checkbox-row">
+        <mat-checkbox formControlName="deliveryAvailable" (change)="onDeliveryChange($event)">
+          <span class="checkbox-label">
+            <mat-icon class="checkbox-icon">local_shipping</mat-icon>
+            Delivery services available
+          </span>
+        </mat-checkbox>
+      </div>
+    </div>
+
+    <div class="form-row" *ngIf="registerForm.get('deliveryAvailable')?.value">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Delivery Radius (in km)</mat-label>
+        <input matInput type="number" formControlName="deliveryRadiusInKm" placeholder="Enter delivery radius">
+        <mat-icon matSuffix>radio_button_unchecked</mat-icon>
+        <mat-error>{{ getErrorMessage('deliveryRadiusInKm') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Social Media & Online Presence Section -->
+    <div class="advanced-section">
+      <div class="section-header expandable" (click)="toggleSocialSection()">
+        <h3 class="section-title">
+          <mat-icon class="expand-icon" [class.expanded]="showSocialSection">expand_more</mat-icon>
+          Social Media & Online Presence (Optional)
+        </h3>
+      </div>
+
+      <div class="advanced-content" [class.show]="showSocialSection">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Facebook Page</mat-label>
+            <input matInput formControlName="facebookUrl" placeholder="https://facebook.com/yourpage">
+            <mat-icon matSuffix>facebook</mat-icon>
+            <mat-error>{{ getErrorMessage('facebookUrl') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Instagram Handle</mat-label>
+            <input matInput formControlName="instagramUrl" placeholder="https://instagram.com/yourhandle">
+            <mat-icon matSuffix>camera_alt</mat-icon>
+            <mat-error>{{ getErrorMessage('instagramUrl') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Twitter Handle</mat-label>
+            <input matInput formControlName="twitterUrl" placeholder="https://twitter.com/yourhandle">
+            <mat-icon matSuffix>alternate_email</mat-icon>
+            <mat-error>{{ getErrorMessage('twitterUrl') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legal & Documentation Section -->
+    <div class="section-header">
+      <h3 class="section-title">Legal & Documentation</h3>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>GST Number (Optional)</mat-label>
+        <input matInput formControlName="taxIdentificationNumber" placeholder="Enter GST number">
+        <mat-icon matSuffix>receipt</mat-icon>
+        <mat-error>{{ getErrorMessage('taxIdentificationNumber') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <div class="file-upload">
+        <mat-label>Shop Image (Optional)</mat-label>
+        <div class="file-input-wrapper">
+          <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" hidden>
+          <button type="button" class="file-upload-btn" (click)="fileInput.click()">
+            <mat-icon>cloud_upload</mat-icon>
+            <span>Choose Shop Image</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  
+
+    <!-- Admin Fields - Replace the existing admin section in your HTML -->
+  <div *ngIf="selectedRole === 'admin'" class="form-section">
+    <!-- Basic Information Section -->
+    <div class="section-header">
+      <h3 class="section-title">
+        <mat-icon>admin_panel_settings</mat-icon>
+        Administrator Information
+      </h3>
+    </div>
+
+    <div class="form-row two-columns">
+      <mat-form-field appearance="outline">
+        <mat-label>Full Name</mat-label>
+        <input matInput formControlName="fullName" placeholder="Enter your full name">
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error>{{ getErrorMessage('fullName') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email Address</mat-label>
+        <input matInput type="email" formControlName="emailAddress" placeholder="Enter admin email">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error>{{ getErrorMessage('emailAddress') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row two-columns">
+      <!-- Phone Number with OTP Verification (Admin) -->
+      <div class="phone-verification-container">
+        <mat-form-field appearance="outline" class="phone-field">
+          <mat-label>Contact Number</mat-label>
+          <input matInput formControlName="contactNumber" 
+                 placeholder="Enter 10-digit phone number"
+                 (input)="onContactNumberChange()"
+                 [readonly]="isPhoneVerified">
+          <mat-icon matSuffix *ngIf="!isPhoneVerified">phone</mat-icon>
+          <mat-icon matSuffix *ngIf="isPhoneVerified" class="verified-icon">verified</mat-icon>
+          <mat-error>{{ getErrorMessage('contactNumber') }}</mat-error>
+        </mat-form-field>
+        
+        <!-- Verify Button (when not verified) -->
+        <button type="button" mat-stroked-button color="primary" 
+                class="verify-btn"
+                *ngIf="!isPhoneVerified && !showOtpInput && registerForm.get('contactNumber')?.valid"
+                (click)="sendOtp()"
+                [disabled]="isOtpLoading">
+          <mat-icon *ngIf="isOtpLoading">
+            <mat-spinner diameter="18"></mat-spinner>
+          </mat-icon>
+          <span *ngIf="!isOtpLoading">Verify</span>
+        </button>
+        
+        <!-- Verified Badge -->
+        <span class="verified-badge" *ngIf="isPhoneVerified">
+          <mat-icon>check_circle</mat-icon> Verified
+        </span>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Position & Role</mat-label>
+        <mat-select formControlName="positionAndRole">
+          <mat-option value="super-admin">Super Administrator</mat-option>
+          <mat-option value="admin">Administrator</mat-option>
+          <mat-option value="moderator">Moderator</mat-option>
+          <mat-option value="support">Support Admin</mat-option>
+          <mat-option value="hr-admin">HR Administrator</mat-option>
+          <mat-option value="content-admin">Content Administrator</mat-option>
+        </mat-select>
+        <mat-icon matSuffix>supervisor_account</mat-icon>
+        <mat-error>{{ getErrorMessage('positionAndRole') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- OTP Input Section for Admin -->
+    <div class="otp-verification-section" *ngIf="showOtpInput && !isPhoneVerified">
+      <div class="otp-header">
+        <mat-icon>sms</mat-icon>
+        <span>Enter OTP sent to your phone</span>
+      </div>
+      
+      <div class="otp-input-row">
+        <mat-form-field appearance="outline" class="otp-field">
+          <mat-label>Enter 6-digit OTP</mat-label>
+          <input matInput 
+                 [value]="otpValue"
+                 (input)="onOtpChange($any($event.target).value)"
+                 placeholder="000000"
+                 maxlength="6"
+                 pattern="[0-9]*"
+                 inputmode="numeric">
+          <mat-icon matSuffix>lock</mat-icon>
+        </mat-form-field>
+        
+        <button type="button" mat-flat-button color="primary"
+                class="verify-otp-btn"
+                (click)="verifyOtp()"
+                [disabled]="isOtpLoading || otpValue.length !== 6">
+          <mat-icon *ngIf="isOtpLoading">
+            <mat-spinner diameter="18"></mat-spinner>
+          </mat-icon>
+          <span *ngIf="!isOtpLoading">Verify OTP</span>
+        </button>
+      </div>
+      
+      <div class="otp-actions">
+        <button type="button" mat-button color="warn" (click)="cancelOtpVerification()">
+          Cancel
+        </button>
+        <button type="button" mat-button color="primary" 
+                (click)="resendOtp()"
+                [disabled]="!canResend">
+          <span *ngIf="canResend">Resend OTP</span>
+          <span *ngIf="!canResend">Resend in {{ resendTimer }}s</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Security Section -->
+    <div class="section-header">
+      <h3 class="section-title">
+        <mat-icon>security</mat-icon>
+        Security & Authorization
+      </h3>
+    </div>
+
+    <!-- <div class="form-row two-columns">
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="Enter password">
+        <button type="button" mat-icon-button matSuffix (click)="hidePassword = !hidePassword">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error>{{ getErrorMessage('password') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Confirm Password</mat-label>
+        <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword" placeholder="Confirm password">
+        <button type="button" mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword">
+          <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error>{{ getErrorMessage('confirmPassword') }}</mat-error>
+      </mat-form-field>
+    </div> -->
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Authorization Key</mat-label>
+        <input matInput formControlName="authorizationKey" placeholder="Enter admin authorization key">
+        <mat-icon matSuffix>vpn_key</mat-icon>
+        <mat-error>{{ getErrorMessage('authorizationKey') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Optional Profile Picture Upload -->
+    <div class="advanced-section">
+      <div class="section-header expandable" (click)="toggleAdvancedSection()">
+        <h3 class="section-title">
+          <mat-icon class="expand-icon" [class.expanded]="showAdvancedSection">expand_more</mat-icon>
+          Upload Profile Picture (Optional)
+        </h3>
+      </div>
+
+      <div class="advanced-content" [class.show]="showAdvancedSection">
+        <div class="form-row">
+          <div class="file-upload">
+            <mat-label>Profile Picture</mat-label>
+            <div class="file-input-wrapper">
+              <input type="file" #adminProfileFileInput (change)="onProfilePictureSelected($event)" accept="image/*" hidden>
+              <button type="button" class="file-upload-btn" (click)="adminProfileFileInput.click()">
+                <mat-icon>photo_camera</mat-icon>
+                <span>Choose Profile Picture</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+    <!-- Password Fields (Common for all roles) -->
+    <div class="form-section password-section">
+      <div class="form-row two-columns">
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="Create password">
+          <button type="button" mat-icon-button matSuffix (click)="hidePassword = !hidePassword">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>{{ getErrorMessage('password') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Confirm Password</mat-label>
+          <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword" placeholder="Confirm password">
+          <button type="button" mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword">
+            <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>{{ getErrorMessage('confirmPassword') }}</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Terms and Conditions -->
+    <div class="form-row">
+      <div class="checkbox-row">
+        <mat-checkbox formControlName="termsAndServiceAgreement" (change)="onTermsChange($event)" class="terms-checkbox">
+          <span class="checkbox-label">
+            <mat-icon class="checkbox-icon">gavel</mat-icon>
+            I agree to the 
+            <a href="#" class="terms-link">Terms and Conditions</a> and 
+            <a href="#" class="terms-link">Privacy Policy</a>
+          </span>
+        </mat-checkbox>
+        <mat-error *ngIf="registerForm.get('termsAndServiceAgreement')?.hasError('requiredTrue')">
+          You must accept the terms and conditions
+        </mat-error>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="submit-btn"
+        
+        >
+        <!-- [disabled]="registerForm.invalid || isLoading" -->
+        <span *ngIf="!isLoading" class="btn-content">
+          <mat-icon>person_add</mat-icon>
+          Create Account
+        </span>
+        <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+      </button>
+    </div>
+
+    <!-- Register Link -->
+    <div class="register-section">
+      <p class="register-text">
+        Already have an account? 
+        <button type="button" class="register-link" (click)="openLoginDialog()">
+          Login here
+        </button>
+      </p>
+    </div>
+
+    <!-- Terms and Conditions -->
+    <div class="terms-section">
+      <p class="terms-text">
+        By creating an account, you agree to our 
+        <a href="#" class="terms-link">Terms of Service</a> and 
+        <a href="#" class="terms-link">Privacy Policy</a>
+      </p>
+    </div>
+  </form>
+</div>

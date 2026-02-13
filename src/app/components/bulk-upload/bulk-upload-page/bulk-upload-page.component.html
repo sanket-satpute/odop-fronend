@@ -1,0 +1,436 @@
+<div class="bulk-upload-page">
+  <!-- Header Section -->
+  <section class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1>
+          <i class="fas fa-cloud-upload-alt"></i>
+          Bulk Upload Center
+        </h1>
+        <p>Import large datasets efficiently with our bulk upload tools</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-value">{{ uploadHistory.length }}</span>
+          <span class="stat-label">Total Uploads</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ getSuccessfulUploadsCount() }}</span>
+          <span class="stat-label">Successful</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ templates.length }}</span>
+          <span class="stat-label">Templates</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Progress Steps -->
+  <section class="progress-steps-section">
+    <div class="progress-steps">
+      <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+        <div class="step-number">
+          <span *ngIf="currentStep <= 1">1</span>
+          <i *ngIf="currentStep > 1" class="fas fa-check"></i>
+        </div>
+        <span class="step-label">Select Template</span>
+      </div>
+      <div class="step-connector" [class.active]="currentStep > 1"></div>
+      <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+        <div class="step-number">
+          <span *ngIf="currentStep <= 2">2</span>
+          <i *ngIf="currentStep > 2" class="fas fa-check"></i>
+        </div>
+        <span class="step-label">Upload File</span>
+      </div>
+      <div class="step-connector" [class.active]="currentStep > 2"></div>
+      <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+        <div class="step-number">
+          <span *ngIf="currentStep <= 3">3</span>
+          <i *ngIf="currentStep > 3" class="fas fa-check"></i>
+        </div>
+        <span class="step-label">Preview & Validate</span>
+      </div>
+      <div class="step-connector" [class.active]="currentStep > 3"></div>
+      <div class="step" [class.active]="currentStep >= 4" [class.completed]="currentStep > 4">
+        <div class="step-number">
+          <span *ngIf="currentStep <= 4">4</span>
+          <i *ngIf="currentStep > 4" class="fas fa-check"></i>
+        </div>
+        <span class="step-label">Processing</span>
+      </div>
+      <div class="step-connector" [class.active]="currentStep > 4"></div>
+      <div class="step" [class.active]="currentStep >= 5">
+        <div class="step-number">5</div>
+        <span class="step-label">Complete</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="main-content">
+    <!-- Step 1: Select Template -->
+    <section class="step-content" *ngIf="currentStep === 1">
+      <h2 class="step-title">
+        <i class="fas fa-file-alt"></i>
+        Choose Upload Template
+      </h2>
+      <p class="step-description">Select the type of data you want to upload. Each template is designed for specific data types with pre-defined fields.</p>
+
+      <div class="templates-grid">
+        <div class="template-card" 
+             *ngFor="let template of templates" 
+             (click)="selectTemplate(template)"
+             [class.selected]="selectedTemplate?.id === template.id">
+          <div class="template-icon">
+            <i class="fas" [ngClass]="template.icon"></i>
+          </div>
+          <div class="template-info">
+            <h3>{{ template.name }}</h3>
+            <p>{{ template.description }}</p>
+            <div class="template-meta">
+              <span class="meta-item">
+                <i class="fas fa-columns"></i>
+                {{ template.fields.length }} fields
+              </span>
+              <span class="meta-item">
+                <i class="fas fa-layer-group"></i>
+                Max {{ template.maxRows | number }} rows
+              </span>
+            </div>
+          </div>
+          <div class="template-select-icon">
+            <i class="fas fa-chevron-right"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2: Upload File -->
+    <section class="step-content" *ngIf="currentStep === 2">
+      <div class="step-header-with-back">
+        <button class="back-btn" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i>
+          Back
+        </button>
+        <div>
+          <h2 class="step-title">
+            <i class="fas fa-upload"></i>
+            Upload {{ selectedTemplate?.name }} File
+          </h2>
+          <p class="step-description">Upload a CSV or Excel file with your data</p>
+        </div>
+      </div>
+
+      <!-- Template Info Banner -->
+      <div class="template-info-banner">
+        <div class="banner-content">
+          <h4>Required Fields for {{ selectedTemplate?.name }}</h4>
+          <div class="fields-list">
+            <span class="field-tag" *ngFor="let field of selectedTemplate?.fields">
+              {{ field }}
+            </span>
+          </div>
+        </div>
+        <button class="download-sample-btn" (click)="downloadSampleFile()">
+          <i class="fas fa-download"></i>
+          Download Sample
+        </button>
+      </div>
+
+      <!-- Dropzone -->
+      <div class="dropzone" 
+           [class.drag-over]="isDragOver"
+           [class.has-file]="selectedFile"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event)"
+           (click)="triggerFileInput()">
+        
+        <input type="file" 
+               #fileInput 
+               accept=".csv,.xlsx,.xls"
+               (change)="onFileSelected($event)"
+               hidden>
+        
+        <div class="dropzone-content" *ngIf="!selectedFile && !isValidating">
+          <div class="dropzone-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+          <h3>Drag & Drop your file here</h3>
+          <p>or click to browse</p>
+          <div class="file-types">
+            <span>Supported formats: CSV, XLSX, XLS</span>
+            <span>Maximum file size: 10MB</span>
+          </div>
+        </div>
+
+        <div class="file-preview-mini" *ngIf="selectedFile && !isValidating">
+          <div class="file-icon">
+            <i class="fas fa-file-csv"></i>
+          </div>
+          <div class="file-info">
+            <span class="file-name">{{ selectedFile.name }}</span>
+            <span class="file-size">{{ formatBytes(selectedFile.size) }}</span>
+          </div>
+          <div class="file-status">
+            <i class="fas fa-check-circle"></i>
+            Ready
+          </div>
+        </div>
+
+        <div class="validating-state" *ngIf="isValidating">
+          <div class="spinner"></div>
+          <p>Validating file...</p>
+        </div>
+      </div>
+
+      <!-- Upload Guidelines -->
+      <div class="guidelines-section">
+        <h4>Upload Guidelines</h4>
+        <ul class="guidelines-list">
+          <li>
+            <i class="fas fa-check"></i>
+            First row should contain column headers matching the required fields
+          </li>
+          <li>
+            <i class="fas fa-check"></i>
+            Data should be properly formatted (dates as YYYY-MM-DD, prices without currency symbols)
+          </li>
+          <li>
+            <i class="fas fa-check"></i>
+            Ensure no duplicate entries in unique fields like SKU
+          </li>
+          <li>
+            <i class="fas fa-check"></i>
+            Remove any empty rows from the file before uploading
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Step 3: Preview & Validate -->
+    <section class="step-content" *ngIf="currentStep === 3">
+      <div class="step-header-with-back">
+        <button class="back-btn" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i>
+          Back
+        </button>
+        <div>
+          <h2 class="step-title">
+            <i class="fas fa-search"></i>
+            Preview & Validate
+          </h2>
+          <p class="step-description">Review your data before uploading</p>
+        </div>
+      </div>
+
+      <!-- Validation Summary -->
+      <div class="validation-summary">
+        <div class="summary-card success">
+          <div class="summary-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="summary-info">
+            <span class="summary-value">{{ filePreview?.validRows | number }}</span>
+            <span class="summary-label">Valid Records</span>
+          </div>
+        </div>
+        <div class="summary-card error" *ngIf="filePreview && filePreview.errorRows > 0">
+          <div class="summary-icon">
+            <i class="fas fa-exclamation-circle"></i>
+          </div>
+          <div class="summary-info">
+            <span class="summary-value">{{ filePreview.errorRows | number }}</span>
+            <span class="stat-label">Errors Found</span>
+          </div>
+        </div>
+        <div class="summary-card total">
+          <div class="summary-icon">
+            <i class="fas fa-list-ol"></i>
+          </div>
+          <div class="summary-info">
+            <span class="summary-value">{{ filePreview?.totalRows | number }}</span>
+            <span class="summary-label">Total Records</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Preview Table -->
+      <div class="preview-table-container">
+        <div class="preview-header">
+          <h4>
+            <i class="fas fa-table"></i>
+            Data Preview (First 5 Rows)
+          </h4>
+        </div>
+        <div class="table-wrapper">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th class="row-num">#</th>
+                <th *ngFor="let header of filePreview?.headers">{{ header }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of filePreview?.rows; let i = index">
+                <td class="row-num">{{ i + 1 }}</td>
+                <td *ngFor="let cell of row">{{ cell }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Errors Section -->
+      <div class="errors-section" *ngIf="filePreview && filePreview.errors && filePreview.errors.length > 0">
+        <div class="errors-header" (click)="showErrorDetails = !showErrorDetails">
+          <h4>
+            <i class="fas fa-exclamation-triangle"></i>
+            Validation Errors ({{ filePreview.errors.length }})
+          </h4>
+          <button class="toggle-btn">
+            <i class="fas" [ngClass]="showErrorDetails ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </button>
+        </div>
+        <div class="errors-list" *ngIf="showErrorDetails">
+          <div class="error-item" *ngFor="let error of filePreview?.errors">
+            <div class="error-location">
+              <span class="row-badge">Row {{ error.row }}</span>
+              <span class="column-badge">{{ error.column }}</span>
+            </div>
+            <div class="error-message">{{ error.message }}</div>
+            <div class="error-value">Value: "{{ error.value }}"</div>
+          </div>
+        </div>
+        <div class="errors-note">
+          <i class="fas fa-info-circle"></i>
+          Rows with errors will be skipped during upload. You can fix these issues and re-upload the file.
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn-secondary" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i>
+          Upload Different File
+        </button>
+        <button class="btn-primary" (click)="startUpload()" [disabled]="!filePreview?.validRows">
+          <i class="fas fa-upload"></i>
+          Upload {{ filePreview?.validRows | number }} Records
+        </button>
+      </div>
+    </section>
+
+    <!-- Step 4: Processing -->
+    <section class="step-content processing-content" *ngIf="currentStep === 4">
+      <div class="processing-container">
+        <div class="processing-visual">
+          <div class="progress-circle">
+            <svg viewBox="0 0 120 120">
+              <circle class="progress-bg" cx="60" cy="60" r="54"/>
+              <circle class="progress-bar" 
+                      cx="60" cy="60" r="54" 
+                      [style.strokeDashoffset]="339.292 - (339.292 * uploadProgress.progress / 100)"/>
+            </svg>
+            <div class="progress-text">
+              <span class="percentage">{{ uploadProgress.progress }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="processing-info">
+          <h2>{{ uploadProgress.message }}</h2>
+          <div class="processing-stats">
+            <div class="stat">
+              <span class="stat-value">{{ uploadProgress.processedRows | number }}</span>
+              <span class="stat-label">of {{ uploadProgress.totalRows | number }} rows</span>
+            </div>
+          </div>
+          <div class="processing-bar">
+            <div class="bar-fill" [style.width.%]="uploadProgress.progress"></div>
+          </div>
+          <p class="processing-note">Please do not close this page while upload is in progress</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 5: Complete -->
+    <section class="step-content complete-content" *ngIf="currentStep === 5">
+      <div class="complete-container">
+        <div class="complete-icon success">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h2>Upload Complete!</h2>
+        <p>Your data has been successfully processed</p>
+
+        <div class="complete-summary">
+          <div class="summary-row">
+            <span class="summary-label">Total Records:</span>
+            <span class="summary-value">{{ uploadProgress.totalRows | number }}</span>
+          </div>
+          <div class="summary-row success">
+            <span class="summary-label">
+              <i class="fas fa-check-circle"></i>
+              Successfully Uploaded:
+            </span>
+            <span class="summary-value">{{ uploadProgress.successCount | number }}</span>
+          </div>
+          <div class="summary-row error" *ngIf="uploadProgress.errorCount > 0">
+            <span class="summary-label">
+              <i class="fas fa-times-circle"></i>
+              Failed Records:
+            </span>
+            <span class="summary-value">{{ uploadProgress.errorCount | number }}</span>
+          </div>
+        </div>
+
+        <div class="complete-actions">
+          <button class="btn-secondary" (click)="downloadErrorReport()" *ngIf="uploadProgress.errorCount > 0">
+            <i class="fas fa-download"></i>
+            Download Error Report
+          </button>
+          <button class="btn-primary" (click)="resetUpload()">
+            <i class="fas fa-plus"></i>
+            Upload Another File
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload History Sidebar -->
+    <aside class="history-sidebar" *ngIf="currentStep === 1">
+      <h3>
+        <i class="fas fa-history"></i>
+        Recent Uploads
+      </h3>
+      
+      <div class="history-list" *ngIf="uploadHistory.length > 0">
+        <div class="history-item" *ngFor="let history of uploadHistory">
+          <div class="history-icon" [ngClass]="history.status">
+            <i class="fas" [ngClass]="{'fa-check-circle': history.status === 'success', 
+                                        'fa-exclamation-circle': history.status === 'partial',
+                                        'fa-times-circle': history.status === 'failed'}"></i>
+          </div>
+          <div class="history-info">
+            <span class="history-template">{{ history.templateName }}</span>
+            <span class="history-file">{{ history.fileName }}</span>
+            <span class="history-date">{{ formatDate(history.uploadedAt) }}</span>
+          </div>
+          <div class="history-stats">
+            <span class="stat-success">{{ history.successRecords }}/{{ history.totalRecords }}</span>
+            <span class="stat-label">records</span>
+          </div>
+          <button class="retry-btn" (click)="retryUpload(history)" *ngIf="history.status === 'failed'">
+            <i class="fas fa-redo"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-history" *ngIf="uploadHistory.length === 0">
+        <i class="fas fa-inbox"></i>
+        <p>No upload history yet</p>
+      </div>
+    </aside>
+  </div>
+</div>

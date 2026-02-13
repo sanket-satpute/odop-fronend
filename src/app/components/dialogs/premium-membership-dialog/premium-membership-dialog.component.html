@@ -1,0 +1,154 @@
+<div class="premium-dialog-overlay" (click)="closeDialog()">
+  <div class="premium-dialog" (click)="$event.stopPropagation()" [@fadeInUp]>
+    
+    <!-- Decorative Background Elements -->
+    <div class="bg-decoration">
+      <div class="bg-circle circle-1"></div>
+      <div class="bg-circle circle-2"></div>
+      <div class="bg-circle circle-3"></div>
+      <div class="sparkle sparkle-1">✨</div>
+      <div class="sparkle sparkle-2">⭐</div>
+      <div class="sparkle sparkle-3">💎</div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="dialog-header">
+      <button class="close-btn" (click)="closeDialog()">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <div class="header-content" [@pulse]>
+        <div class="crown-icon">
+          <i class="fas fa-crown"></i>
+        </div>
+        <h1 class="dialog-title">Upgrade to Premium</h1>
+        <p class="dialog-subtitle">Unlock exclusive benefits and elevate your shopping experience</p>
+      </div>
+
+      <!-- Billing Toggle -->
+      <div class="billing-toggle">
+        <span [class.active]="billingCycle === 'monthly'">Monthly</span>
+        <label class="toggle-switch">
+          <input type="checkbox" [checked]="billingCycle === 'yearly'" (change)="toggleBillingCycle()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span [class.active]="billingCycle === 'yearly'">
+          Yearly
+          <span class="save-badge">Save 20%</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Plans Container -->
+    <div class="plans-container" [@staggerCards]="plans.length">
+      <div 
+        *ngFor="let plan of plans" 
+        class="plan-card"
+        [class.selected]="selectedPlan === plan.id"
+        [class.popular]="plan.popular"
+        (click)="selectPlan(plan.id)"
+      >
+        <!-- Popular Badge -->
+        <div class="popular-badge" *ngIf="plan.popular">
+          <i class="fas fa-fire"></i>
+          Most Popular
+        </div>
+
+        <!-- Plan Header -->
+        <div class="plan-header" [style.background]="plan.gradient">
+          <div class="plan-icon">
+            <i [class]="plan.icon"></i>
+          </div>
+          <h3 class="plan-name">{{ plan.name }}</h3>
+          <p class="plan-description">{{ plan.description }}</p>
+        </div>
+
+        <!-- Pricing -->
+        <div class="plan-pricing">
+          <div class="price-container">
+            <span class="currency">₹</span>
+            <span class="price-amount">{{ getDisplayPrice(plan) }}</span>
+            <span class="price-period" *ngIf="plan.price > 0">/{{ plan.period }}</span>
+            <span class="price-period" *ngIf="plan.price === 0">{{ plan.period }}</span>
+          </div>
+          <div class="original-price" *ngIf="plan.originalPrice && billingCycle === 'monthly'">
+            <span>₹{{ plan.originalPrice }}/month</span>
+          </div>
+          <div class="yearly-savings" *ngIf="plan.price > 0 && billingCycle === 'yearly'">
+            <i class="fas fa-tag"></i>
+            Save ₹{{ getYearlySavings(plan) }}/year
+          </div>
+        </div>
+
+        <!-- Features List -->
+        <div class="plan-features">
+          <div 
+            *ngFor="let feature of plan.features" 
+            class="feature-item"
+            [class.included]="feature.included"
+            [class.highlight]="feature.highlight"
+          >
+            <div class="feature-icon">
+              <i [class]="feature.included ? 'fas fa-check' : 'fas fa-times'"></i>
+            </div>
+            <span class="feature-text">{{ feature.text }}</span>
+            <span class="highlight-badge" *ngIf="feature.highlight">
+              <i class="fas fa-star"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Select Button -->
+        <button 
+          class="select-plan-btn"
+          [class.selected]="selectedPlan === plan.id"
+          [style.background]="selectedPlan === plan.id ? plan.gradient : 'transparent'"
+          [style.border-color]="plan.color"
+          [style.color]="selectedPlan === plan.id ? 'white' : plan.color"
+        >
+          <i [class]="selectedPlan === plan.id ? 'fas fa-check-circle' : 'fas fa-circle'"></i>
+          {{ selectedPlan === plan.id ? 'Selected' : 'Select Plan' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer Section -->
+    <div class="dialog-footer">
+      <div class="guarantee-badges">
+        <div class="badge">
+          <i class="fas fa-shield-alt"></i>
+          <span>Secure Payment</span>
+        </div>
+        <div class="badge">
+          <i class="fas fa-undo"></i>
+          <span>Cancel Anytime</span>
+        </div>
+        <div class="badge">
+          <i class="fas fa-headset"></i>
+          <span>24/7 Support</span>
+        </div>
+      </div>
+
+      <button 
+        class="subscribe-btn" 
+        [disabled]="isProcessing"
+        (click)="subscribeToPlan()"
+      >
+        <span *ngIf="!isProcessing">
+          <i class="fas fa-rocket"></i>
+          {{ selectedPlan === 'free' ? 'Continue with Free' : 'Subscribe to ' + getSelectedPlan()?.name + ' - ₹' + getDisplayPrice(getSelectedPlan()!) + '/' + (billingCycle === 'yearly' ? 'month' : getSelectedPlan()?.period) }}
+        </span>
+        <span *ngIf="isProcessing" class="processing">
+          <i class="fas fa-spinner fa-spin"></i>
+          Processing...
+        </span>
+      </button>
+
+      <p class="terms-text">
+        By subscribing, you agree to our 
+        <a href="/terms" target="_blank">Terms of Service</a> and 
+        <a href="/privacy" target="_blank">Privacy Policy</a>
+      </p>
+    </div>
+  </div>
+</div>

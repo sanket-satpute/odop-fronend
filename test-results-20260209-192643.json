@@ -1,0 +1,218 @@
+[
+  {
+    "Passed": false,
+    "Message": "API: http://localhost:50982/odop",
+    "Timestamp": "2026-02-09T19:26:42.1511211+05:30",
+    "Name": "Backend Server Running"
+  },
+  {
+    "Passed": false,
+    "Message": "Endpoint responsive",
+    "Timestamp": "2026-02-09T19:26:42.1696673+05:30",
+    "Name": "Customer API Endpoint"
+  },
+  {
+    "Passed": true,
+    "Message": "Endpoint responsive",
+    "Timestamp": "2026-02-09T19:26:42.2025357+05:30",
+    "Name": "Product API Endpoint"
+  },
+  {
+    "Passed": false,
+    "Message": "Endpoint responsive",
+    "Timestamp": "2026-02-09T19:26:42.3029763+05:30",
+    "Name": "Category API Endpoint"
+  },
+  {
+    "Passed": true,
+    "Message": "Checking if email is available",
+    "Timestamp": "2026-02-09T19:26:42.3331536+05:30",
+    "Name": "Email Availability Check"
+  },
+  {
+    "Passed": true,
+    "Message": "Customer ID: ecfb9f1d-45d3-4bc1-a87e-3fd380fdaf5d",
+    "Timestamp": "2026-02-09T19:26:42.5199492+05:30",
+    "Name": "Customer Registration"
+  },
+  {
+    "Passed": true,
+    "Message": "Expected: Test Customer 20260209192642, Got: Test Customer 20260209192642",
+    "Timestamp": "2026-02-09T19:26:42.5246295+05:30",
+    "Name": "Name Stored Correctly"
+  },
+  {
+    "Passed": true,
+    "Message": "Expected: test.customer.20260209192642@example.com",
+    "Timestamp": "2026-02-09T19:26:42.5283702+05:30",
+    "Name": "Email Stored Correctly"
+  },
+  {
+    "Passed": true,
+    "Message": "Expected: Rajasthan",
+    "Timestamp": "2026-02-09T19:26:42.5331822+05:30",
+    "Name": "State Stored Correctly"
+  },
+  {
+    "Passed": true,
+    "Message": "System should prevent duplicate emails",
+    "Timestamp": "2026-02-09T19:26:42.5777506+05:30",
+    "Name": "Duplicate Registration Blocked"
+  },
+  {
+    "Passed": true,
+    "Message": "Validation applied",
+    "Timestamp": "2026-02-09T19:26:42.5953796+05:30",
+    "Name": "Invalid Email Validation"
+  },
+  {
+    "Passed": false,
+    "Message": "Error: ",
+    "Timestamp": "2026-02-09T19:26:42.7257364+05:30",
+    "Name": "Customer Login"
+  },
+  {
+    "Passed": true,
+    "Message": "Wrong credentials blocked",
+    "Timestamp": "2026-02-09T19:26:42.854329+05:30",
+    "Name": "Invalid Password Rejected"
+  },
+  {
+    "Passed": true,
+    "Message": "Invalid user blocked",
+    "Timestamp": "2026-02-09T19:26:42.8686409+05:30",
+    "Name": "Non-existent User Rejected"
+  },
+  {
+    "Passed": true,
+    "Message": "Products count: 6",
+    "Timestamp": "2026-02-09T19:26:42.8921448+05:30",
+    "Name": "Load All Products"
+  },
+  {
+    "Passed": false,
+    "Message": "Categories count: 0",
+    "Timestamp": "2026-02-09T19:26:42.9752936+05:30",
+    "Name": "Load All Categories"
+  },
+  {
+    "Passed": true,
+    "Message": "Search term: 'Chanderi'",
+    "Timestamp": "2026-02-09T19:26:43.0249274+05:30",
+    "Name": "Search Products"
+  },
+  {
+    "Passed": true,
+    "Message": "Product: Chanderi Silk Saree - Royal Blue",
+    "Timestamp": "2026-02-09T19:26:43.0821661+05:30",
+    "Name": "Get Product by ID"
+  },
+  {
+    "Passed": true,
+    "Message": "State: Rajasthan",
+    "Timestamp": "2026-02-09T19:26:43.0984465+05:30",
+    "Name": "Filter by State"
+  },
+  {
+    "Passed": true,
+    "Message": "GI Tagged filter",
+    "Timestamp": "2026-02-09T19:26:43.1157844+05:30",
+    "Name": "GI Tagged Products"
+  },
+  {
+    "Passed": true,
+    "Message": "Comparable attribute: productName",
+    "Timestamp": "2026-02-09T19:26:43.1292831+05:30",
+    "Name": "Products Have Names"
+  },
+  {
+    "Passed": true,
+    "Message": "Comparable attribute: price",
+    "Timestamp": "2026-02-09T19:26:43.1338968+05:30",
+    "Name": "Products Have Prices"
+  },
+  {
+    "Passed": false,
+    "Message": "Comparable attribute: category",
+    "Timestamp": "2026-02-09T19:26:43.1369364+05:30",
+    "Name": "Products Have Categories"
+  },
+  {
+    "Passed": true,
+    "Message": "Comparable attribute: rating",
+    "Timestamp": "2026-02-09T19:26:43.1396229+05:30",
+    "Name": "Products Have Ratings"
+  },
+  {
+    "Passed": true,
+    "Message": "Name: Chanderi Silk Saree - Royal Blue",
+    "Timestamp": "2026-02-09T19:26:43.1468983+05:30",
+    "Name": "Product Name Available"
+  },
+  {
+    "Passed": true,
+    "Message": "Price: ₹8500",
+    "Timestamp": "2026-02-09T19:26:43.1510868+05:30",
+    "Name": "Product Price Available"
+  },
+  {
+    "Passed": true,
+    "Message": "Quick view needs description",
+    "Timestamp": "2026-02-09T19:26:43.1536693+05:30",
+    "Name": "Product Description Available"
+  },
+  {
+    "Passed": false,
+    "Message": "Images for quick view gallery",
+    "Timestamp": "2026-02-09T19:26:43.1564942+05:30",
+    "Name": "Product Images Available"
+  },
+  {
+    "Passed": true,
+    "Message": "Vendor link for quick view",
+    "Timestamp": "2026-02-09T19:26:43.1589016+05:30",
+    "Name": "Vendor ID Available"
+  },
+  {
+    "Passed": true,
+    "Message": "Complete data for quick view",
+    "Timestamp": "2026-02-09T19:26:43.2090049+05:30",
+    "Name": "Full Product Details API"
+  },
+  {
+    "Passed": true,
+    "Message": "Vendors count: 9",
+    "Timestamp": "2026-02-09T19:26:43.2290103+05:30",
+    "Name": "Load All Vendors"
+  },
+  {
+    "Passed": false,
+    "Message": "Vendor: Test Vendor User",
+    "Timestamp": "2026-02-09T19:26:43.2794727+05:30",
+    "Name": "Get Vendor Details"
+  },
+  {
+    "Passed": true,
+    "Message": "Vendor's product catalog",
+    "Timestamp": "2026-02-09T19:26:43.3247604+05:30",
+    "Name": "Get Vendor Products"
+  },
+  {
+    "Passed": true,
+    "Message": "URL: http://localhost:4200",
+    "Timestamp": "2026-02-09T19:26:43.3521653+05:30",
+    "Name": "Frontend Server Running"
+  },
+  {
+    "Passed": true,
+    "Message": "Page content received",
+    "Timestamp": "2026-02-09T19:26:43.3553238+05:30",
+    "Name": "Home Page Loads"
+  },
+  {
+    "Passed": false,
+    "Message": "Angular framework loaded",
+    "Timestamp": "2026-02-09T19:26:43.3593488+05:30",
+    "Name": "Angular App Detected"
+  }
+]

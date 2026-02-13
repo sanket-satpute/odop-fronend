@@ -1,0 +1,380 @@
+<!-- Government Scheme Detail Page -->
+<div class="scheme-detail-page" *ngIf="!isLoading && scheme">
+  
+  <!-- Back Button -->
+  <button class="back-btn" (click)="goBack()">
+    <i class="fas fa-arrow-left"></i> All Schemes
+  </button>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-background" [style.backgroundImage]="'url(' + (scheme.bannerUrl || 'assets/images/scheme-banner.jpg') + ')'">
+      <div class="hero-overlay"></div>
+    </div>
+    
+    <div class="hero-content">
+      <div class="container">
+        <!-- Status Badges -->
+        <div class="hero-badges">
+          <span class="badge status-badge" [class.active]="scheme.openForApplications" [class.closed]="scheme.applicationsClosed">
+            {{ scheme.openForApplications ? 'Open for Applications' : 'Applications Closed' }}
+          </span>
+          <span class="badge type-badge">{{ scheme.typeDisplayName }}</span>
+          <span class="badge deadline-badge" *ngIf="scheme.daysUntilDeadline && scheme.daysUntilDeadline <= 30">
+            <i class="fas fa-clock"></i> {{ scheme.daysUntilDeadline }} days left
+          </span>
+        </div>
+        
+        <!-- Ministry Info -->
+        <div class="ministry-info">
+          <i class="fas fa-landmark"></i>
+          {{ scheme.ministry }} | {{ scheme.implementingAgency }}
+        </div>
+        
+        <!-- Scheme Title -->
+        <h1>{{ scheme.name }}</h1>
+        <p class="scheme-tagline">{{ scheme.tagline || scheme.description }}</p>
+        
+        <!-- Key Stats -->
+        <div class="hero-stats">
+          <div class="stat-item" *ngIf="scheme.maxFundingAmount">
+            <span class="stat-value">{{ scheme.maxFundingAmount }}</span>
+            <span class="stat-label">Max Funding</span>
+          </div>
+          <div class="stat-item" *ngIf="scheme.subsidyPercentage">
+            <span class="stat-value">{{ scheme.subsidyPercentage }}</span>
+            <span class="stat-label">Subsidy</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ scheme.successStories.length }}+</span>
+            <span class="stat-label">Success Stories</span>
+          </div>
+        </div>
+        
+        <!-- CTA Buttons -->
+        <div class="hero-actions">
+          <button class="btn btn-primary" (click)="applyNow()" *ngIf="scheme.openForApplications">
+            <i class="fas fa-paper-plane"></i> Apply Now
+          </button>
+          <button class="btn btn-secondary" (click)="checkEligibility()">
+            <i class="fas fa-user-check"></i> Check Eligibility
+          </button>
+          <button class="btn btn-outline" (click)="shareScheme()">
+            <i class="fas fa-share-alt"></i> Share
+          </button>
+          <button class="btn btn-outline" (click)="downloadBrochure()" *ngIf="scheme.pdfBrochureUrl">
+            <i class="fas fa-download"></i> Brochure
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Info Bar -->
+  <section class="quick-info-bar">
+    <div class="container">
+      <div class="info-items">
+        <div class="info-item" *ngIf="scheme.launchDate">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Launched: {{ scheme.launchDate }}</span>
+        </div>
+        <div class="info-item" *ngIf="scheme.processingTime">
+          <i class="fas fa-sync-alt"></i>
+          <span>Processing Time: {{ scheme.processingTime }}</span>
+        </div>
+        <div class="info-item" *ngIf="scheme.helplineNumber">
+          <i class="fas fa-phone-alt"></i>
+          <span>Helpline: {{ scheme.helplineNumber }}</span>
+        </div>
+        <div class="info-item" *ngIf="scheme.applicationUrl">
+          <i class="fas fa-external-link-alt"></i>
+          <a [href]="scheme.applicationUrl" target="_blank">Apply Online</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tab Navigation -->
+  <section class="tabs-section">
+    <div class="container">
+      <div class="tab-nav">
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'overview'"
+          (click)="switchTab('overview')">
+          <i class="fas fa-info-circle"></i> Overview
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'eligibility'"
+          (click)="switchTab('eligibility')">
+          <i class="fas fa-user-check"></i> Eligibility
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'benefits'"
+          (click)="switchTab('benefits')">
+          <i class="fas fa-gift"></i> Benefits
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'how-to-apply'"
+          (click)="switchTab('how-to-apply')">
+          <i class="fas fa-clipboard-list"></i> How to Apply
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'documents'"
+          (click)="switchTab('documents')">
+          <i class="fas fa-file-alt"></i> Documents
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'faqs'"
+          (click)="switchTab('faqs')">
+          <i class="fas fa-question-circle"></i> FAQs
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tab Content -->
+  <section class="tab-content">
+    <div class="container">
+      
+      <!-- Overview Tab -->
+      <div class="overview-tab" *ngIf="activeTab === 'overview'">
+        <div class="content-grid">
+          <div class="main-content">
+            <h2>About This Scheme</h2>
+            <div class="description">{{ scheme.description }}</div>
+            
+            <!-- Target Audience -->
+            <div class="info-block" *ngIf="scheme.targetBeneficiaries?.length">
+              <h3><i class="fas fa-users"></i> Target Beneficiaries</h3>
+              <div class="tags-list">
+                <span class="tag" *ngFor="let beneficiary of scheme.targetBeneficiaries">
+                  {{ beneficiary.name }}
+                </span>
+              </div>
+            </div>
+            
+            <!-- Regions -->
+            <div class="info-block" *ngIf="scheme.applicableStates?.length">
+              <h3><i class="fas fa-map-marker-alt"></i> Applicable States</h3>
+              <div class="tags-list">
+                <span class="tag region" *ngFor="let state of scheme.applicableStates">
+                  {{ state }}
+                </span>
+              </div>
+              <span class="tag pan-india" *ngIf="scheme.panIndiaScheme">Available Pan-India</span>
+            </div>
+          </div>
+          
+          <!-- Sidebar -->
+          <aside class="sidebar">
+            <!-- Apply CTA -->
+            <div class="cta-card" *ngIf="scheme.openForApplications">
+              <h3>Ready to Apply?</h3>
+              <p>Check your eligibility and start your application today</p>
+              <button class="btn btn-primary btn-block" (click)="applyNow()">
+                <i class="fas fa-paper-plane"></i> Apply Now
+              </button>
+              <button class="btn btn-outline btn-block" (click)="checkEligibility()">
+                Check Eligibility First
+              </button>
+            </div>
+            
+            <!-- Contact Card -->
+            <div class="contact-card">
+              <h4>Need Help?</h4>
+              <div class="contact-item" *ngIf="scheme.helplineNumber">
+                <i class="fas fa-phone"></i>
+                <span>{{ scheme.helplineNumber }}</span>
+              </div>
+              <div class="contact-item" *ngIf="scheme.contactEmail">
+                <i class="fas fa-envelope"></i>
+                <a [href]="'mailto:' + scheme.contactEmail">{{ scheme.contactEmail }}</a>
+              </div>
+              <div class="contact-item" *ngIf="scheme.applicationUrl">
+                <i class="fas fa-globe"></i>
+                <a [href]="scheme.applicationUrl" target="_blank">Apply Online</a>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Eligibility Tab -->
+      <div class="eligibility-tab" *ngIf="activeTab === 'eligibility'">
+        <h2>Eligibility Criteria</h2>
+        
+        <!-- Summary -->
+        <div class="eligibility-summary" *ngIf="scheme.eligibilitySummary">
+          <p>{{ scheme.eligibilitySummary }}</p>
+        </div>
+        
+        <!-- Criteria List -->
+        <div class="criteria-section" *ngIf="scheme.eligibilityCriteria?.length">
+          <h3>Requirements</h3>
+          <ul class="criteria-list">
+            <li *ngFor="let criteria of scheme.eligibilityCriteria" [class.mandatory]="criteria.mandatory">
+              <i class="fas" [class.fa-check-circle]="criteria.mandatory" [class.fa-info-circle]="!criteria.mandatory"></i>
+              {{ criteria.criterion }}
+              <span class="badge" *ngIf="criteria.mandatory">Mandatory</span>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- CTA -->
+        <div class="eligibility-cta">
+          <button class="btn btn-primary btn-lg" (click)="checkEligibility()">
+            <i class="fas fa-user-check"></i> Check Your Eligibility
+          </button>
+        </div>
+      </div>
+
+      <!-- Benefits Tab -->
+      <div class="benefits-tab" *ngIf="activeTab === 'benefits'">
+        <h2>Scheme Benefits</h2>
+        
+        <div class="benefits-grid">
+          <div class="benefit-card" *ngFor="let benefit of scheme.benefits; trackBy: trackByBenefit">
+            <div class="benefit-icon">
+              <i [class]="benefit.iconName || 'fas fa-gift'"></i>
+            </div>
+            <div class="benefit-content">
+              <h4>{{ benefit.title }}</h4>
+              <p>{{ benefit.description }}</p>
+              <div class="benefit-amount" *ngIf="benefit.amount">
+                <span class="amount">{{ benefit.amount }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- How to Apply Tab -->
+      <div class="apply-tab" *ngIf="activeTab === 'how-to-apply'">
+        <h2>Application Process</h2>
+        
+        <div class="steps-timeline">
+          <div class="step" *ngFor="let step of scheme.applicationSteps">
+            <div class="step-number">{{ step.stepNumber }}</div>
+            <div class="step-content">
+              <h4>{{ step.title }}</h4>
+              <p>{{ step.description }}</p>
+              <a *ngIf="step.actionUrl" [href]="step.actionUrl" target="_blank" class="step-link">
+                <i class="fas fa-external-link-alt"></i> Take Action
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="apply-cta">
+          <button class="btn btn-primary btn-lg" (click)="applyNow()" *ngIf="scheme.openForApplications">
+            <i class="fas fa-external-link-alt"></i> Apply on Official Portal
+          </button>
+          <p class="note" *ngIf="scheme.openForApplications">
+            You will be redirected to the official government portal
+          </p>
+        </div>
+      </div>
+
+      <!-- Documents Tab -->
+      <div class="documents-tab" *ngIf="activeTab === 'documents'">
+        <h2>Required Documents</h2>
+        
+        <div class="documents-list">
+          <div class="document-item" 
+               *ngFor="let doc of scheme.requiredDocuments; trackBy: trackByDocument">
+            <div class="doc-icon">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="doc-info">
+              <h4>{{ doc }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQs Tab -->
+      <div class="faqs-tab" *ngIf="activeTab === 'faqs'">
+        <h2>Frequently Asked Questions</h2>
+        
+        <div class="faq-list">
+          <div class="faq-item" 
+               *ngFor="let faq of scheme.faqs; let i = index; trackBy: trackByFaq"
+               [class.expanded]="expandedFaqIndex === i">
+            <button class="faq-question" (click)="toggleFaq(i)">
+              <span>{{ faq.question }}</span>
+              <i class="fas" [class.fa-chevron-down]="expandedFaqIndex !== i" [class.fa-chevron-up]="expandedFaqIndex === i"></i>
+            </button>
+            <div class="faq-answer" *ngIf="expandedFaqIndex === i">
+              <p>{{ faq.answer }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Success Stories -->
+  <section class="success-stories-section" *ngIf="scheme.successStories.length">
+    <div class="container">
+      <div class="section-header">
+        <h2><i class="fas fa-star"></i> Success Stories</h2>
+        <p>Real artisans who benefited from this scheme</p>
+      </div>
+      
+      <div class="stories-carousel">
+        <button class="nav-btn prev" (click)="prevStory()">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <div class="story-card" *ngIf="scheme.successStories[activeStoryIndex] as story">
+          <div class="story-image">
+            <img [src]="story.imageUrl || 'assets/images/artisan-placeholder.jpg'" [alt]="story.beneficiaryName">
+          </div>
+          <div class="story-content">
+            <blockquote>"{{ story.story }}"</blockquote>
+            <div class="story-author">
+              <h4>{{ story.beneficiaryName }}</h4>
+              <p>{{ story.craft }} | {{ story.location }}</p>
+              <span class="benefit-tag">{{ story.amountReceived }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <button class="nav-btn next" (click)="nextStory()">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      
+      <!-- Dots -->
+      <div class="story-dots">
+        <span 
+          *ngFor="let story of scheme.successStories; let i = index"
+          class="dot"
+          [class.active]="i === activeStoryIndex"
+          (click)="goToStory(i)">
+        </span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Loading -->
+<div class="loading-page" *ngIf="isLoading">
+  <div class="spinner"></div>
+  <p>Loading scheme details...</p>
+</div>
+
+<!-- Error -->
+<div class="error-page" *ngIf="error">
+  <i class="fas fa-exclamation-triangle"></i>
+  <h2>Oops!</h2>
+  <p>{{ error }}</p>
+  <button class="btn btn-primary" (click)="goBack()">Back to Schemes</button>
+</div>

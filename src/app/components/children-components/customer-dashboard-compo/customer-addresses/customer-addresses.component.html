@@ -1,0 +1,167 @@
+<div class="customer-addresses">
+  <!-- Header -->
+  <div class="section-header">
+    <h2><i class="fas fa-map-marker-alt"></i> Manage Addresses</h2>
+    <button class="add-btn" (click)="openAddForm()" [disabled]="isLoading">
+      <i class="fas fa-plus"></i> Add New Address
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading && addresses.length === 0">
+    <i class="fas fa-spinner fa-spin fa-2x"></i>
+    <p>Loading addresses...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="loadError && !isLoading">
+    <i class="fas fa-exclamation-circle"></i>
+    <p>{{ loadError }}</p>
+    <button class="retry-btn" (click)="loadAddresses()">
+      <i class="fas fa-redo"></i> Retry
+    </button>
+  </div>
+
+  <!-- Addresses List -->
+  <div class="addresses-grid" *ngIf="addresses.length > 0 && !isLoading">
+    <div class="address-card" *ngFor="let address of addresses" [class.default]="address.isDefault">
+      <div class="address-type">
+        <i class="fas" [ngClass]="getAddressTypeIcon(address.type)"></i>
+        <span>{{ getAddressTypeLabel(address.type) }}</span>
+        <span class="default-badge" *ngIf="address.isDefault">Default</span>
+      </div>
+      
+      <div class="address-details">
+        <h3>{{ address.name }}</h3>
+        <p class="phone"><i class="fas fa-phone"></i> {{ address.phone }}</p>
+        <p class="address-text">{{ formatAddress(address) }}</p>
+      </div>
+
+      <div class="address-actions">
+        <button class="action-btn edit" (click)="openEditForm(address)" title="Edit">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="action-btn delete" (click)="deleteAddress(address)" title="Delete">
+          <i class="fas fa-trash"></i>
+        </button>
+        <button class="action-btn default" *ngIf="!address.isDefault" (click)="setAsDefault(address)" title="Set as Default">
+          <i class="fas fa-check-circle"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="addresses.length === 0 && !isLoading && !loadError">
+    <div class="empty-icon">
+      <i class="fas fa-map-marked-alt"></i>
+    </div>
+    <h3>No Addresses Saved</h3>
+    <p>Add your first address to make checkout faster</p>
+    <button class="add-btn" (click)="openAddForm()">
+      <i class="fas fa-plus"></i> Add Address
+    </button>
+  </div>
+
+  <!-- Address Form Modal -->
+  <div class="modal-overlay" *ngIf="showAddressForm" (click)="closeForm()">
+    <div class="address-form-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editingAddress ? 'Edit Address' : 'Add New Address' }}</h2>
+        <button class="close-btn" (click)="closeForm()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Address Type</label>
+          <div class="type-selector">
+            <button 
+              type="button"
+              [class.active]="formData.type === 'home'" 
+              (click)="formData.type = 'home'">
+              <i class="fas fa-home"></i> Home
+            </button>
+            <button 
+              type="button"
+              [class.active]="formData.type === 'work'" 
+              (click)="formData.type = 'work'">
+              <i class="fas fa-building"></i> Work
+            </button>
+            <button 
+              type="button"
+              [class.active]="formData.type === 'other'" 
+              (click)="formData.type = 'other'">
+              <i class="fas fa-map-marker-alt"></i> Other
+            </button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="formData.name" placeholder="Enter full name">
+          </div>
+          <div class="form-group">
+            <label>Phone Number <span class="required">*</span></label>
+            <input type="tel" [(ngModel)]="formData.phone" placeholder="+91 XXXXX XXXXX">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Address Line 1 <span class="required">*</span></label>
+          <textarea [(ngModel)]="formData.addressLine1" rows="2" placeholder="House/Flat No., Building, Street"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Address Line 2</label>
+          <input type="text" [(ngModel)]="formData.addressLine2" placeholder="Area, Colony (Optional)">
+        </div>
+
+        <div class="form-group">
+          <label>Landmark</label>
+          <input type="text" [(ngModel)]="formData.landmark" placeholder="Near any landmark">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>City <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="formData.city" placeholder="City">
+          </div>
+          <div class="form-group">
+            <label>State <span class="required">*</span></label>
+            <select [(ngModel)]="formData.state">
+              <option value="">Select State</option>
+              <option *ngFor="let state of states" [value]="state">{{ state }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>PIN Code <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="formData.pincode" placeholder="6-digit PIN code" maxlength="6">
+          </div>
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="formData.isDefault">
+              <span>Set as default address</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="cancel-btn" (click)="closeForm()" [disabled]="isSaving">Cancel</button>
+        <button 
+          class="save-btn" 
+          (click)="saveAddress()" 
+          [disabled]="!validateForm() || isSaving">
+          <i class="fas" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-check'"></i>
+          {{ editingAddress ? 'Update Address' : 'Save Address' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

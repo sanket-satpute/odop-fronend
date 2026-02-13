@@ -1,0 +1,198 @@
+<div class="category-landing-page">
+  <!-- Category Hero Banner -->
+  <section class="category-hero" [style.background-image]="'url(' + getCategoryBanner() + ')'">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <nav class="breadcrumb">
+        <a routerLink="/">Home</a>
+        <i class="fas fa-chevron-right"></i>
+        <a routerLink="/products">Products</a>
+        <i class="fas fa-chevron-right"></i>
+        <span>{{ getCategoryName() }}</span>
+      </nav>
+      <h1>{{ getCategoryName() }}</h1>
+      <p>{{ getCategoryDescription() }}</p>
+      <div class="category-stats">
+        <span><i class="fas fa-box"></i> {{ filteredProducts.length }}+ Products</span>
+        <span><i class="fas fa-store"></i> Verified Artisans</span>
+        <span><i class="fas fa-award"></i> GI Tagged</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Navigation -->
+  <section class="category-nav">
+    <div class="container">
+      <div class="nav-scroll">
+        <button 
+          *ngFor="let cat of allCategories"
+          [class.active]="cat.categoryName === getCategoryName()"
+          (click)="navigateToCategory(cat.categoryName ? cat.categoryName.toLowerCase().replace(' ', '-') : '')">
+          <i [class]="getCategoryIcon(cat.categoryName || '')"></i>
+          {{ cat.categoryName }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="main-content">
+    <div class="container">
+      <!-- Sidebar Filters -->
+      <aside class="sidebar">
+        <div class="filter-section">
+          <h3>Price Range</h3>
+          <div class="price-inputs">
+            <input type="number" [(ngModel)]="priceRange[0]" placeholder="Min">
+            <span>to</span>
+            <input type="number" [(ngModel)]="priceRange[1]" placeholder="Max">
+          </div>
+          <button class="apply-filter-btn" (click)="applyFilters()">Apply</button>
+        </div>
+
+        <div class="filter-section">
+          <h3>Availability</h3>
+          <label class="checkbox-item">
+            <input type="checkbox" checked>
+            <span>In Stock</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox">
+            <span>GI Tagged Only</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox">
+            <span>Free Shipping</span>
+          </label>
+        </div>
+      </aside>
+
+      <!-- Products Area -->
+      <div class="products-area">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="results-info">
+            Showing <strong>{{ filteredProducts.length }}</strong> products
+          </div>
+          <div class="toolbar-actions">
+            <div class="sort-by">
+              <label>Sort by:</label>
+              <select [(ngModel)]="sortBy" (change)="onSortChange()">
+                <option value="popularity">Popularity</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="newest">Newest First</option>
+                <option value="rating">Highest Rated</option>
+              </select>
+            </div>
+            <div class="view-toggle">
+              <button [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'">
+                <i class="fas fa-th-large"></i>
+              </button>
+              <button [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">
+                <i class="fas fa-list"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoading">
+          <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading products...</p>
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div class="error-state" *ngIf="!isLoading && errorMessage">
+          <div class="error-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>{{ errorMessage }}</p>
+            <button class="retry-btn" (click)="retryLoad()">
+              <i class="fas fa-redo"></i> Try Again
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="!isLoading && !errorMessage && filteredProducts.length === 0">
+          <div class="empty-content">
+            <i class="fas fa-box-open"></i>
+            <h3>No Products Found</h3>
+            <p>Try adjusting your filters or browse other categories.</p>
+          </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="products-grid" *ngIf="!isLoading && viewMode === 'grid' && filteredProducts.length > 0">
+          <article class="product-card" *ngFor="let product of filteredProducts" (click)="navigateToProduct(product.productId)">
+            <div class="product-image">
+              <img [src]="getProductImage(product)" [alt]="product.productName">
+              <span class="discount-badge" *ngIf="getProductDiscount(product) > 0">-{{ getProductDiscount(product) }}%</span>
+              <span class="gi-badge" *ngIf="product.giTagCertified">GI Tagged</span>
+              <div class="quick-actions">
+                <button class="action-btn"><i class="far fa-heart"></i></button>
+                <button class="action-btn"><i class="fas fa-shopping-cart"></i></button>
+              </div>
+            </div>
+            <div class="product-info">
+              <p class="vendor">{{ product.madeBy || 'Local Artisan' }} | {{ product.originState || 'India' }}</p>
+              <h4>{{ product.productName }}</h4>
+              <div class="rating">
+                <i class="fas fa-star" *ngFor="let star of getRatingStars(product.rating || 4)"></i>
+                <span>({{ product.totalSold || 0 }})</span>
+              </div>
+              <div class="price">
+                <span class="current">{{ formatPrice(product.price || 0) }}</span>
+                <span class="original" *ngIf="product.discount && product.discount > 0">
+                  {{ formatPrice((product.price || 0) * 100 / (100 - product.discount)) }}
+                </span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Products List -->
+        <div class="products-list" *ngIf="!isLoading && viewMode === 'list' && filteredProducts.length > 0">
+          <article class="product-list-item" *ngFor="let product of filteredProducts" (click)="navigateToProduct(product.productId)">
+            <div class="list-image">
+              <img [src]="getProductImage(product)" [alt]="product.productName">
+              <span class="discount-badge" *ngIf="getProductDiscount(product) > 0">-{{ getProductDiscount(product) }}%</span>
+            </div>
+            <div class="list-info">
+              <p class="vendor">{{ product.madeBy || 'Local Artisan' }} | {{ product.originState || 'India' }}</p>
+              <h4>{{ product.productName }}</h4>
+              <p class="description">{{ product.productDescription }}</p>
+              <div class="rating">
+                <i class="fas fa-star" *ngFor="let star of getRatingStars(product.rating || 4)"></i>
+                <span>({{ product.totalSold || 0 }} reviews)</span>
+              </div>
+              <div class="price">
+                <span class="current">{{ formatPrice(product.price || 0) }}</span>
+                <span class="original" *ngIf="product.discount && product.discount > 0">
+                  {{ formatPrice((product.price || 0) * 100 / (100 - product.discount)) }}
+                </span>
+              </div>
+              <div class="list-actions">
+                <button class="add-cart-btn"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                <button class="wishlist-btn"><i class="far fa-heart"></i></button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="filteredProducts.length > 0">
+          <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <span>...</span>
+          <button class="page-btn">12</button>
+          <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,206 @@
+<div class="vendor-reviews-container">
+  <!-- Rating Summary Section -->
+  <div class="rating-summary">
+    <div class="rating-overview">
+      <div class="average-rating">
+        <span class="rating-number">{{ averageRating }}</span>
+        <div class="stars-display">
+          <ng-container *ngFor="let star of getStarArray(averageRating); let i = index">
+            <i class="fas fa-star" *ngIf="star === 1"></i>
+            <i class="fas fa-star-half-alt" *ngIf="star === 0.5"></i>
+            <i class="far fa-star" *ngIf="star === 0"></i>
+          </ng-container>
+        </div>
+        <span class="total-reviews">{{ totalReviews }} reviews</span>
+      </div>
+      
+      <div class="rating-breakdown">
+        <div 
+          class="breakdown-row" 
+          *ngFor="let row of ratingBreakdown"
+          [class.active]="selectedRating === row.star"
+          (click)="filterByRating(row.star)">
+          <span class="star-label">{{ row.star }} <i class="fas fa-star"></i></span>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="row.percentage"></div>
+          </div>
+          <span class="count">{{ row.count }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="write-review-cta">
+      <h3>Share Your Experience</h3>
+      <p>Help other customers make informed decisions</p>
+      <button class="write-btn" (click)="toggleWriteReview()">
+        <i class="fas fa-pen"></i>
+        Write a Review
+      </button>
+    </div>
+  </div>
+
+  <!-- Write Review Form -->
+  <div class="write-review-form" *ngIf="showWriteReview">
+    <div class="form-header">
+      <h3>Write Your Review</h3>
+      <button class="close-btn" (click)="toggleWriteReview()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="rating-input">
+      <label>Your Rating *</label>
+      <div class="star-selector">
+        <i 
+          *ngFor="let star of [1,2,3,4,5]"
+          [class]="(hoverRating || newReview.rating) >= star ? 'fas fa-star' : 'far fa-star'"
+          (click)="setNewRating(star)"
+          (mouseenter)="setHoverRating(star)"
+          (mouseleave)="setHoverRating(0)">
+        </i>
+      </div>
+      <span class="rating-text" *ngIf="newReview.rating > 0">
+        {{ ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][newReview.rating] }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label>Review Title *</label>
+      <input 
+        type="text" 
+        [(ngModel)]="newReview.title" 
+        placeholder="Sum up your experience in a few words"
+        maxlength="100">
+    </div>
+
+    <div class="form-group">
+      <label>Your Review *</label>
+      <textarea 
+        [(ngModel)]="newReview.comment" 
+        placeholder="What did you like or dislike? How was the quality and packaging?"
+        rows="4"
+        maxlength="1000"></textarea>
+      <span class="char-count">{{ newReview.comment.length }}/1000</span>
+    </div>
+
+    <div class="form-actions">
+      <button class="cancel-btn" (click)="toggleWriteReview()">Cancel</button>
+      <button class="submit-btn" (click)="submitReview()">
+        <i class="fas fa-paper-plane"></i>
+        Submit Review
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="reviews-filters">
+    <div class="filter-left">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()"
+          placeholder="Search reviews...">
+      </div>
+      <div class="rating-pills" *ngIf="selectedRating">
+        <span class="active-filter">
+          {{ selectedRating }} Star<ng-container *ngIf="selectedRating > 1">s</ng-container>
+          <button (click)="filterByRating(null)"><i class="fas fa-times"></i></button>
+        </span>
+      </div>
+    </div>
+    
+    <div class="filter-right">
+      <select [(ngModel)]="selectedSort" (change)="onSortChange()">
+        <option value="recent">Most Recent</option>
+        <option value="oldest">Oldest First</option>
+        <option value="highest">Highest Rated</option>
+        <option value="lowest">Lowest Rated</option>
+        <option value="helpful">Most Helpful</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Reviews List -->
+  <div class="reviews-list">
+    <div class="review-card" *ngFor="let review of displayedReviews">
+      <div class="review-header">
+        <div class="reviewer-info">
+          <div class="avatar">
+            <img *ngIf="review.customerAvatar" [src]="review.customerAvatar" [alt]="review.customerName">
+            <span *ngIf="!review.customerAvatar">{{ review.customerName.charAt(0) }}</span>
+          </div>
+          <div class="reviewer-details">
+            <h4>{{ review.customerName }}</h4>
+            <div class="review-meta">
+              <span class="verified-badge" *ngIf="review.verified">
+                <i class="fas fa-check-circle"></i> Verified Purchase
+              </span>
+              <span class="review-date">{{ formatDate(review.date) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="review-rating">
+          <i *ngFor="let star of [1,2,3,4,5]" 
+             [class]="star <= review.rating ? 'fas fa-star' : 'far fa-star'"></i>
+        </div>
+      </div>
+
+      <div class="product-context" *ngIf="review.productName">
+        <span class="product-label">Reviewed:</span>
+        <span class="product-name">{{ review.productName }}</span>
+      </div>
+
+      <div class="review-content">
+        <h5 class="review-title">{{ review.title }}</h5>
+        <p class="review-comment">{{ review.comment }}</p>
+      </div>
+
+      <div class="review-images" *ngIf="review.images && review.images.length > 0">
+        <img *ngFor="let img of review.images" [src]="img" alt="Review image">
+      </div>
+
+      <!-- Vendor Reply -->
+      <div class="vendor-reply" *ngIf="review.vendorReply">
+        <div class="reply-header">
+          <i class="fas fa-store"></i>
+          <span class="reply-label">Vendor Response</span>
+          <span class="reply-date">{{ formatDate(review.vendorReply.date) }}</span>
+        </div>
+        <p class="reply-message">{{ review.vendorReply.message }}</p>
+      </div>
+
+      <div class="review-footer">
+        <button class="helpful-btn" (click)="markHelpful(review)">
+          <i class="far fa-thumbs-up"></i>
+          Helpful ({{ review.helpful }})
+        </button>
+        <button class="report-btn" (click)="reportReview(review)">
+          <i class="far fa-flag"></i>
+          Report
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-reviews" *ngIf="filteredReviews.length === 0 && !isLoading">
+      <i class="fas fa-comment-slash"></i>
+      <h3>No reviews found</h3>
+      <p *ngIf="selectedRating || searchQuery">Try adjusting your filters</p>
+      <p *ngIf="!selectedRating && !searchQuery">Be the first to review this vendor!</p>
+      <button class="write-btn" (click)="toggleWriteReview()">
+        <i class="fas fa-pen"></i>
+        Write a Review
+      </button>
+    </div>
+
+    <!-- Load More -->
+    <div class="load-more" *ngIf="canLoadMore">
+      <button class="load-more-btn" (click)="loadMoreReviews()">
+        <i class="fas fa-chevron-down"></i>
+        Load More Reviews
+      </button>
+    </div>
+  </div>
+</div>

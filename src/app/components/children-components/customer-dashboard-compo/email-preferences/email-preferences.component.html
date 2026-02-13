@@ -1,0 +1,153 @@
+<div class="email-preferences-container">
+  <!-- Header -->
+  <div class="preferences-header">
+    <div class="header-content">
+      <h1 class="main-title">
+        <i class="fas fa-bell"></i>
+        Notification Preferences
+      </h1>
+      <p class="subtitle">Choose how and when you want to hear from us</p>
+    </div>
+    <div class="header-actions" *ngIf="hasChanges">
+      <span class="unsaved-indicator">
+        <i class="fas fa-circle"></i> Unsaved changes
+      </span>
+    </div>
+  </div>
+
+  <!-- Master Controls -->
+  <div class="master-controls">
+    <h2 class="section-title">Communication Channels</h2>
+    <div class="channels-grid">
+      <div class="channel-card" [class.disabled]="!masterEmailEnabled">
+        <div class="channel-icon">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <div class="channel-info">
+          <h3>Email</h3>
+          <p>Receive notifications via email</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [checked]="masterEmailEnabled" (change)="toggleMasterEmail()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="channel-card" [class.disabled]="!masterSmsEnabled">
+        <div class="channel-icon">
+          <i class="fas fa-sms"></i>
+        </div>
+        <div class="channel-info">
+          <h3>SMS</h3>
+          <p>Receive text messages</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [checked]="masterSmsEnabled" (change)="toggleMasterSms()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="channel-card" [class.disabled]="!masterPushEnabled">
+        <div class="channel-icon">
+          <i class="fas fa-mobile-alt"></i>
+        </div>
+        <div class="channel-info">
+          <h3>Push Notifications</h3>
+          <p>Browser & app notifications</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [checked]="masterPushEnabled" (change)="toggleMasterPush()">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Categories -->
+  <div class="categories-section">
+    <div class="section-header">
+      <h2 class="section-title">Notification Types</h2>
+      <p class="section-description">Customize what updates you receive</p>
+    </div>
+
+    <div class="category-card" *ngFor="let category of categories">
+      <div class="category-header">
+        <div class="category-icon">
+          <i [class]="category.icon"></i>
+        </div>
+        <div class="category-info">
+          <h3>{{ category.title }}</h3>
+          <p>{{ category.description }}</p>
+        </div>
+        <div class="category-stats">
+          <span class="enabled-count">
+            {{ getCategoryEnabledCount(category) }}/{{ category.settings.length }} enabled
+          </span>
+          <div class="quick-actions">
+            <button class="quick-btn" (click)="toggleCategoryAll(category, true)" title="Enable all">
+              <i class="fas fa-check-double"></i>
+            </button>
+            <button class="quick-btn" (click)="toggleCategoryAll(category, false)" title="Disable all">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-list">
+        <div class="setting-item" *ngFor="let setting of category.settings">
+          <div class="setting-info">
+            <h4>{{ setting.label }}</h4>
+            <p>{{ setting.description }}</p>
+            <div class="setting-channels">
+              <span class="channel-badge email" *ngIf="setting.type === 'email' || setting.type === 'all'">
+                <i class="fas fa-envelope"></i> Email
+              </span>
+              <span class="channel-badge sms" *ngIf="setting.type === 'sms' || setting.type === 'all'">
+                <i class="fas fa-sms"></i> SMS
+              </span>
+              <span class="channel-badge push" *ngIf="setting.type === 'push' || setting.type === 'all'">
+                <i class="fas fa-bell"></i> Push
+              </span>
+            </div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="setting.enabled" (change)="onSettingChange()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="footer-actions">
+    <div class="secondary-actions">
+      <button class="action-btn outline" (click)="resetToDefault()">
+        <i class="fas fa-undo"></i>
+        Reset to Default
+      </button>
+      <button class="action-btn danger" (click)="unsubscribeAll()">
+        <i class="fas fa-ban"></i>
+        Unsubscribe from All
+      </button>
+    </div>
+    <button 
+      class="action-btn primary save-btn" 
+      [disabled]="!hasChanges || isSaving"
+      (click)="savePreferences()">
+      <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+      <i class="fas fa-save" *ngIf="!isSaving"></i>
+      {{ isSaving ? 'Saving...' : 'Save Preferences' }}
+    </button>
+  </div>
+
+  <!-- Info Notice -->
+  <div class="info-notice">
+    <i class="fas fa-info-circle"></i>
+    <p>
+      Note: Account security notifications (login alerts, password changes) cannot be fully disabled 
+      as they are essential for protecting your account.
+    </p>
+  </div>
+</div>

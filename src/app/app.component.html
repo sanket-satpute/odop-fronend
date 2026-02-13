@@ -1,0 +1,13 @@
+<ng-container *ngIf="loading$ | async as loadingState">
+  <div *ngIf="loadingState.loading" class="loading-overlay">
+    <mat-spinner class="loading-spinner" diameter="48"></mat-spinner>
+    <div *ngIf="loadingState.message" style="color: white; margin-top: 16px;">
+      {{ loadingState.message }}
+    </div>
+  </div>
+</ng-container>
+
+<router-outlet></router-outlet>
+
+<!-- Live Chat Widget - Available on all pages -->
+<app-live-chat-widget></app-live-chat-widget>

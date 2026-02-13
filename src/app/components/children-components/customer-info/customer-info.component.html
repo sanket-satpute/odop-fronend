@@ -1,0 +1,32 @@
+<div class="customer-info-container">
+    <div class="customer-header">
+      <div class="profile-picture">
+        <img *ngIf="customer.profilePicturePath" [src]="customer.profilePicturePath" alt="Profile Picture">
+      </div>
+      <h2>{{ customer.fullName }}</h2>
+    </div>
+  
+    <div class="customer-details">
+      <div class="detail">
+        <label>Email:</label>
+        <p>{{ customer.emailAddress }}</p>
+      </div>
+      <div class="detail">
+        <label>Contact Number:</label>
+        <p>{{ customer.contactNumber }}</p>
+      </div>
+      <div class="detail">
+        <label>Date of Birth:</label>
+        <p>{{ customer.dateOfBirth }}</p>
+      </div>
+      <div class="detail">
+        <label>Shipping Address:</label>
+        <p>{{ customer.shippingAddress }}</p>
+      </div>
+      <div class="detail">
+        <label>Billing Address:</label>
+        <p>{{ customer.billingAddress }}</p>
+      </div>
+    </div>
+  </div>
+  

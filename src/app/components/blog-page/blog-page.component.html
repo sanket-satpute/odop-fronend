@@ -1,0 +1,117 @@
+<div class="blog-page">
+  <!-- Hero Section -->
+  <section class="blog-hero">
+    <div class="hero-content">
+      <h1>Stories & Insights</h1>
+      <p>Discover the rich heritage of Indian craftsmanship, artisan stories, and shopping guides</p>
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search stories, topics, or tags...">
+      </div>
+    </div>
+    <div class="hero-decoration">
+      <div class="pattern pattern-1"></div>
+      <div class="pattern pattern-2"></div>
+    </div>
+  </section>
+
+  <!-- Featured Posts -->
+  <section class="featured-section" *ngIf="featuredPosts.length > 0 && selectedCategory === 'all' && !searchQuery">
+    <div class="container">
+      <h2 class="section-title">
+        <i class="fas fa-star"></i>
+        Featured Stories
+      </h2>
+      <div class="featured-grid">
+        <article class="featured-card" *ngFor="let post of featuredPosts">
+          <div class="featured-image">
+            <img [src]="post.image" [alt]="post.title">
+            <span class="category-badge">{{ getCategoryName(post.category) }}</span>
+          </div>
+          <div class="featured-content">
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.excerpt }}</p>
+            <div class="post-meta">
+              <div class="author">
+                <img [src]="post.authorImage" [alt]="post.author">
+                <span>{{ post.author }}</span>
+              </div>
+              <div class="post-info">
+                <span><i class="far fa-calendar"></i> {{ formatDate(post.date) }}</span>
+                <span><i class="far fa-clock"></i> {{ post.readTime }} min read</span>
+              </div>
+            </div>
+            <a href="#" class="read-more">
+              Read Full Story <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="blog-content">
+    <div class="container">
+      <!-- Category Filter -->
+      <div class="category-filter">
+        <button 
+          *ngFor="let category of categories"
+          [class.active]="selectedCategory === category.id"
+          (click)="filterByCategory(category.id)">
+          <i [class]="category.icon"></i>
+          {{ category.name }}
+        </button>
+      </div>
+
+      <!-- Blog Grid -->
+      <div class="blog-grid" *ngIf="filteredPosts.length > 0">
+        <article class="blog-card" *ngFor="let post of filteredPosts">
+          <div class="card-image">
+            <img [src]="post.image" [alt]="post.title">
+            <span class="category-tag">{{ getCategoryName(post.category) }}</span>
+          </div>
+          <div class="card-content">
+            <div class="card-meta">
+              <span><i class="far fa-calendar"></i> {{ formatDate(post.date) }}</span>
+              <span><i class="far fa-clock"></i> {{ post.readTime }} min</span>
+            </div>
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.excerpt }}</p>
+            <div class="card-tags">
+              <span class="tag" *ngFor="let tag of post.tags.slice(0, 3)">{{ tag }}</span>
+            </div>
+            <div class="card-footer">
+              <div class="author-info">
+                <img [src]="post.authorImage" [alt]="post.author">
+                <span>{{ post.author }}</span>
+              </div>
+              <a href="#" class="read-link">Read <i class="fas fa-chevron-right"></i></a>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- No Results -->
+      <div class="no-results" *ngIf="filteredPosts.length === 0">
+        <i class="fas fa-search"></i>
+        <h3>No stories found</h3>
+        <p>Try adjusting your search or filter to find what you're looking for</p>
+        <button (click)="selectedCategory = 'all'; searchQuery = ''">View All Stories</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="newsletter-cta">
+    <div class="cta-content">
+      <i class="fas fa-envelope-open-text"></i>
+      <h2>Stay Updated</h2>
+      <p>Subscribe to our newsletter for the latest stories, artisan features, and exclusive offers</p>
+      <div class="newsletter-form">
+        <input type="email" placeholder="Enter your email address">
+        <button>Subscribe <i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,81 @@
+<div class="cancel-order-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-icon warning">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h2>Cancel Order</h2>
+    <p class="header-subtitle">Order #{{ data.orderNumber || data.orderId }}</p>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="order-summary">
+    <div class="summary-item">
+      <span class="label">Order Total</span>
+      <span class="value">₹{{ data.totalAmount | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="label">Items</span>
+      <span class="value">{{ data.productCount }} item(s)</span>
+    </div>
+    <div class="summary-item">
+      <span class="label">Status</span>
+      <span class="value status-badge">{{ data.orderStatus | titlecase }}</span>
+    </div>
+  </div>
+
+  <!-- Warning Message -->
+  <div class="warning-message">
+    <i class="fas fa-info-circle"></i>
+    <p>Once cancelled, this action cannot be undone. Refund will be processed within 5-7 business days.</p>
+  </div>
+
+  <!-- Reason Selection -->
+  <div class="reason-section">
+    <h3>Why are you cancelling this order?</h3>
+    <p class="reason-subtitle">Please select a reason to help us improve our service</p>
+
+    <div class="reason-options">
+      <div 
+        *ngFor="let reason of cancellationReasons" 
+        class="reason-option"
+        [class.selected]="selectedReason === reason.value"
+        (click)="selectReason(reason.value)">
+        <div class="reason-icon">
+          <i [class]="reason.icon"></i>
+        </div>
+        <span class="reason-label">{{ reason.label }}</span>
+        <div class="check-mark" *ngIf="selectedReason === reason.value">
+          <i class="fas fa-check"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Reason Input -->
+    <div class="custom-reason" *ngIf="selectedReason === 'other'">
+      <label>Please specify your reason:</label>
+      <textarea 
+        [(ngModel)]="customReason" 
+        placeholder="Enter your reason for cancellation..."
+        rows="3"
+        maxlength="500">
+      </textarea>
+      <span class="char-count">{{ customReason.length }}/500</span>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="dialog-actions">
+    <button class="btn-secondary" (click)="onCancel()">
+      <i class="fas fa-arrow-left"></i>
+      Keep Order
+    </button>
+    <button 
+      class="btn-danger" 
+      (click)="onConfirm()"
+      [disabled]="!isValidForm() || isSubmitting">
+      <i class="fas" [ngClass]="isSubmitting ? 'fa-spinner fa-spin' : 'fa-times-circle'"></i>
+      {{ isSubmitting ? 'Cancelling...' : 'Cancel Order' }}
+    </button>
+  </div>
+</div>

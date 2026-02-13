@@ -1,0 +1,41 @@
+
+<div *ngIf="isLoading" class="orders-loading">
+	<mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+	<span>Loading your orders...</span>
+</div>
+
+<div *ngIf="error" class="orders-error">
+	<mat-icon color="warn">error</mat-icon>
+	{{ error }}
+</div>
+
+<div *ngIf="!isLoading && !error && orders.length === 0" class="orders-empty">
+	<mat-icon>shopping_bag</mat-icon>
+	<span>No orders found.</span>
+</div>
+
+<div *ngIf="orders.length > 0" class="orders-list">
+	<h3>Your Orders</h3>
+	<table class="orders-table">
+		<thead>
+			<tr>
+				<th>Order ID</th>
+				<th>Date</th>
+				<th>Status</th>
+				<th>Total</th>
+				<th>Details</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr *ngFor="let order of orders">
+				<td>{{ order.orderId }}</td>
+				<td>{{ order.orderDateTime | date:'mediumDate' }}</td>
+				<td>{{ order.orderStatus }}</td>
+				<td>{{ order.totalAmount | currency:'INR' }}</td>
+				<td>
+					<button mat-button color="primary" (click)="/* TODO: show details dialog */">View</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

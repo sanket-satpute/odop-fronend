@@ -1,0 +1,44 @@
+<div class="container">
+  <div class="row">
+    <div class="col col1">
+      <img src="https://www.freshone.com.pk/content/images/thumbs/default-image_550.png" alt="Shopkeeper Image" class="rounded-image">
+      <div class="shop-info">
+        <h2>{{ vendor?.shopkeeperName }}</h2>
+        <h3>{{ vendor?.shoppeeName }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col col3">
+      <h1>E-mail</h1>
+      <p>{{ vendor?.emailAddress }}</p>
+    </div>
+    <div class="col col3">
+      <h1>Contact</h1>
+      <p>{{ vendor?.contactNumber }}</p>
+    </div>
+    <div class="col col3">
+      <h1>Registry No</h1>
+      <p>{{ vendor?.businessRegistryNumber }}</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col col2">
+      <h2>Return Policy</h2>
+      <p>{{ vendor?.returnPolicy }}</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col col2">
+      <h2>Term's And Condition</h2>
+      <p>{{ vendor?.termsAndServiceAgreement }}</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <button class="edit">Edit Profile</button>
+  </div>
+</div>

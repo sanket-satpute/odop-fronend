@@ -1,0 +1,312 @@
+<!-- Orders Management Component -->
+<div class="orders-container">
+  <!-- Error/Loading Banner -->
+  <div *ngIf="isLoading" class="loading-banner">
+    <i class="fas fa-spinner fa-spin"></i> Loading orders...
+  </div>
+  <div *ngIf="error && !isLoading" class="error-banner">
+    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    <button class="retry-btn" (click)="fetchOrders()">Retry</button>
+  </div>
+  <!-- Header Section -->
+  <div class="orders-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="main-title">Manage Orders</h1>
+        <p class="subtitle">View and fulfill customer orders efficiently</p>
+      </div>
+      
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card" [class.active]="selectedStat === 'total'">
+          <div class="stat-icon total">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-number">{{ totalOrders }}</span>
+            <span class="stat-label">Total Orders</span>
+          </div>
+        </div>
+        
+        <div class="stat-card" [class.active]="selectedStat === 'pending'">
+          <div class="stat-icon pending">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-number">{{ pendingOrders }}</span>
+            <span class="stat-label">Pending</span>
+          </div>
+        </div>
+        
+        <div class="stat-card" [class.active]="selectedStat === 'delivered'">
+          <div class="stat-icon delivered">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-number">{{ deliveredOrders }}</span>
+            <span class="stat-label">Delivered</span>
+          </div>
+        </div>
+        
+        <div class="stat-card" [class.active]="selectedStat === 'cancelled'">
+          <div class="stat-icon cancelled">
+            <i class="fas fa-times-circle"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-number">{{ cancelledOrders }}</span>
+            <span class="stat-label">Cancelled</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-container">
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+          type="text" 
+          placeholder="Search by Order ID or Customer Name..."
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange($event)"
+        />
+      </div>
+      
+      <div class="filter-group">
+        <div class="filter-item">
+          <select class="filter-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <i class="fas fa-chevron-down select-icon"></i>
+        </div>
+        
+        <div class="filter-item">
+          <select class="filter-select" [(ngModel)]="selectedDateRange" (change)="onDateRangeChange()">
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">Last 7 Days</option>
+            <option value="month">This Month</option>
+            <option value="custom">Custom Range</option>
+          </select>
+          <i class="fas fa-chevron-down select-icon"></i>
+        </div>
+        
+        <button class="export-btn" (click)="exportOrders()">
+          <i class="fas fa-download"></i>
+          Export CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="orders-table-container" *ngIf="!isLoading && !error">
+    <div class="table-wrapper">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let order of filteredOrders; trackBy: trackByOrderId">
+            <tr 
+              class="order-row"
+              [class.expanded]="expandedOrderId === order.id"
+              (click)="toggleOrderDetails(order.id)"
+            >
+              <td class="order-id">
+                <span class="id-text">#{{ order.id }}</span>
+              </td>
+              <td class="customer-cell">
+                <div class="customer-info">
+                  <div class="customer-avatar">
+                    <img [src]="order.customer.avatar" [alt]="order.customer.name" />
+                  </div>
+                  <div class="customer-details">
+                    <span class="customer-name">{{ order.customer.name }}</span>
+                    <span class="customer-email">{{ order.customer.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="items-cell">
+                <span class="items-count">{{ order.itemsCount }} Items</span>
+              </td>
+              <td class="total-cell">
+                <span class="total-amount">₹{{ order.total | number:'1.2-2' }}</span>
+              </td>
+              <td class="status-cell">
+                <span class="status-badge" [ngClass]="'status-' + order.status">
+                  {{ order.status | titlecase }}
+                </span>
+              </td>
+              <td class="date-cell">
+                <span class="order-date">{{ order.createdAt | date:'dd MMM yyyy' }}</span>
+                <span class="order-time">{{ order.createdAt | date:'HH:mm' }}</span>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button 
+                    class="action-btn view-btn"
+                    (click)="viewOrderDetails(order.id, $event)"
+                    matTooltip="View Details"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button 
+                    class="action-btn ship-btn"
+                    *ngIf="order.status === 'pending' || order.status === 'processing'"
+                    (click)="markAsShipped(order.id, $event)"
+                    matTooltip="Mark as Shipped"
+                  >
+                    <i class="fas fa-truck"></i>
+                  </button>
+                  <button 
+                    class="action-btn cancel-btn"
+                    *ngIf="order.status !== 'delivered' && order.status !== 'cancelled'"
+                    (click)="cancelOrder(order.id, $event)"
+                    matTooltip="Cancel Order"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            
+            <!-- Expanded Order Details Row -->
+            <tr *ngIf="expandedOrderId === order.id" class="order-details-row">
+              <td colspan="7">
+                <div class="order-details-content">
+                  <div class="details-grid">
+                    <div class="customer-section">
+                      <h4>Customer Information</h4>
+                      <div class="detail-item">
+                        <span class="label">Name:</span>
+                        <span class="value">{{ order.customer.name }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="label">Email:</span>
+                        <span class="value">{{ order.customer.email }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="label">Phone:</span>
+                        <span class="value">{{ order.customer.phone }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="label">Address:</span>
+                        <span class="value">{{ order.customer.address }}</span>
+                      </div>
+                    </div>
+                    
+                    <div class="items-section">
+                      <h4>Order Items</h4>
+                      <div class="items-list">
+                        <div *ngFor="let item of order.items" class="item-card">
+                          <img [src]="item.image" [alt]="item.name" class="item-image" />
+                          <div class="item-info">
+                            <span class="item-name">{{ item.name }}</span>
+                            <span class="item-details">Qty: {{ item.quantity }} × ₹{{ item.price }}</span>
+                          </div>
+                          <span class="item-total">₹{{ item.quantity * item.price }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="timeline-section">
+                      <h4>Order Timeline</h4>
+                      <div class="timeline">
+                        <div class="timeline-item" [class.completed]="order.timeline.placed">
+                          <div class="timeline-dot"></div>
+                          <span>Order Placed</span>
+                        </div>
+                        <div class="timeline-item" [class.completed]="order.timeline.accepted">
+                          <div class="timeline-dot"></div>
+                          <span>Order Accepted</span>
+                        </div>
+                        <div class="timeline-item" [class.completed]="order.timeline.shipped">
+                          <div class="timeline-dot"></div>
+                          <span>Order Shipped</span>
+                        </div>
+                        <div class="timeline-item" [class.completed]="order.timeline.delivered">
+                          <div class="timeline-dot"></div>
+                          <span>Order Delivered</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="notes-section">
+                    <h4>Order Notes</h4>
+                    <textarea 
+                      class="notes-input"
+                      placeholder="Add notes or tracking information..."
+                      [(ngModel)]="order.notes"
+                    ></textarea>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="filteredOrders.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-shopping-cart"></i>
+    </div>
+    <h3>No Orders Found</h3>
+    <p>No orders match your current filters. Try adjusting your search criteria.</p>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-section" *ngIf="filteredOrders.length > 0">
+    <div class="pagination-info">
+      Showing {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, totalItems) }} of {{ totalItems }} orders
+    </div>
+    <div class="pagination-controls">
+      <button 
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="previousPage()"
+      >
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      
+      <span class="page-numbers">
+        <button 
+          *ngFor="let page of getPageNumbers()"
+          class="page-btn"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+      </span>
+      
+      <button 
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages"
+        (click)="nextPage()"
+      >
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>

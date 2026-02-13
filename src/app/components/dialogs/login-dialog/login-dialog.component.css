@@ -1,0 +1,509 @@
+.dialog-container {
+	 background: #fff;
+	 border-radius: 16px;
+	 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+	 width: 100%;
+	 max-width: auto;
+	 max-height: 90vh;
+	 overflow-y: auto;
+	 position: relative;
+}
+ .dialog-container::-webkit-scrollbar {
+	 width: 6px;
+}
+ .dialog-container::-webkit-scrollbar-track {
+	 background: #f8f9fa;
+	 border-radius: 3px;
+}
+ .dialog-container::-webkit-scrollbar-thumb {
+	 background: #ffc966;
+	 border-radius: 3px;
+}
+ .dialog-header {
+	 display: flex;
+	 justify-content: space-between;
+	 align-items: flex-start;
+	 padding: 2rem 2rem 1rem;
+	 border-bottom: 1px solid #e9ecef;
+}
+ .dialog-header .header-content {
+	 flex: 1;
+}
+ .dialog-header .header-content .dialog-title {
+	 font-size: 1.5rem;
+	 font-weight: 700;
+	 color: #2c3e50;
+	 margin: 0 0 0.25rem;
+	 letter-spacing: -0.025em;
+	 text-align: left;
+}
+ .dialog-header .header-content .dialog-subtitle {
+	 font-size: 0.9rem;
+	 color: #6c757d;
+	 margin: 0;
+	 line-height: 1.4;
+	 text-align: left;
+}
+ .dialog-header .close-btn {
+	 background: none;
+	 border: none;
+	 color: #6c757d;
+	 cursor: pointer;
+	 padding: 0.5rem;
+	 border-radius: 50%;
+	 transition: all 0.2s ease;
+	 display: flex;
+	 align-items: center;
+	 justify-content: center;
+	 width: 36px;
+	 height: 36px;
+	 min-width: unset;
+	 flex-shrink: 0;
+}
+ .dialog-header .close-btn:hover {
+	 background: #f8f9fa;
+	 color: #2c3e50;
+}
+ .dialog-header .close-btn mat-icon {
+	 font-size: 1.25rem;
+}
+ .role-selection {
+	 padding: 1.5rem 2rem;
+	 background: #f8f9fa;
+}
+ .role-selection .role-tabs {
+	 display: flex;
+	 gap: 0.5rem;
+	 background: #fff;
+	 padding: 0.25rem;
+	 border-radius: 12px;
+	 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+ .role-selection .role-tabs .role-tab {
+	 flex: 1;
+	 display: flex;
+	 align-items: center;
+	 justify-content: center;
+	 gap: 0.5rem;
+	 padding: 0.75rem 1rem;
+	 border: none;
+	 background: transparent;
+	 border-radius: 8px;
+	 cursor: pointer;
+	 transition: all 0.3s ease;
+	 color: #6c757d;
+	 font-weight: 500;
+	 font-size: 0.9rem;
+}
+ .role-selection .role-tabs .role-tab mat-icon {
+	 font-size: 1.1rem;
+}
+ .role-selection .role-tabs .role-tab:hover {
+	 background: #fff6e6;
+	 color: #cc8400;
+}
+ .role-selection .role-tabs .role-tab.active {
+	 background: #ffa500;
+	 color: #fff;
+	 box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
+}
+ .role-selection .role-tabs .role-tab.active:hover {
+	 background: #e69500;
+}
+ .error-message {
+	 margin: 1rem 2rem 0;
+	 padding: 0.75rem 1rem;
+	 background: #fef9f9;
+	 border: 1px solid #f3b7bd;
+	 border-radius: 8px;
+	 color: #bd2130;
+	 display: flex;
+	 align-items: center;
+	 gap: 0.5rem;
+	 font-size: 0.9rem;
+	 animation: shake 0.5s ease-in-out;
+}
+ .error-message mat-icon {
+	 font-size: 1.1rem;
+	 color: #dc3545;
+}
+ @keyframes shake {
+	 0%, 100% {
+		 transform: translateX(0);
+	}
+	 25% {
+		 transform: translateX(-5px);
+	}
+	 75% {
+		 transform: translateX(5px);
+	}
+}
+ .login-form {
+	 padding: 1.5rem 2rem 2rem;
+}
+ .form-row {
+	 margin-bottom: 1.25rem;
+}
+ ::ng-deep .mat-mdc-form-field {
+	 width: 100%;
+}
+ ::ng-deep .mat-mdc-form-field.full-width {
+	 width: 100%;
+}
+ ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+	 background: #fff;
+	 border-radius: 8px;
+}
+ ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex {
+	 padding: 0.25rem 0.75rem;
+}
+ ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-outline .mat-mdc-notched-outline-start, ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-outline .mat-mdc-notched-outline-middle, ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-outline .mat-mdc-notched-outline-end {
+	 border-color: #e9ecef;
+	 border-width: 1px;
+}
+ ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline .mat-mdc-notched-outline-start, ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline .mat-mdc-notched-outline-middle, ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline .mat-mdc-notched-outline-end {
+	 border-color: #ffa500;
+	 border-width: 2px;
+}
+ ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-label {
+	 color: #6c757d;
+	 font-weight: 500;
+}
+ ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
+	 color: #ffa500;
+}
+ ::ng-deep .mat-mdc-form-field .mat-mdc-input-element {
+	 color: #2c3e50;
+	 font-size: 0.95rem;
+}
+ ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-suffix {
+	 color: #6c757d;
+}
+ ::ng-deep .mat-mdc-checkbox .mat-mdc-checkbox-frame {
+	 border-color: #e9ecef;
+}
+ ::ng-deep .mat-mdc-checkbox.mat-mdc-checkbox-checked .mat-mdc-checkbox-background {
+	 background-color: #ffa500;
+	 border-color: #ffa500;
+}
+ .form-options {
+	 display: flex;
+	 justify-content: space-between;
+	 align-items: center;
+	 margin-bottom: 1.5rem;
+}
+ .form-options .remember-me ::ng-deep .mat-mdc-checkbox-label {
+	 font-size: 0.9rem;
+	 color: #6c757d;
+}
+ .form-options .forgot-password-btn {
+	 background: none;
+	 border: none;
+	 color: #ffa500;
+	 font-size: 0.9rem;
+	 font-weight: 500;
+	 cursor: pointer;
+	 text-decoration: none;
+	 transition: all 0.2s ease;
+}
+ .form-options .forgot-password-btn:hover {
+	 color: #cc8400;
+	 text-decoration: underline;
+}
+ .forgot-password-section {
+	 margin-bottom: 1.5rem;
+	 padding: 1rem;
+	 background: #d4f5fa;
+	 border: 1px solid #a7e9f4;
+	 border-radius: 8px;
+}
+ .forgot-password-section .forgot-password-content {
+	 display: flex;
+	 gap: 0.75rem;
+}
+ .forgot-password-section .forgot-password-content mat-icon {
+	 color: #17a2b8;
+	 margin-top: 0.1rem;
+}
+ .forgot-password-section .forgot-password-content .forgot-password-text {
+	 flex: 1;
+}
+ .forgot-password-section .forgot-password-content .forgot-password-text p {
+	 margin: 0 0 0.75rem;
+	 font-size: 0.9rem;
+	 color: #0c525d;
+	 line-height: 1.4;
+}
+ .forgot-password-section .forgot-password-content .forgot-password-text .forgot-password-actions {
+	 display: flex;
+	 gap: 0.5rem;
+}
+ .forgot-password-section .forgot-password-content .forgot-password-text .forgot-password-actions .reset-btn {
+	 background: #17a2b8;
+	 color: #fff;
+	 border: none;
+	 padding: 0.5rem 1rem;
+	 border-radius: 6px;
+	 font-size: 0.85rem;
+	 font-weight: 500;
+	 cursor: pointer;
+	 transition: all 0.2s ease;
+}
+ .forgot-password-section .forgot-password-content .forgot-password-text .forgot-password-actions .reset-btn:hover {
+	 background: #117a8b;
+}
+ .forgot-password-section .forgot-password-content .forgot-password-text .forgot-password-actions .cancel-btn {
+	 background: none;
+	 border: 1px solid #17a2b8;
+	 color: #17a2b8;
+	 padding: 0.5rem 1rem;
+	 border-radius: 6px;
+	 font-size: 0.85rem;
+	 font-weight: 500;
+	 cursor: pointer;
+	 transition: all 0.2s ease;
+}
+ .forgot-password-section .forgot-password-content .forgot-password-text .forgot-password-actions .cancel-btn:hover {
+	 background: #17a2b8;
+	 color: #fff;
+}
+ .form-actions {
+	 margin: 2rem 0 1rem;
+}
+ .form-actions .submit-btn {
+	 width: 100%;
+	 background: linear-gradient(135deg, #ffa500, #cc8400);
+	 color: #fff;
+	 border: none;
+	 padding: 1rem 1.5rem;
+	 border-radius: 12px;
+	 font-size: 1rem;
+	 font-weight: 600;
+	 cursor: pointer;
+	 transition: all 0.3s ease;
+	 box-shadow: 0 4px 16px rgba(255, 165, 0, 0.3);
+	 position: relative;
+	 overflow: hidden;
+}
+ .form-actions .submit-btn .btn-content {
+	 display: flex;
+	 align-items: center;
+	 justify-content: center;
+	 gap: 0.5rem;
+}
+ .form-actions .submit-btn .btn-content mat-icon {
+	 font-size: 1.1rem;
+}
+ .form-actions .submit-btn:hover:not(:disabled) {
+	 transform: translateY(-2px);
+	 box-shadow: 0 8px 24px rgba(255, 165, 0, 0.4);
+	 background: linear-gradient(135deg, #ffae1a, #ffa500);
+}
+ .form-actions .submit-btn:active:not(:disabled) {
+	 transform: translateY(0);
+}
+ .form-actions .submit-btn:disabled {
+	 opacity: 0.6;
+	 cursor: not-allowed;
+	 transform: none;
+	 box-shadow: 0 4px 16px rgba(255, 165, 0, 0.15);
+}
+ .form-actions .submit-btn mat-spinner {
+	 margin: 0 auto;
+}
+ .form-actions .submit-btn mat-spinner ::ng-deep circle {
+	 stroke: #fff;
+}
+ .register-section {
+	 text-align: center;
+	 padding: 1rem 0;
+	 border-top: 1px solid #e9ecef;
+	 margin-bottom: 1rem;
+}
+ .register-section .register-text {
+	 font-size: 0.9rem;
+	 color: #6c757d;
+	 margin: 0;
+}
+ .register-section .register-text .register-link {
+	 background: none;
+	 border: none;
+	 color: #ffa500;
+	 font-weight: 600;
+	 cursor: pointer;
+	 text-decoration: none;
+	 font-size: 0.9rem;
+}
+ .register-section .register-text .register-link:hover {
+	 color: #cc8400;
+	 text-decoration: underline;
+}
+ .help-section .help-content {
+	 display: flex;
+	 align-items: flex-start;
+	 gap: 0.5rem;
+	 padding: 0.75rem;
+	 background: #f8f9fa;
+	 border-radius: 8px;
+	 margin-top: 1rem;
+}
+ .help-section .help-content mat-icon {
+	 color: #6c757d;
+	 font-size: 1rem;
+	 margin-top: 0.1rem;
+}
+ .help-section .help-content p {
+	 margin: 0;
+	 font-size: 0.85rem;
+	 color: #6c757d;
+	 line-height: 1.4;
+}
+ @media (max-width: 600px) {
+	 .dialog-container {
+		 max-width: 95vw;
+		 margin: 1rem;
+		 max-height: 95vh;
+	}
+	 .dialog-header {
+		 padding: 1.5rem 1.5rem 1rem;
+	}
+	 .dialog-header .header-content .dialog-title {
+		 font-size: 1.5rem;
+	}
+	 .dialog-header .header-content .dialog-subtitle {
+		 font-size: 0.9rem;
+	}
+	 .role-selection {
+		 padding: 1rem 1.5rem;
+	}
+	 .role-selection .role-tabs .role-tab {
+		 padding: 0.65rem 0.75rem;
+		 font-size: 0.85rem;
+	}
+	 .role-selection .role-tabs .role-tab span {
+		 display: none;
+	}
+	 .login-form {
+		 padding: 1rem 1.5rem 1.5rem;
+	}
+	 .form-options {
+		 flex-direction: column;
+		 align-items: flex-start;
+		 gap: 0.75rem;
+	}
+	 .forgot-password-section .forgot-password-content .forgot-password-text .forgot-password-actions {
+		 flex-direction: column;
+	}
+	 .forgot-password-section .forgot-password-content .forgot-password-text .forgot-password-actions .reset-btn, .forgot-password-section .forgot-password-content .forgot-password-text .forgot-password-actions .cancel-btn {
+		 width: 100%;
+		 text-align: center;
+	}
+}
+ @media (max-width: 600px) and (min-width: 400px) {
+	 .role-selection .role-tabs .role-tab span {
+		 display: inline;
+	}
+}
+ .login-form {
+	 animation: slideIn 0.3s ease-out;
+}
+ @keyframes slideIn {
+	 from {
+		 opacity: 0;
+		 transform: translateY(10px);
+	}
+	 to {
+		 opacity: 1;
+		 transform: translateY(0);
+	}
+}
+/* Social Login Styles */
+.social-login-section {
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.social-login-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.75rem;
+  text-align: left;
+}
+
+.social-buttons-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.google-btn-container {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+  width: auto;
+  min-width: unset;
+}
+
+.social-btn:hover:not(:disabled) {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.social-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.facebook-btn {
+  background: #1877f2;
+  color: white;
+  border-color: #1877f2;
+}
+
+.facebook-btn:hover:not(:disabled) {
+  background: #166fe5;
+}
+
+.social-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.social-btn span {
+  white-space: nowrap;
+}
+
+.divider-with-text {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.divider-with-text::before,
+.divider-with-text::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider-with-text span {
+  padding: 0 0.75rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+} 

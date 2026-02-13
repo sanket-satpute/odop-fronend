@@ -1,0 +1,88 @@
+<div class="compare-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="container">
+      <h1><i class="fas fa-balance-scale"></i> Compare Products</h1>
+      <p>Compare up to 4 products side by side</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Empty State -->
+    <div *ngIf="compareProducts.length === 0" class="empty-state">
+      <i class="fas fa-balance-scale-left fa-4x"></i>
+      <h2>No Products to Compare</h2>
+      <p>Add products to compare by clicking the compare icon on product cards</p>
+      <button class="btn-primary" (click)="browseProducts()">
+        <i class="fas fa-shopping-bag"></i> Browse Products
+      </button>
+    </div>
+
+    <!-- Comparison Table -->
+    <div *ngIf="compareProducts.length > 0" class="comparison-section">
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <span class="product-count">Comparing {{ compareProducts.length }} product{{ compareProducts.length > 1 ? 's' : '' }}</span>
+        <button class="btn-clear" (click)="clearAll()">
+          <i class="fas fa-trash"></i> Clear All
+        </button>
+      </div>
+
+      <!-- Comparison Table -->
+      <div class="comparison-table-wrapper">
+        <table class="comparison-table">
+          <!-- Product Cards Row -->
+          <thead>
+            <tr class="product-row">
+              <th class="attribute-header"></th>
+              <th *ngFor="let product of compareProducts" class="product-cell">
+                <div class="product-card">
+                  <button class="remove-btn" (click)="removeProduct(product.productId!)" title="Remove">
+                    <i class="fas fa-times"></i>
+                  </button>
+                  <div class="product-image" (click)="viewProduct(product.productId)">
+                    <img [src]="product.productImageURL || 'assets/placeholder-product.png'" [alt]="product.productName">
+                    <span *ngIf="product.giTagCertified" class="gi-badge">GI</span>
+                  </div>
+                  <h3 (click)="viewProduct(product.productId)">{{ product.productName }}</h3>
+                  <div class="product-price">₹{{ product.price }}</div>
+                  <button class="btn-view" (click)="viewProduct(product.productId)">
+                    View Details
+                  </button>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Attribute Rows -->
+            <tr *ngFor="let attr of comparisonAttributes" class="attribute-row">
+              <td class="attribute-label">{{ attr.label }}</td>
+              <td *ngFor="let product of compareProducts" 
+                  class="attribute-value"
+                  [class.highlight]="isHighlight(attr, product)">
+                <span *ngIf="attr.type === 'boolean'">
+                  <i *ngIf="getValue(product, attr.key)" class="fas fa-check-circle text-success"></i>
+                  <i *ngIf="!getValue(product, attr.key)" class="fas fa-times-circle text-danger"></i>
+                </span>
+                <span *ngIf="attr.type === 'rating' && getValue(product, attr.key)">
+                  <i class="fas fa-star text-warning"></i>
+                  {{ getValue(product, attr.key) }}
+                </span>
+                <span *ngIf="attr.type !== 'boolean' && attr.type !== 'rating'">
+                  {{ getDisplayValue(product, attr) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add More Products -->
+      <div *ngIf="compareProducts.length < 4" class="add-more">
+        <button class="btn-add" (click)="browseProducts()">
+          <i class="fas fa-plus"></i> Add More Products ({{ 4 - compareProducts.length }} slots remaining)
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

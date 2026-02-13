@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="emptyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#emptyGrad)"/>
+  
+  <!-- Box icon -->
+  <g transform="translate(140, 70)">
+    <!-- Main box -->
+    <path d="M60 30 L110 55 L110 115 L60 140 L10 115 L10 55 Z" fill="#dee2e6" stroke="#ced4da" stroke-width="2"/>
+    <path d="M60 30 L60 90 L10 65 L10 55 Z" fill="#e9ecef"/>
+    <path d="M60 30 L60 90 L110 65 L110 55 Z" fill="#ced4da"/>
+    <path d="M60 90 L60 140 L10 115 L10 65 Z" fill="#dee2e6"/>
+    <!-- Lid open -->
+    <path d="M60 0 L100 20 L60 35 L20 20 Z" fill="#FFA500" opacity="0.4" stroke="#FFA500" stroke-width="1" stroke-opacity="0.6"/>
+  </g>
+  
+  <!-- Question marks -->
+  <text x="90" y="100" font-family="Inter, sans-serif" font-size="28" fill="#FFA500" opacity="0.4">?</text>
+  <text x="300" y="120" font-family="Inter, sans-serif" font-size="24" fill="#FFA500" opacity="0.3">?</text>
+  
+  <text x="200" y="210" font-family="Poppins, sans-serif" font-size="16" font-weight="600" fill="#6c757d" text-anchor="middle">No Items Found</text>
+  <text x="200" y="235" font-family="Inter, sans-serif" font-size="12" fill="#adb5bd" text-anchor="middle">Try adjusting your search or filters</text>
+</svg>

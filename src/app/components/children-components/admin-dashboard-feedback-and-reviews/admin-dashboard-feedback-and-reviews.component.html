@@ -1,0 +1,272 @@
+<!-- Feedback & Review Component -->
+<div class="feedback-container">
+  <!-- Section Header -->
+  <div class="section-header">
+    <div class="header-content">
+      <h1 class="section-title">Customer Feedback & Reviews</h1>
+      <p class="section-subtitle">Monitor, respond to and moderate user feedback across all vendors</p>
+      <div class="title-accent"></div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="card" *ngFor="let stat of summaryStats">
+      <div class="card-icon" [ngClass]="stat.iconClass">
+        <i [class]="stat.icon"></i>
+      </div>
+      <div class="card-content">
+        <h3 class="card-number">{{ stat.count }}</h3>
+        <p class="card-label">{{ stat.label }}</p>
+      </div>
+      <div class="card-accent" [ngClass]="stat.accentClass"></div>
+    </div>
+  </div>
+
+  <!-- Filters & Search -->
+  <div class="filters-section">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <i class="search-icon fas fa-search"></i>
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Search by product, customer, vendor..."
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()">
+      </div>
+    </div>
+    
+    <div class="filters-row">
+      <div class="filter-group">
+        <label class="filter-label">Rating</label>
+        <select class="filter-select" [(ngModel)]="ratingFilter" (change)="onFilterChange()">
+          <option value="">All Ratings</option>
+          <option value="5">5 Stars</option>
+          <option value="4">4 Stars</option>
+          <option value="3">3 Stars</option>
+          <option value="2">2 Stars</option>
+          <option value="1">1 Star</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label class="filter-label">Date Range</label>
+        <div class="date-range">
+          <input type="date" class="date-input" [(ngModel)]="dateFrom" (change)="onFilterChange()">
+          <span class="date-separator">to</span>
+          <input type="date" class="date-input" [(ngModel)]="dateTo" (change)="onFilterChange()">
+        </div>
+      </div>
+      
+      <div class="filter-group">
+        <label class="filter-label">Vendor</label>
+        <select class="filter-select" [(ngModel)]="vendorFilter" (change)="onFilterChange()">
+          <option value="">All Vendors</option>
+          <option *ngFor="let vendor of vendors" [value]="vendor.id">{{ vendor.name }}</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label class="toggle-label">
+          <input type="checkbox" class="toggle-checkbox" [(ngModel)]="showFlaggedOnly" (change)="onFilterChange()">
+          <span class="toggle-slider"></span>
+          Show Flagged Only
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews Table -->
+  <div class="table-container">
+    <div class="table-header">
+      <h2 class="table-title">Reviews & Feedback</h2>
+      <div class="table-actions">
+        <button class="btn-secondary" (click)="exportData()">
+          <i class="fas fa-download"></i> Export
+        </button>
+      </div>
+    </div>
+    
+    <div class="table-wrapper">
+      <table class="reviews-table">
+        <thead>
+          <tr>
+            <th>Rating</th>
+            <th>Product</th>
+            <th>Customer</th>
+            <th>Vendor</th>
+            <th>Review</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let review of filteredReviews; let i = index" class="table-row" [ngClass]="{'flagged': review.flagged}">
+            <td class="rating-cell">
+              <div class="star-rating" [ngClass]="getStarClass(review.rating)">
+                <div class="stars">
+                  <i *ngFor="let star of getStars(review.rating)" [class]="star"></i>
+                </div>
+                <span class="rating-number">{{ review.rating }}</span>
+              </div>
+            </td>
+            <td class="product-cell">
+              <div class="product-info">
+                <img [src]="review.product.image" [alt]="review.product.name" class="product-image">
+                <div class="product-details">
+                  <span class="product-name">{{ review.product.name }}</span>
+                  <span class="product-category">{{ review.product.category }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="customer-cell">
+              <div class="customer-info">
+                <div class="customer-avatar">
+                  <img [src]="review.customer.avatar || 'assets/default-avatar.png'" [alt]="review.customer.name">
+                </div>
+                <div class="customer-details">
+                  <span class="customer-name">{{ review.customer.name }}</span>
+                  <span class="customer-email">{{ review.customer.email }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="vendor-cell">
+              <span class="vendor-name">{{ review.vendor.name }}</span>
+            </td>
+            <td class="review-cell">
+              <div class="review-content">
+                <p class="review-text">{{ review.comment | slice:0:100 }}{{ review.comment.length > 100 ? '...' : '' }}</p>
+                <button *ngIf="review.comment.length > 100" class="read-more-btn" (click)="openReviewModal(review)">
+                  Read More
+                </button>
+              </div>
+            </td>
+            <td class="date-cell">
+              <span class="review-date">{{ review.date | date:'MMM dd, yyyy' }}</span>
+              <span class="review-time">{{ review.date | date:'HH:mm' }}</span>
+            </td>
+            <td class="status-cell">
+              <span class="status-badge" [ngClass]="getStatusClass(review)">
+                {{ getStatusText(review) }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button class="action-btn view-btn" (click)="viewReview(review)" title="View Details">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-btn reply-btn" (click)="replyToReview(review)" title="Reply">
+                  <i class="fas fa-reply"></i>
+                </button>
+                <button class="action-btn flag-btn" (click)="flagReview(review)" title="Flag/Unflag" [ngClass]="{'flagged': review.flagged}">
+                  <i class="fas fa-flag"></i>
+                </button>
+                <button class="action-btn delete-btn" (click)="deleteReview(review)" title="Delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <div class="pagination-info">
+        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} results
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span *ngFor="let page of getPaginationPages()" class="pagination-number" [ngClass]="{'active': page === currentPage}" (click)="changePage(page)">
+          {{ page }}
+        </span>
+        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Detail Modal -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Review Details</h3>
+        <button class="modal-close" (click)="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body" *ngIf="selectedReview">
+        <div class="review-detail-section">
+          <div class="review-meta">
+            <div class="customer-section">
+              <img [src]="selectedReview.customer.avatar || 'assets/default-avatar.png'" class="customer-large-avatar">
+              <div class="customer-info-detailed">
+                <h4>{{ selectedReview.customer.name }}</h4>
+                <p>{{ selectedReview.customer.email }}</p>
+                <p>{{ selectedReview.customer.phone }}</p>
+              </div>
+            </div>
+            
+            <div class="product-section">
+              <img [src]="selectedReview.product.image" class="product-large-image">
+              <div class="product-info-detailed">
+                <h4>{{ selectedReview.product.name }}</h4>
+                <p class="product-category">{{ selectedReview.product.category }}</p>
+                <p class="vendor-info">by {{ selectedReview.vendor.name }}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="review-rating-section">
+            <div class="large-star-rating">
+              <div class="stars-large">
+                <i *ngFor="let star of getStars(selectedReview.rating)" [class]="star"></i>
+              </div>
+              <span class="rating-text">{{ selectedReview.rating }} out of 5</span>
+            </div>
+            <span class="review-date-large">{{ selectedReview.date | date:'fullDate' }}</span>
+          </div>
+          
+          <div class="review-content-section">
+            <h5>Review</h5>
+            <p class="full-review-text">{{ selectedReview.comment }}</p>
+          </div>
+          
+          <div class="reply-section" *ngIf="selectedReview.adminReply">
+            <h5>Admin Reply</h5>
+            <div class="admin-reply">
+              <p>{{ selectedReview.adminReply.message }}</p>
+              <span class="reply-date">{{ selectedReview.adminReply.date | date:'MMM dd, yyyy HH:mm' }}</span>
+            </div>
+          </div>
+          
+          <div class="new-reply-section">
+            <h5>Add Reply</h5>
+            <textarea 
+              class="reply-textarea" 
+              placeholder="Type your reply here..."
+              [(ngModel)]="replyMessage"
+              rows="4">
+            </textarea>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+        <button class="btn-danger" (click)="deleteReview(selectedReview)">Delete Review</button>
+        <button class="btn-warning" (click)="flagReview(selectedReview)">
+          {{ selectedReview?.flagged ? 'Unflag' : 'Flag' }}
+        </button>
+        <button class="btn-primary" (click)="sendReply()">Send Reply</button>
+      </div>
+    </div>
+  </div>
+</div>

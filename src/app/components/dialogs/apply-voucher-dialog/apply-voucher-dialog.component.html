@@ -1,0 +1,122 @@
+<div class="apply-voucher-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-icon">🎟️</div>
+    <div class="header-content">
+      <h2 class="dialog-title">Apply Voucher</h2>
+      <p class="dialog-subtitle">Enter your voucher code to get bonus credits</p>
+    </div>
+    <button class="close-btn" (click)="onCancel()">
+      <span>✕</span>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="dialog-body">
+    <form [formGroup]="voucherForm">
+      <!-- Voucher Code Input -->
+      <div class="form-section">
+        <label class="section-label">Voucher Code</label>
+        <div class="voucher-input-wrapper" 
+             [class.valid]="verificationStatus === 'valid'"
+             [class.invalid]="verificationStatus === 'invalid' || verificationStatus === 'used'">
+          <span class="voucher-icon">🏷️</span>
+          <input 
+            type="text" 
+            class="voucher-input"
+            formControlName="voucherCode"
+            placeholder="Enter voucher code"
+            (input)="onCodeInput()"
+            (keyup.enter)="verifyVoucher()"
+            autocomplete="off"
+            spellcheck="false">
+          <button 
+            type="button" 
+            class="verify-btn"
+            (click)="verifyVoucher()"
+            [disabled]="isVerifying || !voucherForm.value.voucherCode">
+            <span *ngIf="!isVerifying">Verify</span>
+            <span *ngIf="isVerifying" class="verifying">
+              <span class="spinner-small"></span>
+            </span>
+          </button>
+        </div>
+        
+        <!-- Status Message -->
+        <p class="status-message" 
+           [class.valid]="verificationStatus === 'valid'"
+           [class.invalid]="verificationStatus === 'invalid'"
+           [class.used]="verificationStatus === 'used'"
+           *ngIf="verificationStatus !== 'idle'">
+          {{ getStatusMessage() }}
+        </p>
+      </div>
+
+      <!-- Verified Voucher Details -->
+      <div class="voucher-details" *ngIf="verifiedVoucher && verificationStatus === 'valid'">
+        <div class="voucher-card verified">
+          <div class="voucher-badge">✅ VERIFIED</div>
+          <div class="voucher-info">
+            <div class="voucher-code">{{ verifiedVoucher.code }}</div>
+            <div class="voucher-description">{{ verifiedVoucher.description }}</div>
+            <div class="voucher-meta">
+              <span class="voucher-discount">
+                <ng-container *ngIf="verifiedVoucher.type === 'flat'">₹{{ verifiedVoucher.discount }} Bonus</ng-container>
+                <ng-container *ngIf="verifiedVoucher.type === 'percentage'">{{ verifiedVoucher.discount }}% Cashback</ng-container>
+              </span>
+              <span class="voucher-expiry">Expires: {{ verifiedVoucher.expiryDate }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured Vouchers -->
+      <div class="form-section featured-section" *ngIf="featuredVouchers.length > 0">
+        <label class="section-label">Available Vouchers</label>
+        <div class="featured-vouchers">
+          <div 
+            *ngFor="let voucher of featuredVouchers"
+            class="voucher-card clickable"
+            (click)="applyFeaturedVoucher(voucher)">
+            <div class="voucher-amount">
+              <span *ngIf="voucher.type === 'flat'">₹{{ voucher.discount }}</span>
+              <span *ngIf="voucher.type === 'percentage'">{{ voucher.discount }}%</span>
+            </div>
+            <div class="voucher-info">
+              <div class="voucher-code">{{ voucher.code }}</div>
+              <div class="voucher-description">{{ voucher.description }}</div>
+            </div>
+            <div class="voucher-apply-icon">→</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Box -->
+      <div class="info-box">
+        <div class="info-icon">💡</div>
+        <div class="info-text">
+          <strong>How it works:</strong>
+          <ul>
+            <li>Enter a valid voucher code and click "Verify"</li>
+            <li>Once verified, click "Apply Voucher" to add bonus credits</li>
+            <li>Each voucher can only be used once per account</li>
+          </ul>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="cancel-btn" (click)="onCancel()">
+      Cancel
+    </button>
+    <button 
+      class="submit-btn" 
+      (click)="onApply()" 
+      [disabled]="verificationStatus !== 'valid'">
+      <span>🎁</span>
+      <span>Apply Voucher</span>
+    </button>
+  </div>
+</div>

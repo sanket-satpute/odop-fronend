@@ -1,0 +1,223 @@
+<div class="promotions-page">
+  <!-- Hero Banner - Featured Promotion -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <div class="hero-text">
+        <span class="sale-badge"><i class="fas fa-fire"></i> Limited Time Offer</span>
+        <h1>{{ featuredPromotion.title }}</h1>
+        <p>{{ featuredPromotion.description }}</p>
+        
+        <!-- Countdown Timer -->
+        <div class="countdown-timer">
+          <div class="timer-label">Offer ends in:</div>
+          <div class="timer-blocks">
+            <div class="timer-block">
+              <span class="timer-value">{{ featuredDealCountdown.days }}</span>
+              <span class="timer-unit">Days</span>
+            </div>
+            <span class="timer-separator">:</span>
+            <div class="timer-block">
+              <span class="timer-value">{{ featuredDealCountdown.hours | number:'2.0-0' }}</span>
+              <span class="timer-unit">Hours</span>
+            </div>
+            <span class="timer-separator">:</span>
+            <div class="timer-block">
+              <span class="timer-value">{{ featuredDealCountdown.minutes | number:'2.0-0' }}</span>
+              <span class="timer-unit">Mins</span>
+            </div>
+            <span class="timer-separator">:</span>
+            <div class="timer-block">
+              <span class="timer-value">{{ featuredDealCountdown.seconds | number:'2.0-0' }}</span>
+              <span class="timer-unit">Secs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn-shop-now" (click)="shopNow(featuredPromotion)">
+            <i class="fas fa-shopping-bag"></i> Shop Now
+          </button>
+          <div class="coupon-display" *ngIf="featuredPromotion.couponCode">
+            <span class="coupon-label">Use Code:</span>
+            <span class="coupon-code">{{ featuredPromotion.couponCode }}</span>
+          </div>
+        </div>
+
+        <p class="products-count">
+          <i class="fas fa-box-open"></i> {{ featuredPromotion.products }}+ products on sale
+        </p>
+      </div>
+      
+      <div class="hero-discount">
+        <div class="discount-circle">
+          <span class="discount-up-to">Up to</span>
+          <span class="discount-value">{{ featuredPromotion.discountPercentage }}%</span>
+          <span class="discount-off">OFF</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Coupon Codes Section -->
+  <section class="coupons-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2><i class="fas fa-ticket-alt"></i> Active Coupon Codes</h2>
+        <p>Copy and apply at checkout for extra savings</p>
+      </div>
+
+      <div class="coupons-grid">
+        <div *ngFor="let coupon of couponCodes" class="coupon-card">
+          <div class="coupon-left">
+            <div class="coupon-discount">
+              <span *ngIf="coupon.discountPercentage > 0">{{ coupon.discountPercentage }}% OFF</span>
+              <span *ngIf="coupon.discountPercentage === 0">FREE SHIPPING</span>
+            </div>
+            <div class="coupon-description">{{ coupon.description }}</div>
+            <div class="coupon-terms">
+              <span *ngIf="coupon.minOrderValue > 0">Min. order ₹{{ coupon.minOrderValue }}</span>
+              <span *ngIf="coupon.maxDiscount > 0"> • Max ₹{{ coupon.maxDiscount }} off</span>
+            </div>
+          </div>
+          <div class="coupon-right">
+            <div class="coupon-code-box">
+              <span class="code">{{ coupon.code }}</span>
+            </div>
+            <button class="btn-copy" [class.copied]="coupon.copied" (click)="copyCoupon(coupon)">
+              <i class="fas" [ngClass]="coupon.copied ? 'fa-check' : 'fa-copy'"></i>
+              {{ coupon.copied ? 'Copied!' : 'Copy' }}
+            </button>
+            <div class="coupon-expiry">
+              <i class="fas fa-clock"></i> {{ getDaysRemaining(coupon.validUntil) }} days left
+            </div>
+          </div>
+          <div class="coupon-dashes"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Filter -->
+  <section class="categories-section">
+    <div class="section-container">
+      <div class="category-tabs">
+        <button 
+          *ngFor="let cat of categories"
+          [class.active]="activeTab === cat.id"
+          (click)="setActiveTab(cat.id)">
+          <i class="fas {{ cat.icon }}"></i>
+          <span>{{ cat.label }}</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Promotions Grid -->
+  <section class="promotions-grid-section">
+    <div class="section-container">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="loading-spinner">
+          <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <p>Loading amazing deals...</p>
+      </div>
+
+      <!-- Promotions Grid -->
+      <div *ngIf="!isLoading" class="promotions-grid">
+        <div *ngFor="let promo of filteredPromotions" class="promo-card" (click)="viewPromotion(promo)">
+          <!-- Discount Badge -->
+          <div class="promo-badge" [ngClass]="{
+            'flash': promo.category === 'flash-sale',
+            'clearance': promo.category === 'clearance',
+            'bogo': promo.discountType === 'bogo'
+          }">
+            <span *ngIf="promo.discountType === 'bogo'">BOGO</span>
+            <span *ngIf="promo.discountType !== 'bogo'">{{ promo.discountPercentage }}% OFF</span>
+          </div>
+
+          <!-- Image -->
+          <div class="promo-image">
+            <img [src]="promo.imageUrl" [alt]="promo.title" 
+                 onerror="this.src='assets/images/placeholder-product.jpg'">
+            <div class="promo-overlay">
+              <button class="btn-view">View Deals</button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="promo-content">
+            <h3>{{ promo.title }}</h3>
+            <p>{{ promo.description }}</p>
+
+            <!-- Price Display -->
+            <div class="price-display" *ngIf="promo.originalPrice">
+              <span class="original-price">₹{{ promo.originalPrice | number }}</span>
+              <span class="sale-price">₹{{ promo.salePrice | number }}</span>
+            </div>
+
+            <!-- Progress Bar (urgency) -->
+            <div class="promo-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="getProgressWidth(promo)"></div>
+              </div>
+              <span class="progress-text">{{ promo.usedCount }} claimed</span>
+            </div>
+
+            <!-- Timer -->
+            <div class="promo-timer">
+              <i class="fas fa-clock"></i>
+              <span>{{ getDaysRemaining(promo.validUntil) }} days left</span>
+            </div>
+
+            <!-- Products Count -->
+            <div class="promo-products" *ngIf="promo.products">
+              <i class="fas fa-box"></i>
+              <span>{{ promo.products }} products</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredPromotions.length === 0" class="empty-state">
+        <i class="fas fa-tag"></i>
+        <h3>No offers in this category</h3>
+        <p>Check back later or explore other categories</p>
+        <button class="btn-primary" (click)="setActiveTab('all')">View All Offers</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Section -->
+  <section class="newsletter-section">
+    <div class="section-container">
+      <div class="newsletter-content">
+        <div class="newsletter-text">
+          <h2><i class="fas fa-envelope"></i> Never Miss a Deal</h2>
+          <p>Subscribe to get exclusive offers and early access to sales</p>
+        </div>
+        <form class="newsletter-form">
+          <input type="email" placeholder="Enter your email address" required>
+          <button type="submit">
+            <i class="fas fa-paper-plane"></i> Subscribe
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Terms Section -->
+  <section class="terms-section">
+    <div class="section-container">
+      <h4><i class="fas fa-info-circle"></i> Terms & Conditions</h4>
+      <ul>
+        <li>All offers are subject to availability and may be modified or withdrawn without prior notice</li>
+        <li>Discounts cannot be combined with other promotional offers unless specifically mentioned</li>
+        <li>Coupon codes are valid for single use per customer unless otherwise stated</li>
+        <li>Prices shown are inclusive of all applicable taxes</li>
+        <li>ODOP reserves the right to cancel orders placed using invalid coupon codes</li>
+      </ul>
+    </div>
+  </section>
+</div>

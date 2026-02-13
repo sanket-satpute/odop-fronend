@@ -1,0 +1,84 @@
+<!-- Skeleton Loader Component -->
+<ng-container [ngSwitch]="type">
+  
+  <!-- Product Card Skeleton -->
+  <ng-container *ngSwitchCase="'product-card'">
+    <div class="skeleton-product-card" *ngFor="let item of items">
+      <div class="skeleton-image skeleton-animate"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-title skeleton-animate"></div>
+        <div class="skeleton-price skeleton-animate"></div>
+        <div class="skeleton-rating">
+          <div class="skeleton-star skeleton-animate" *ngFor="let s of [1,2,3,4,5]"></div>
+        </div>
+        <div class="skeleton-button skeleton-animate"></div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Product List Skeleton -->
+  <ng-container *ngSwitchCase="'product-list'">
+    <div class="skeleton-product-list" *ngFor="let item of items">
+      <div class="skeleton-list-image skeleton-animate"></div>
+      <div class="skeleton-list-content">
+        <div class="skeleton-list-title skeleton-animate"></div>
+        <div class="skeleton-list-desc skeleton-animate"></div>
+        <div class="skeleton-list-meta">
+          <div class="skeleton-list-price skeleton-animate"></div>
+          <div class="skeleton-list-rating skeleton-animate"></div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Text Skeleton -->
+  <ng-container *ngSwitchCase="'text'">
+    <div class="skeleton-text skeleton-animate" 
+         *ngFor="let item of items" 
+         [style.width]="width" 
+         [style.height]="height">
+    </div>
+  </ng-container>
+
+  <!-- Circle Skeleton (Avatar) -->
+  <ng-container *ngSwitchCase="'circle'">
+    <div class="skeleton-circle skeleton-animate" 
+         *ngFor="let item of items" 
+         [style.width]="width" 
+         [style.height]="width">
+    </div>
+  </ng-container>
+
+  <!-- Image Skeleton -->
+  <ng-container *ngSwitchCase="'image'">
+    <div class="skeleton-image-placeholder skeleton-animate" 
+         *ngFor="let item of items" 
+         [style.width]="width" 
+         [style.height]="height">
+      <i class="fas fa-image"></i>
+    </div>
+  </ng-container>
+
+  <!-- Banner Skeleton -->
+  <ng-container *ngSwitchCase="'banner'">
+    <div class="skeleton-banner skeleton-animate" *ngFor="let item of items">
+      <div class="skeleton-banner-content">
+        <div class="skeleton-banner-title skeleton-animate"></div>
+        <div class="skeleton-banner-subtitle skeleton-animate"></div>
+        <div class="skeleton-banner-btn skeleton-animate"></div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Table Row Skeleton -->
+  <ng-container *ngSwitchCase="'table-row'">
+    <div class="skeleton-table-row" *ngFor="let item of items">
+      <div class="skeleton-cell skeleton-animate" style="width: 50px;"></div>
+      <div class="skeleton-cell skeleton-animate" style="flex: 2;"></div>
+      <div class="skeleton-cell skeleton-animate" style="flex: 1;"></div>
+      <div class="skeleton-cell skeleton-animate" style="flex: 1;"></div>
+      <div class="skeleton-cell skeleton-animate" style="width: 100px;"></div>
+    </div>
+  </ng-container>
+
+</ng-container>

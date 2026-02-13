@@ -1,0 +1,305 @@
+<!-- product-management.component.html -->
+<div class="product-management-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-area">
+      <h1 class="main-title">Product Management</h1>
+      <p class="subtitle">Monitor and manage all products listed by vendors</p>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button 
+        *ngFor="let tab of filterTabs" 
+        [class]="'tab-btn ' + (activeTab === tab.key ? 'active' : '')"
+        (click)="setActiveTab(tab.key)">
+        {{ tab.label }}
+        <span class="tab-count">{{ tab.count }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="card" *ngFor="let card of summaryCards">
+      <div class="card-icon">
+        <i [class]="card.icon"></i>
+      </div>
+      <div class="card-content">
+        <h3 class="card-number">{{ card.count }}</h3>
+        <p class="card-label">{{ card.label }}</p>
+      </div>
+      <div class="card-trend" [class]="card.trend">
+        <i [class]="card.trendIcon"></i>
+        <span>{{ card.trendValue }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="search-filter-section">
+    <div class="search-area">
+      <div class="search-input-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+          type="text" 
+          placeholder="Search products or vendors..." 
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          class="search-input">
+      </div>
+    </div>
+    
+    <div class="filter-controls">
+      <select class="filter-select" [(ngModel)]="selectedCategory" (change)="onFilter()">
+        <option value="">All Categories</option>
+        <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+      </select>
+      
+      <select class="filter-select" [(ngModel)]="selectedVendor" (change)="onFilter()">
+        <option value="">All Vendors</option>
+        <option *ngFor="let vendor of vendors" [value]="vendor">{{ vendor }}</option>
+      </select>
+      
+      <select class="filter-select" [(ngModel)]="sortBy" (change)="onSort()">
+        <option value="name">Sort by Name</option>
+        <option value="date">Sort by Date</option>
+        <option value="price">Sort by Price</option>
+      </select>
+    </div>
+
+    <div class="action-buttons">
+      <div class="bulk-actions">
+        <button class="btn-secondary dropdown-toggle" (click)="toggleBulkDropdown()">
+          <i class="fas fa-tasks"></i>
+          Bulk Actions
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="dropdown-menu" [class.show]="showBulkDropdown">
+          <button (click)="bulkApprove()" class="dropdown-item">
+            <i class="fas fa-check"></i> Approve Selected
+          </button>
+          <button (click)="bulkReject()" class="dropdown-item">
+            <i class="fas fa-times"></i> Reject Selected
+          </button>
+          <button (click)="bulkDelete()" class="dropdown-item text-danger">
+            <i class="fas fa-trash"></i> Delete Selected
+          </button>
+        </div>
+      </div>
+      
+      <button class="btn-primary" (click)="exportData()">
+        <i class="fas fa-download"></i>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Product Table -->
+  <div class="table-container">
+    <div class="table-header">
+      <div class="selected-info" *ngIf="selectedProducts.length > 0">
+        <span>{{ selectedProducts.length }} items selected</span>
+        <button class="clear-selection" (click)="clearSelection()">Clear</button>
+      </div>
+    </div>
+    
+    <div class="table-wrapper">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th class="checkbox-col">
+              <input 
+                type="checkbox" 
+                [checked]="isAllSelected()"
+                (change)="toggleAllSelection()"
+                class="checkbox-input">
+            </th>
+            <th>Product</th>
+            <th>Vendor</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Date Added</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of paginatedProducts; trackBy: trackByProduct" 
+              [class.selected]="isSelected(product.id)"
+              class="table-row">
+            <td>
+              <input 
+                type="checkbox" 
+                [checked]="isSelected(product.id)"
+                (change)="toggleSelection(product.id)"
+                class="checkbox-input">
+            </td>
+            <td class="product-cell">
+              <div class="product-info">
+                <img [src]="product.thumbnail" [alt]="product.name" class="product-thumbnail">
+                <div class="product-details">
+                  <h4 class="product-name">{{ product.name }}</h4>
+                  <p class="product-sku">SKU: {{ product.sku }}</p>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="vendor-info">
+                <span class="vendor-name">{{ product.vendor }}</span>
+                <span class="vendor-email">{{ product.vendorEmail }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="category-badge">{{ product.category }}</span>
+            </td>
+            <td class="price-cell">
+              <span class="price">${{ product.price }}</span>
+            </td>
+            <td>
+              <span [class]="'status-badge status-' + product.status.toLowerCase()">
+                {{ product.status }}
+              </span>
+            </td>
+            <td class="date-cell">
+              {{ product.dateAdded | date:'MMM dd, yyyy' }}
+            </td>
+            <td class="actions-cell">
+              <div class="action-buttons-group">
+                <button 
+                  class="action-btn view-btn" 
+                  (click)="viewProduct(product)"
+                  title="View Details">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button 
+                  *ngIf="product.status === 'Pending'"
+                  class="action-btn approve-btn" 
+                  (click)="approveProduct(product.id)"
+                  title="Approve">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button 
+                  *ngIf="product.status === 'Pending'"
+                  class="action-btn reject-btn" 
+                  (click)="rejectProduct(product.id)"
+                  title="Reject">
+                  <i class="fas fa-times"></i>
+                </button>
+                <button 
+                  class="action-btn delete-btn" 
+                  (click)="deleteProduct(product.id)"
+                  title="Delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <div class="pagination-info">
+        Showing {{ (currentPage - 1) * pageSize + 1 }} to 
+        {{ Math.min(currentPage * pageSize, totalProducts) }} of 
+        {{ totalProducts }} products
+      </div>
+      
+      <div class="pagination-controls">
+        <button 
+          class="pagination-btn" 
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <span class="page-numbers">
+          <button 
+            *ngFor="let page of getPageNumbers()" 
+            [class]="'page-btn ' + (page === currentPage ? 'active' : '')"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </span>
+        
+        <button 
+          class="pagination-btn" 
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Product Modal -->
+  <div class="modal-overlay" *ngIf="selectedProduct" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Product Details</h2>
+        <button class="close-btn" (click)="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="product-images">
+          <div class="main-image">
+            <img [src]="selectedProduct.images[currentImageIndex]" [alt]="selectedProduct.name">
+          </div>
+          <div class="thumbnail-list">
+            <img 
+              *ngFor="let image of selectedProduct.images; let i = index"
+              [src]="image"
+              [class]="'thumbnail ' + (i === currentImageIndex ? 'active' : '')"
+              (click)="currentImageIndex = i">
+          </div>
+        </div>
+        
+        <div class="product-info-modal">
+          <h3>{{ selectedProduct.name }}</h3>
+          <p class="product-description">{{ selectedProduct.description }}</p>
+          
+          <div class="product-meta">
+            <div class="meta-item">
+              <span class="meta-label">Category:</span>
+              <span class="meta-value">{{ selectedProduct.category }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Price:</span>
+              <span class="meta-value">${{ selectedProduct.price }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Vendor:</span>
+              <span class="meta-value">{{ selectedProduct.vendor }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Status:</span>
+              <span [class]="'status-badge status-' + selectedProduct.status.toLowerCase()">
+                {{ selectedProduct.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()">Close</button>
+        <button 
+          *ngIf="selectedProduct.status === 'Pending'"
+          class="btn-success" 
+          (click)="approveProduct(selectedProduct.id)">
+          Approve
+        </button>
+        <button 
+          *ngIf="selectedProduct.status === 'Pending'"
+          class="btn-danger" 
+          (click)="rejectProduct(selectedProduct.id)">
+          Reject
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

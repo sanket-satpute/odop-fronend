@@ -1,0 +1,138 @@
+<div class="select-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="header-title">
+        <i class="fas fa-th-large"></i>
+        <h2>Select Products to Compare</h2>
+      </div>
+      <button class="close-btn" (click)="close()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="selection-info">
+      <span class="selected-count">{{ selectedIds.size }}/{{ maxItems }} Selected</span>
+      <div class="selection-actions">
+        <button class="select-action-btn" (click)="selectAll()" *ngIf="selectedIds.size < maxItems">
+          <i class="fas fa-check-double"></i> Select All
+        </button>
+        <button class="select-action-btn danger" (click)="clearSelection()" *ngIf="selectedIds.size > 0">
+          <i class="fas fa-times"></i> Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input 
+        type="text" 
+        placeholder="Search products by name, vendor, district..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearchChange()"
+      >
+      <button class="clear-search" *ngIf="searchQuery" (click)="searchQuery=''; onSearchChange()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="filter-dropdown">
+      <select [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
+        <option value="">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+      </select>
+    </div>
+    <button class="clear-filters-btn" *ngIf="searchQuery || selectedCategory" (click)="clearFilters()">
+      <i class="fas fa-filter-circle-xmark"></i> Clear Filters
+    </button>
+  </div>
+
+  <!-- Selected Products Preview -->
+  <div class="selected-preview" *ngIf="selectedIds.size > 0">
+    <div class="preview-label">Selected for comparison:</div>
+    <div class="preview-items">
+      <div class="preview-item" *ngFor="let product of getSelectedProducts()">
+        <img [src]="product.image" [alt]="product.name">
+        <span class="preview-name">{{ product.name }}</span>
+        <button class="remove-preview" (click)="toggleSelection(product.id)">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Grid -->
+  <div class="products-grid" *ngIf="filteredProducts.length > 0">
+    <div 
+      class="product-item" 
+      *ngFor="let product of filteredProducts"
+      [class.selected]="isSelected(product.id)"
+      [class.disabled]="!isSelected(product.id) && selectedIds.size >= maxItems"
+      (click)="toggleSelection(product.id)"
+    >
+      <div class="selection-indicator">
+        <i class="fas" [class.fa-check-circle]="isSelected(product.id)" [class.fa-circle]="!isSelected(product.id)"></i>
+      </div>
+      
+      <div class="product-image">
+        <img [src]="product.image" [alt]="product.name">
+        <span class="gi-badge" *ngIf="product.giTagged">
+          <i class="fas fa-certificate"></i>
+        </span>
+      </div>
+      
+      <div class="product-details">
+        <h4 class="product-name" [title]="product.name">{{ product.name }}</h4>
+        <div class="product-price">₹{{ product.price | number }}</div>
+        <div class="product-rating">
+          <span class="stars">{{ generateStars(product.rating) }}</span>
+          <span class="rating-value">{{ product.rating }}</span>
+        </div>
+        <div class="product-meta">
+          <span class="vendor"><i class="fas fa-user"></i> {{ product.vendor }}</span>
+          <span class="district"><i class="fas fa-map-marker-alt"></i> {{ product.district }}</span>
+        </div>
+      </div>
+
+      <div class="selection-overlay" *ngIf="isSelected(product.id)">
+        <i class="fas fa-check"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="filteredProducts.length === 0">
+    <div class="empty-icon">
+      <i class="fas fa-search"></i>
+    </div>
+    <h3>No Products Found</h3>
+    <p>Try adjusting your search or filter criteria</p>
+    <button class="clear-filters-btn" (click)="clearFilters()">
+      <i class="fas fa-redo"></i> Reset Filters
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <div class="footer-info">
+      <span *ngIf="selectedIds.size < 2" class="warning-text">
+        <i class="fas fa-info-circle"></i> Select at least 2 products to compare
+      </span>
+      <span *ngIf="selectedIds.size >= 2" class="success-text">
+        <i class="fas fa-check-circle"></i> Ready to compare {{ selectedIds.size }} products
+      </span>
+    </div>
+    <div class="footer-actions">
+      <button class="footer-btn secondary" (click)="close()">Cancel</button>
+      <button 
+        class="footer-btn primary" 
+        (click)="confirm()"
+        [disabled]="selectedIds.size < 2"
+      >
+        <i class="fas fa-balance-scale"></i>
+        Compare Selected ({{ selectedIds.size }})
+      </button>
+    </div>
+  </div>
+</div>

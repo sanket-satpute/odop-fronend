@@ -1,0 +1,63 @@
+<section class="recently-viewed-section" *ngIf="recentlyViewed.length > 0">
+  <div class="container">
+    <div class="section-header">
+      <div class="header-content">
+        <div class="section-badge">
+          <i class="fas fa-clock-rotate-left"></i>
+          Your History
+        </div>
+        <h2 class="section-title">{{ title }}</h2>
+        <p class="section-subtitle">Continue exploring products you've shown interest in</p>
+      </div>
+      <button *ngIf="showClearButton" class="btn-clear" (click)="clearHistory()">
+        <i class="fas fa-trash-alt"></i>
+        <span>Clear All</span>
+      </button>
+    </div>
+    
+    <div class="products-grid">
+      <div class="product-card" *ngFor="let product of recentlyViewed; let i = index" 
+           (click)="viewProduct(product.productId)"
+           [style.animation-delay]="(i * 0.1) + 's'">
+        <button class="remove-btn" (click)="removeItem($event, product.productId!)" title="Remove from history">
+          <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="product-image-wrapper">
+          <img [src]="product.productImageURL || 'assets/placeholder-product.png'" [alt]="product.productName">
+          <div class="image-overlay">
+            <span class="view-btn">
+              <i class="fas fa-eye"></i>
+              View Details
+            </span>
+          </div>
+          <div class="badges">
+            <span *ngIf="product.giTagCertified" class="gi-badge">
+              <i class="fas fa-certificate"></i> GI Certified
+            </span>
+          </div>
+        </div>
+        
+        <div class="product-content">
+          <h3 class="product-name">{{ product.productName }}</h3>
+          <div class="product-meta">
+            <span class="product-origin" *ngIf="product.originDistrict">
+              <i class="fas fa-map-marker-alt"></i> {{ product.originDistrict }}
+            </span>
+          </div>
+          <div class="product-footer">
+            <div class="price-wrapper">
+              <span class="price">₹{{ product.price | number }}</span>
+            </div>
+            <div class="rating-wrapper" *ngIf="product.rating">
+              <div class="star-rating">
+                <i class="fas fa-star"></i>
+                <span>{{ product.rating | number:'1.1-1' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

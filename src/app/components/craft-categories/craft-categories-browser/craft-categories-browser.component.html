@@ -1,0 +1,235 @@
+<div class="craft-categories-page">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Explore Indian Crafts</h1>
+      <p class="hero-subtitle">Discover authentic handcrafted treasures from every corner of India</p>
+      
+      <!-- Search Bar -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search crafts, categories, or artisans..."
+            [(ngModel)]="searchQuery"
+            (input)="onSearchInput()"
+          >
+          <button *ngIf="searchQuery" class="clear-btn" (click)="clearSearch()">✕</button>
+        </div>
+        
+        <!-- Search Results Dropdown -->
+        <div class="search-results" *ngIf="searchResults.length > 0 || isSearching">
+          <div *ngIf="isSearching" class="search-loading">
+            <span class="spinner"></span> Searching...
+          </div>
+          <div *ngFor="let result of searchResults; trackBy: trackByCategoryId" 
+               class="search-result-item"
+               (click)="selectCategory(result)">
+            <span class="result-icon" [innerHTML]="getCategoryIcon(result)"></span>
+            <div class="result-info">
+              <span class="result-name">{{ result.name }}</span>
+              <span class="result-meta">{{ getProductCountText(result.productCount) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="stats-row" *ngIf="statistics">
+        <div class="stat-item">
+          <span class="stat-value">{{ statistics.totalCategories }}</span>
+          <span class="stat-label">Categories</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">{{ statistics.rootCategories }}</span>
+          <span class="stat-label">Main Crafts</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">28+</span>
+          <span class="stat-label">States</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb-nav" *ngIf="breadcrumb.length > 0">
+    <a class="breadcrumb-link" (click)="goHome()">
+      <span>🏠</span> All Categories
+    </a>
+    <span class="breadcrumb-separator">/</span>
+    <ng-container *ngFor="let crumb of breadcrumb; let i = index; let last = last">
+      <a class="breadcrumb-link" 
+         [class.active]="last"
+         (click)="!last && navigateToBreadcrumb(crumb, i)">
+        {{ crumb.name }}
+      </a>
+      <span class="breadcrumb-separator" *ngIf="!last">/</span>
+    </ng-container>
+  </nav>
+
+  <!-- Controls Bar -->
+  <div class="controls-bar">
+    <div class="controls-left">
+      <button class="filter-toggle" (click)="toggleFilters()">
+        <span>🔽</span> Filters
+      </button>
+      
+      <select class="state-filter" [(ngModel)]="selectedState" (change)="filterByState(selectedState)">
+        <option value="">All States</option>
+        <option *ngFor="let state of states" [value]="state">{{ state }}</option>
+      </select>
+    </div>
+
+    <div class="view-toggle">
+      <button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')" title="Grid View">
+        <span>▦</span>
+      </button>
+      <button [class.active]="viewMode === 'tree'" (click)="setViewMode('tree')" title="Tree View">
+        <span>☰</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Featured Categories -->
+  <section class="featured-section" *ngIf="featuredCategories.length > 0 && !selectedCategory">
+    <h2 class="section-title">
+      <span class="title-icon">⭐</span> Featured Categories
+    </h2>
+    <div class="featured-grid">
+      <div *ngFor="let category of featuredCategories; trackBy: trackByCategoryId" 
+           class="featured-card"
+           [style.background]="getCategoryGradient(category)"
+           (click)="selectCategory(category)">
+        <div class="featured-image" *ngIf="category.bannerImageUrl">
+          <img [src]="category.bannerImageUrl" [alt]="category.name">
+        </div>
+        <div class="featured-content">
+          <span class="featured-badge">Featured</span>
+          <h3 class="featured-name">{{ category.name }}</h3>
+          <p class="featured-name-hindi" *ngIf="category.nameHindi">{{ category.nameHindi }}</p>
+          <div class="featured-stats">
+            <span>{{ getProductCountText(category.productCount) }}</span>
+            <span class="dot">•</span>
+            <span>{{ getArtisanCountText(category.artisanCount) }}</span>
+          </div>
+          <div class="featured-states" *ngIf="category.majorStates && category.majorStates.length">
+            <span class="state-tag" *ngFor="let state of (category.majorStates || []).slice(0, 3)">
+              {{ state }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+    <p>Loading categories...</p>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main-content" *ngIf="!isLoading">
+    
+    <!-- Grid View -->
+    <div class="categories-grid" *ngIf="viewMode === 'grid'">
+      <div *ngFor="let category of rootCategories; trackBy: trackByCategoryId" 
+           class="category-card"
+           (click)="selectCategory(category)">
+        <div class="card-image">
+          <img [src]="category.imageUrl || 'assets/images/placeholder-category.jpg'" 
+               [alt]="category.name"
+               loading="lazy">
+          <div class="card-overlay">
+            <span class="explore-btn">Explore →</span>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-icon" [innerHTML]="getCategoryIcon(category)"></div>
+          <h3 class="card-title">{{ category.name }}</h3>
+          <p class="card-title-hindi" *ngIf="category.nameHindi">{{ category.nameHindi }}</p>
+          <p class="card-description" *ngIf="category.description">
+            {{ category.description | slice:0:80 }}{{ category.description.length > 80 ? '...' : '' }}
+          </p>
+          <div class="card-meta">
+            <span class="product-count">
+              <span class="meta-icon">🛍️</span> {{ category.productCount }}
+            </span>
+            <span class="artisan-count">
+              <span class="meta-icon">👨‍🎨</span> {{ category.artisanCount }}
+            </span>
+          </div>
+          <div class="card-tags" *ngIf="category.relatedGiTags && category.relatedGiTags.length">
+            <span class="gi-tag" *ngFor="let tag of (category.relatedGiTags || []).slice(0, 2)">
+              🏷️ {{ tag }}
+            </span>
+          </div>
+
+          <!-- Subcategories Preview -->
+          <div class="subcategories" *ngIf="category.children && category.children.length">
+            <div class="subcat-header">
+              <span>{{ (category.children || []).length }} subcategories</span>
+            </div>
+            <div class="subcat-list">
+              <span *ngFor="let sub of (category.children || []).slice(0, 4)" class="subcat-chip">
+                {{ sub.name }}
+              </span>
+              <span *ngIf="(category.children || []).length > 4" class="subcat-more">
+                +{{ (category.children || []).length - 4 }} more
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tree View -->
+    <div class="categories-tree" *ngIf="viewMode === 'tree'">
+      <ng-container *ngFor="let category of rootCategories; trackBy: trackByCategoryId">
+        <ng-container *ngTemplateOutlet="treeNode; context: { $implicit: category, level: 0 }"></ng-container>
+      </ng-container>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="rootCategories.length === 0 && !isLoading">
+      <span class="empty-icon">📦</span>
+      <h3>No categories found</h3>
+      <p>Try adjusting your filters or search query</p>
+      <button class="reset-btn" (click)="goHome(); filterByState('')">Reset Filters</button>
+    </div>
+
+  </main>
+
+  <!-- Tree Node Template -->
+  <ng-template #treeNode let-category let-level="level">
+    <div class="tree-item" [style.padding-left.px]="level * 24">
+      <div class="tree-item-content" (click)="selectCategory(category)">
+        <button *ngIf="hasChildren(category)" 
+                class="expand-btn"
+                (click)="toggleExpand(category); $event.stopPropagation()">
+          {{ isExpanded(category) ? '▼' : '▶' }}
+        </button>
+        <span *ngIf="!hasChildren(category)" class="expand-placeholder"></span>
+        
+        <span class="tree-icon" [innerHTML]="getCategoryIcon(category)"></span>
+        <span class="tree-name">{{ category.name }}</span>
+        <span class="tree-count">({{ category.productCount }})</span>
+        
+        <span class="tree-featured" *ngIf="category.featured">⭐</span>
+      </div>
+      
+      <div class="tree-children" *ngIf="hasChildren(category) && isExpanded(category)">
+        <ng-container *ngFor="let child of category.children; trackBy: trackByCategoryId">
+          <ng-container *ngTemplateOutlet="treeNode; context: { $implicit: child, level: level + 1 }"></ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+
+</div>

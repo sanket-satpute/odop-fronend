@@ -1,0 +1,353 @@
+<!-- Premium Product Listing Page -->
+<div class="product-listing-page">
+  
+  <!-- Hero Search Bar -->
+  <section class="search-hero">
+    <div class="container">
+      <div class="search-results-info">
+        <h1 *ngIf="searchResultText">
+          <span class="result-count">{{ products?.length || 0 }}</span> 
+          results for "<span class="search-term">{{ searchResultText }}</span>"
+        </h1>
+        <h1 *ngIf="!searchResultText">
+          Explore Our Collection
+        </h1>
+        <p class="subtitle">Discover authentic handcrafted products from artisans across India</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters Bar -->
+  <section class="filters-bar">
+    <div class="container">
+      <div class="filters-wrapper">
+        <!-- Location Filters -->
+        <div class="filter-group">
+          <label><i class="fas fa-map-marker-alt"></i> District</label>
+          <input 
+            type="text" 
+            [(ngModel)]="filterDistrict" 
+            placeholder="Enter district"
+            class="filter-input"
+          />
+        </div>
+        
+        <div class="filter-group">
+          <label><i class="fas fa-globe-asia"></i> State</label>
+          <input 
+            type="text" 
+            [(ngModel)]="filterState" 
+            placeholder="Enter state"
+            class="filter-input"
+          />
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn-filter" (click)="filterByLocation()">
+            <i class="fas fa-search"></i> Search
+          </button>
+          <button class="btn-filter btn-filter-outline" (click)="filterByState()">
+            <i class="fas fa-filter"></i> By State
+          </button>
+          <button 
+            class="btn-gi-filter" 
+            [class.active]="isGiFilterActive"
+            (click)="filterGiTagged()"
+          >
+            <span class="gi-icon">🏅</span>
+            GI Certified Only
+          </button>
+        </div>
+
+        <!-- Sort -->
+        <div class="filter-group sort-group">
+          <label><i class="fas fa-sort"></i> Sort By</label>
+          <select class="filter-select" [(ngModel)]="sortBy" (change)="sortProducts()">
+            <option value="popularity">Most Popular</option>
+            <option value="rating">Highest Rated</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="newest">Newest First</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <div class="content-layout">
+        
+        <!-- Sidebar Categories -->
+        <aside class="categories-sidebar">
+          <div class="sidebar-header">
+            <h3><i class="fas fa-th-large"></i> Categories</h3>
+          </div>
+          
+          <ul class="category-nav">
+            <li 
+              class="category-item all-category" 
+              [class.active]="selectedCategory === 'all'"
+              (click)="showAllCategory(1)"
+            >
+              <i class="fas fa-border-all"></i>
+              <span>All Products</span>
+              <span class="count">{{ totalProducts }}</span>
+            </li>
+            
+            <li 
+              *ngFor="let cat of category" 
+              class="category-item"
+              [class.active]="selectedCategory === cat.categoryName"
+              (click)="showCategory(cat)"
+            >
+              <i [class]="getCategoryIcon(cat.categoryName)"></i>
+              <span>{{ cat.categoryName }}</span>
+            </li>
+          </ul>
+
+          <!-- Quick Links -->
+          <div class="quick-links">
+            <h4>Quick Links</h4>
+            <a routerLink="/vendor-directory"><i class="fas fa-store"></i> Browse Vendors</a>
+            <a routerLink="/artisan-stories"><i class="fas fa-users"></i> Artisan Stories</a>
+            <a routerLink="/government-schemes"><i class="fas fa-landmark"></i> Gov Schemes</a>
+          </div>
+        </aside>
+
+        <!-- Products Grid -->
+        <section class="products-section">
+          
+          <!-- View Toggle & Count -->
+          <div class="products-header">
+            <p class="showing-text" *ngIf="products && products.length">
+              Showing <strong>{{ products.length }}</strong> products
+            </p>
+            <div class="view-toggles">
+              <button 
+                class="view-btn" 
+                [class.active]="viewMode === 'grid'"
+                (click)="viewMode = 'grid'"
+              >
+                <i class="fas fa-th"></i>
+              </button>
+              <button 
+                class="view-btn" 
+                [class.active]="viewMode === 'list'"
+                (click)="viewMode = 'list'"
+              >
+                <i class="fas fa-list"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state" *ngIf="products?.length === 0">
+            <div class="empty-illustration">
+              <i class="fas fa-search"></i>
+            </div>
+            <h3>No Products Found</h3>
+            <p>We couldn't find any products matching your criteria. Try adjusting your filters or browse all categories.</p>
+            <button class="btn-primary" (click)="showAllCategory(1)">
+              <i class="fas fa-border-all"></i> View All Products
+            </button>
+          </div>
+
+          <!-- Products Grid View -->
+          <div class="products-grid" *ngIf="products && products.length > 0 && viewMode === 'grid'">
+            <article 
+              class="product-card" 
+              *ngFor="let prod of products"
+              [class.in-cart]="isInCart(prod.productId)"
+              (click)="navigateToProduct(prod)"
+            >
+              <!-- Badges -->
+              <div class="card-badges">
+                <span class="badge badge-gi" *ngIf="prod.giTagCertified">
+                  <span class="gi-icon">🏅</span> GI Certified
+                </span>
+                <span class="badge badge-discount" *ngIf="prod.discount && prod.discount > 0">
+                  -{{ prod.discount }}%
+                </span>
+                <span class="badge badge-in-cart" *ngIf="isInCart(prod.productId)">
+                  <i class="fas fa-check"></i> In Cart
+                </span>
+              </div>
+
+              <!-- Image -->
+              <div class="card-image">
+                <img 
+                  [src]="prod.productImageURL || 'assets/images/product-placeholder.jpg'" 
+                  [alt]="prod.productName"
+                  loading="lazy"
+                />
+                <div class="card-overlay">
+                  <button 
+                    class="overlay-btn" 
+                    [class.active]="isInWishlist(prod.productId)"
+                    [class.loading]="isWishlistLoading(prod.productId)"
+                    (click)="addToWishlist(prod); $event.stopPropagation()"
+                    [title]="isInWishlist(prod.productId) ? 'Remove from Wishlist' : 'Add to Wishlist'"
+                  >
+                    <i [class]="isInWishlist(prod.productId) ? 'fas fa-heart' : 'far fa-heart'"></i>
+                  </button>
+                  <button class="overlay-btn" (click)="quickView(prod); $event.stopPropagation()" title="Quick View">
+                    <i class="far fa-eye"></i>
+                  </button>
+                  <button 
+                    class="overlay-btn" 
+                    [class.active]="isInCompare(prod.productId)"
+                    (click)="addToCompare(prod); $event.stopPropagation()"
+                    title="Add to Compare"
+                  >
+                    <i class="fas fa-exchange-alt"></i>
+                  </button>
+                  <button class="overlay-btn" (click)="shareProduct(prod, $event)" title="Share">
+                    <i class="fas fa-share-alt"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Info -->
+              <div class="card-info">
+                <div class="card-meta">
+                  <span class="origin" *ngIf="prod.originState || prod.originDistrict">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ prod.originDistrict || prod.originState }}
+                  </span>
+                  <span class="rating" *ngIf="prod.rating">
+                    <i class="fas fa-star"></i> {{ prod.rating }}
+                  </span>
+                </div>
+                
+                <h3 class="card-title">{{ prod.productName }}</h3>
+                
+                <p class="gi-tag-number" *ngIf="prod.giTagCertified && prod.giTagNumber">
+                  GI Tag: {{ prod.giTagNumber }}
+                </p>
+
+                <div class="card-footer">
+                  <div class="price-group">
+                    <span class="current-price">₹{{ prod.price | number }}</span>
+                    <span class="original-price" *ngIf="prod.discount && prod.discount > 0 && prod.price">
+                      ₹{{ (prod.price! * 100 / (100 - prod.discount!)) | number:'1.0-0' }}
+                    </span>
+                  </div>
+                  <button 
+                    class="add-cart-btn" 
+                    [class.loading]="isCartLoading(prod.productId)"
+                    [class.added]="isAddedToCart(prod.productId)"
+                    [class.in-cart]="isInCart(prod.productId)"
+                    [disabled]="isCartLoading(prod.productId)"
+                    (click)="addToCart(prod); $event.stopPropagation()"
+                  >
+                    <i *ngIf="!isCartLoading(prod.productId) && !isAddedToCart(prod.productId) && !isInCart(prod.productId)" class="fas fa-shopping-cart"></i>
+                    <i *ngIf="isCartLoading(prod.productId)" class="fas fa-spinner fa-spin"></i>
+                    <i *ngIf="isAddedToCart(prod.productId) || isInCart(prod.productId)" class="fas fa-check"></i>
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <!-- Products List View -->
+          <div class="products-list" *ngIf="products && products.length > 0 && viewMode === 'list'">
+            <article 
+              class="product-list-item" 
+              *ngFor="let prod of products"
+              [class.in-cart]="isInCart(prod.productId)"
+              (click)="navigateToProduct(prod)"
+            >
+              <div class="list-image">
+                <img 
+                  [src]="prod.productImageURL || 'assets/images/product-placeholder.jpg'" 
+                  [alt]="prod.productName"
+                />
+                <span class="badge badge-gi" *ngIf="prod.giTagCertified">
+                  <span class="gi-icon">🏅</span> GI
+                </span>
+                <span class="badge badge-in-cart" *ngIf="isInCart(prod.productId)">
+                  <i class="fas fa-check"></i>
+                </span>
+              </div>
+              
+              <div class="list-content">
+                <div class="list-header">
+                  <h3>{{ prod.productName }}</h3>
+                  <span class="rating" *ngIf="prod.rating">
+                    <i class="fas fa-star"></i> {{ prod.rating }}
+                  </span>
+                </div>
+                
+                <p class="description" *ngIf="prod.productDescription">
+                  {{ prod.productDescription.substring(0, 150) }}{{ prod.productDescription.length > 150 ? '...' : '' }}
+                </p>
+                
+                <div class="list-meta">
+                  <span *ngIf="prod.originState">
+                    <i class="fas fa-map-marker-alt"></i> {{ prod.originState }}
+                  </span>
+                  <span *ngIf="prod.craftType">
+                    <i class="fas fa-hands"></i> {{ prod.craftType }}
+                  </span>
+                  <span *ngIf="prod.totalSold">
+                    <i class="fas fa-shopping-bag"></i> {{ prod.totalSold }} sold
+                  </span>
+                </div>
+              </div>
+              
+              <div class="list-actions">
+                <div class="price-group">
+                  <span class="current-price">₹{{ prod.price | number }}</span>
+                  <span class="original-price" *ngIf="prod.discount && prod.discount > 0 && prod.price">
+                    ₹{{ (prod.price! * 100 / (100 - prod.discount!)) | number:'1.0-0' }}
+                  </span>
+                  <span class="discount-tag" *ngIf="prod.discount && prod.discount > 0">
+                    {{ prod.discount }}% OFF
+                  </span>
+                </div>
+                <div class="action-buttons">
+                  <button 
+                    class="btn-secondary" 
+                    [class.active]="isInWishlist(prod.productId)"
+                    [class.loading]="isWishlistLoading(prod.productId)"
+                    (click)="addToWishlist(prod); $event.stopPropagation()"
+                    [title]="isInWishlist(prod.productId) ? 'Remove from Wishlist' : 'Add to Wishlist'"
+                  >
+                    <i [class]="isInWishlist(prod.productId) ? 'fas fa-heart' : 'far fa-heart'"></i>
+                  </button>
+                  <button 
+                    class="btn-secondary" 
+                    [class.active]="isInCompare(prod.productId)"
+                    (click)="addToCompare(prod); $event.stopPropagation()"
+                    title="Add to Compare"
+                  >
+                    <i class="fas fa-exchange-alt"></i>
+                  </button>
+                  <button 
+                    class="btn-primary add-cart-btn-list" 
+                    [class.loading]="isCartLoading(prod.productId)"
+                    [class.added]="isAddedToCart(prod.productId)"
+                    [class.in-cart]="isInCart(prod.productId)"
+                    [disabled]="isCartLoading(prod.productId)"
+                    (click)="addToCart(prod); $event.stopPropagation()"
+                  >
+                    <i *ngIf="!isCartLoading(prod.productId) && !isAddedToCart(prod.productId) && !isInCart(prod.productId)" class="fas fa-shopping-cart"></i>
+                    <i *ngIf="isCartLoading(prod.productId)" class="fas fa-spinner fa-spin"></i>
+                    <i *ngIf="isAddedToCart(prod.productId) || isInCart(prod.productId)" class="fas fa-check"></i>
+                    <span *ngIf="!isCartLoading(prod.productId) && !isAddedToCart(prod.productId) && !isInCart(prod.productId)">Add to Cart</span>
+                    <span *ngIf="isCartLoading(prod.productId)">Adding...</span>
+                    <span *ngIf="isAddedToCart(prod.productId) && !isInCart(prod.productId)">Added!</span>
+                    <span *ngIf="isInCart(prod.productId)">In Cart</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+
+        </section>
+      </div>
+    </div>
+  </main>
+</div>

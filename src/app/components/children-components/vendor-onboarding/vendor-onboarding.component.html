@@ -1,0 +1,103 @@
+<!-- Vendor Onboarding Wizard -->
+<div class="onboarding-container" *ngIf="showOnboarding && !isLoading">
+
+  <!-- Header with dismiss -->
+  <div class="onboarding-header">
+    <div class="header-left">
+      <div class="header-icon" [ngClass]="getStatusClass()">
+        <i class="fas" [ngClass]="getStatusIcon()"></i>
+      </div>
+      <div class="header-text">
+        <h2 class="onboarding-title">
+          <span *ngIf="completionPercentage < 100">Set Up Your Store</span>
+          <span *ngIf="completionPercentage === 100">Your Store is Ready!</span>
+        </h2>
+        <p class="onboarding-subtitle">
+          <span *ngIf="completionPercentage < 100">Complete these steps to start selling on ODOP</span>
+          <span *ngIf="completionPercentage === 100">Congratulations! Your store setup is complete</span>
+        </p>firstly 
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="status-badge" [ngClass]="getStatusClass()">
+        <i class="fas" [ngClass]="getStatusIcon()"></i>
+        {{ getStatusLabel() }}
+      </span>
+      <button class="dismiss-btn" (click)="dismissOnboarding()" title="Dismiss">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-section">
+    <div class="progress-info">
+      <span class="progress-text">{{ completedCount }} of {{ totalSteps }} steps completed</span>
+      <span class="progress-percentage">{{ completionPercentage }}%</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" [style.width.%]="completionPercentage"
+           [ngClass]="{'complete': completionPercentage === 100}"></div>
+    </div>
+  </div>
+  <!-- Steps -->
+  <div class="steps-list">
+    <div class="step-item" *ngFor="let step of steps; let i = index"
+         [class.completed]="step.completed"
+         [class.current]="step.current"
+         [class.upcoming]="!step.completed && !step.current">
+
+      <!-- Step connector line -->
+      <div class="step-connector" *ngIf="i > 0"
+           [class.completed]="step.completed"></div>
+
+      <!-- Step number/check -->
+      <div class="step-indicator">
+        <div class="step-circle" [class.completed]="step.completed" [class.current]="step.current">
+          <i class="fas fa-check" *ngIf="step.completed"></i>
+          <span *ngIf="!step.completed">{{ i + 1 }}</span>
+        </div>
+      </div>
+
+      <!-- Step content -->
+      <div class="step-content">
+        <div class="step-icon">
+          <i class="fas" [ngClass]="step.icon"></i>
+        </div>
+        <div class="step-info">
+          <h3 class="step-title">{{ step.title }}</h3>
+          <p class="step-description">{{ step.description }}</p>
+        </div>
+        <button class="step-action-btn"
+                [class.completed]="step.completed"
+                [class.current]="step.current"
+                (click)="goToStep(step)">
+          <span *ngIf="step.completed">
+            <i class="fas fa-check-circle"></i> Done
+          </span>
+          <span *ngIf="step.current">
+            {{ step.action }} <i class="fas fa-arrow-right"></i>
+          </span>
+          <span *ngIf="!step.completed && !step.current">
+            {{ step.action }}
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help tip -->
+  <div class="onboarding-footer" *ngIf="completionPercentage < 100">
+    <div class="help-tip">
+      <i class="fas fa-lightbulb"></i>
+      <span>Need help? Visit our <a routerLink="/seller-support">Seller Support</a> page or reach out via <a routerLink="/contact_us">Contact Us</a>.</span>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="onboarding-loading" *ngIf="isLoading">
+  <div class="loading-pulse"></div>
+  <div class="loading-pulse"></div>
+  <div class="loading-pulse"></div>
+</div>

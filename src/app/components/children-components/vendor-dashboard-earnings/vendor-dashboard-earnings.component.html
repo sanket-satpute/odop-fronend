@@ -1,0 +1,193 @@
+<div class="earnings-container">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner-ring"></div>
+      <span>Loading earnings...</span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="loadError && !isLoading">
+    <div class="error-content">
+      <div class="error-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3>Unable to Load Earnings</h3>
+      <p>{{ loadError }}</p>
+      <button class="retry-btn" (click)="refreshEarnings()">
+        <i class="fas fa-redo"></i>
+        Try Again
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <ng-container *ngIf="!isLoading && !loadError">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-wallet"></i>
+        Earnings & Payouts
+      </h1>
+      <p class="page-subtitle">Track your revenue, manage payouts, and view transaction history</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="refreshEarnings()" [disabled]="isLoading" [class.rotating]="isLoading">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+      <button class="btn btn-outline" (click)="downloadStatement()">
+        <i class="fas fa-download"></i>
+        Download Statement
+      </button>
+      <button class="btn btn-primary" (click)="requestPayout()" [disabled]="!earningsOverview || earningsOverview.availableBalance <= 0">
+        <i class="fas fa-paper-plane"></i>
+        Request Payout
+      </button>
+    </div>
+  </div>
+
+  <!-- Period Selector -->
+  <div class="period-selector">
+    <button [class.active]="selectedPeriod === 'WEEK'" (click)="onPeriodChange('WEEK')">This Week</button>
+    <button [class.active]="selectedPeriod === 'MONTH'" (click)="onPeriodChange('MONTH')">This Month</button>
+    <button [class.active]="selectedPeriod === 'QUARTER'" (click)="onPeriodChange('QUARTER')">Quarter</button>
+    <button [class.active]="selectedPeriod === 'YEAR'" (click)="onPeriodChange('YEAR')">This Year</button>
+    <button [class.active]="selectedPeriod === 'ALL_TIME'" (click)="onPeriodChange('ALL_TIME')">All Time</button>
+  </div>
+
+  <!-- Earnings Cards -->
+  <div class="earnings-cards">
+    <div class="earnings-card" *ngFor="let card of earningsCards" [ngClass]="card.color">
+      <div class="card-icon">
+        <i class="fas {{card.icon}}"></i>
+      </div>
+      <div class="card-content">
+        <span class="card-title">{{card.title}}</span>
+        <span class="card-value">{{card.value}}</span>
+        <span class="card-change" [ngClass]="card.changeType">
+          <i class="fas" [ngClass]="{
+            'fa-arrow-up': card.changeType === 'positive',
+            'fa-arrow-down': card.changeType === 'negative',
+            'fa-clock': card.changeType === 'neutral'
+          }"></i>
+          {{card.change}}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="content-grid">
+    <!-- Left Column - Transactions -->
+    <div class="transactions-section">
+      <div class="section-header">
+        <h2 class="section-title">Recent Transactions</h2>
+        <div class="filter-tabs">
+          <button class="filter-tab active">All</button>
+          <button class="filter-tab">Credits</button>
+          <button class="filter-tab">Debits</button>
+        </div>
+      </div>
+      
+      <div class="transactions-list">
+        <div class="transaction-item" *ngFor="let txn of transactions">
+          <div class="txn-icon" [ngClass]="txn.type">
+            <i class="fas {{getTransactionIcon(txn.type)}}"></i>
+          </div>
+          <div class="txn-details">
+            <span class="txn-description">{{txn.description}}</span>
+            <span class="txn-date">{{txn.createdAt | date:'medium'}}</span>
+          </div>
+          <div class="txn-amount" [ngClass]="txn.type">
+            <span>{{txn.type === 'REFUND' || txn.type === 'PLATFORM_FEE' ? '-' : '+'}}₹{{txn.amount | number}}</span>
+            <span class="txn-status" [ngClass]="getStatusClass(txn.status)">{{txn.status}}</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-text view-all">
+        View All Transactions
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+
+    <!-- Right Column - Payout & Bank Info -->
+    <div class="right-column">
+      <!-- Next Payout Card -->
+      <div class="payout-card">
+        <div class="payout-header">
+          <i class="fas fa-calendar-check"></i>
+          <span>Next Scheduled Payout</span>
+        </div>
+        <div class="payout-amount">₹{{payoutSchedule.amount | number}}</div>
+        <div class="payout-date">
+          <i class="fas fa-clock"></i>
+          {{payoutSchedule.nextPayout}}
+        </div>
+        <div class="payout-account">
+          To account ending ****{{payoutSchedule.accountEnding}}
+        </div>
+        <div class="payout-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 75%"></div>
+          </div>
+          <span class="progress-text">Processing in 2 days</span>
+        </div>
+      </div>
+
+      <!-- Bank Account Card -->
+      <div class="bank-card">
+        <div class="bank-header">
+          <h3>Bank Account</h3>
+          <span class="verified-badge" *ngIf="bankAccount.verified">
+            <i class="fas fa-check-circle"></i> Verified
+          </span>
+        </div>
+        <div class="bank-info">
+          <div class="bank-row">
+            <span class="label">Bank</span>
+            <span class="value">{{bankAccount.bankName}}</span>
+          </div>
+          <div class="bank-row">
+            <span class="label">Account</span>
+            <span class="value">{{bankAccount.accountNumber}}</span>
+          </div>
+          <div class="bank-row">
+            <span class="label">IFSC</span>
+            <span class="value">{{bankAccount.ifsc}}</span>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" (click)="updateBankDetails()">
+          <i class="fas fa-edit"></i>
+          Update Details
+        </button>
+      </div>
+
+      <!-- Monthly Chart Preview -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Monthly Earnings</h3>
+          <select class="period-select" [(ngModel)]="selectedPeriod" (change)="onPeriodChange(selectedPeriod)">
+            <option value="WEEK">This Week</option>
+            <option value="MONTH">This Month</option>
+            <option value="QUARTER">Last Quarter</option>
+            <option value="YEAR">This Year</option>
+          </select>
+        </div>
+        <div class="chart-bars" *ngIf="monthlyData.length > 0">
+          <div class="bar-item" *ngFor="let data of monthlyData">
+            <div class="bar" [style.height.%]="(data.amount / 65000) * 100"></div>
+            <span class="bar-label">{{data.month}}</span>
+          </div>
+        </div>
+        <div class="no-data" *ngIf="monthlyData.length === 0">
+          <i class="fas fa-chart-bar"></i>
+          <p>No earnings data for selected period</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  </ng-container>
+</div>

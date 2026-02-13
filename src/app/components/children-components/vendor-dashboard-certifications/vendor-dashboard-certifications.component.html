@@ -1,0 +1,269 @@
+<div class="certifications-container">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner-ring"></div>
+      <span>Loading certifications...</span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="loadError && !isLoading">
+    <div class="error-content">
+      <div class="error-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3>Unable to Load Certifications</h3>
+      <p>{{ loadError }}</p>
+      <button class="retry-btn" (click)="loadCertificationData()">
+        <i class="fas fa-redo"></i>
+        Try Again
+      </button>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !loadError">
+    <!-- Alerts Banner -->
+    <div class="alerts-banner" *ngIf="alerts.length > 0">
+      <div class="alert-item" *ngFor="let alert of alerts" [ngClass]="getAlertClass(alert.severity)">
+        <i class="fas" [ngClass]="getAlertIcon(alert.severity)"></i>
+        <span>{{ alert.message }}</span>
+        <button class="alert-dismiss" (click)="dismissAlert(alert)">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">
+          <i class="fas fa-certificate"></i>
+          Certifications & Credentials
+        </h1>
+        <p class="page-subtitle">Manage your GI tags, artisan certificates, and quality credentials</p>
+      </div>
+      <div class="header-actions">
+        <button class="refresh-btn" (click)="refreshData()" [class.rotating]="isRefreshing" [disabled]="isRefreshing">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+        <button class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+          Apply for Certification
+        </button>
+      </div>
+    </div>
+
+    <!-- Trust Badge -->
+    <div class="trust-banner">
+      <div class="trust-content">
+        <div class="trust-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="trust-info">
+          <h3>Verified Seller Trust Score</h3>
+          <p>Your certifications enhance buyer trust and improve product visibility</p>
+        </div>
+      </div>
+      <div class="trust-score">
+        <div class="score-circle">
+          <span class="score-value">{{ trustScore }}</span>
+          <span class="score-max">/100</span>
+        </div>
+        <span class="score-label">Trust Score</span>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-icon total">
+          <i class="fas fa-certificate"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ totalCertifications }}</span>
+          <span class="stat-label">Total Certifications</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon active">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ activeCertifications }}</span>
+          <span class="stat-label">Active</span>
+        </div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-icon expiring">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ expiringSoon }}</span>
+          <span class="stat-label">Expiring Soon</span>
+        </div>
+        <span class="action-badge" *ngIf="expiringSoon > 0">Renew Now</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon products">
+          <i class="fas fa-box"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ summary?.productCoverage || 0 }}</span>
+          <span class="stat-label">Certified Products</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+      <!-- Certifications List -->
+    <div class="certifications-section">
+      <!-- Filters -->
+      <div class="section-header">
+        <h2 class="section-title">Your Certifications</h2>
+        <div class="filter-tabs">
+          <button class="filter-tab" [class.active]="filterStatus === 'all'" (click)="filterStatus = 'all'">All</button>
+          <button class="filter-tab" [class.active]="filterStatus === 'active'" (click)="filterStatus = 'active'">Active</button>
+          <button class="filter-tab" [class.active]="filterStatus === 'expiring-soon'" (click)="filterStatus = 'expiring-soon'">Expiring</button>
+          <button class="filter-tab" [class.active]="filterStatus === 'expired'" (click)="filterStatus = 'expired'">Expired</button>
+        </div>
+      </div>
+
+      <!-- Certification Cards -->
+      <div class="certifications-list">
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="filteredCertifications.length === 0">
+          <div class="empty-icon">
+            <i class="fas fa-certificate"></i>
+          </div>
+          <h3>No Certifications Found</h3>
+          <p *ngIf="filterStatus === 'all'">You don't have any certifications yet. Apply for your first certification to boost your trust score!</p>
+          <p *ngIf="filterStatus !== 'all'">No {{ filterStatus }} certifications found.</p>
+        </div>
+
+        <div class="cert-card" *ngFor="let cert of filteredCertifications" [class.expiring]="cert.status === 'EXPIRING_SOON'" [class.expired]="cert.status === 'EXPIRED'">
+          <div class="cert-header">
+            <div class="cert-type" [style.background]="'rgba(' + getTypeInfo(cert.type).color + ', 0.1)'" [style.color]="getTypeInfo(cert.type).color">
+              <i class="fas" [ngClass]="getTypeInfo(cert.type).icon"></i>
+              <span>{{ getTypeInfo(cert.type).label }}</span>
+            </div>
+            <span class="cert-status" [ngClass]="getStatusClass(cert.status)">
+              {{ cert.status === 'EXPIRING_SOON' ? 'Expiring Soon' : (cert.status | titlecase) }}
+            </span>
+          </div>
+
+          <h3 class="cert-name">{{ cert.name }}</h3>
+          <p class="cert-issuer">
+            <i class="fas fa-building"></i>
+            {{ cert.issuingAuthority }}
+          </p>
+
+          <div class="cert-details">
+            <div class="detail-row">
+              <span class="detail-label">Verification ID</span>
+              <span class="detail-value id">{{ cert.verificationId || cert.id }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Issue Date</span>
+              <span class="detail-value">{{ formatDate(cert.validityStart) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Expiry Date</span>
+              <span class="detail-value" [class.expiring]="cert.status === 'EXPIRING_SOON'" [class.expired]="cert.status === 'EXPIRED'">
+                {{ cert.validityEnd ? formatDate(cert.validityEnd) : 'No Expiry' }}
+              </span>
+            </div>
+            <div class="detail-row" *ngIf="cert.applicableProductIds?.length">
+              <span class="detail-label">Applicable Products</span>
+              <span class="detail-value">{{ cert.applicableProductIds.length }} products</span>
+            </div>
+          </div>
+
+          <div class="cert-expiry-bar" *ngIf="cert.status !== 'EXPIRED' && cert.validityEnd">
+            <span class="expiry-text">{{ getExpiryText(cert) }}</span>
+          </div>
+
+          <div class="cert-actions">
+            <button class="btn-action view" (click)="viewCertificate(cert)">
+              <i class="fas fa-eye"></i>
+              View
+            </button>
+            <button class="btn-action download" (click)="downloadCertificate(cert)">
+              <i class="fas fa-download"></i>
+              Download
+            </button>
+            <button class="btn-action renew" *ngIf="cert.status === 'EXPIRING_SOON' || cert.status === 'EXPIRED'" (click)="renewCertificate(cert)">
+              <i class="fas fa-sync-alt"></i>
+              Renew
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-section">
+      <!-- Available Certifications -->
+      <div class="available-card">
+        <h3>
+          <i class="fas fa-plus-circle"></i>
+          Apply for New Certification
+        </h3>
+        <div class="cert-type-list">
+          <div class="cert-type-item" *ngFor="let type of certificationTypes" (click)="applyForCertification(type)">
+            <div class="type-icon" [style.background]="'rgba(' + type.color + ', 0.1)'" [style.color]="type.color">
+              <i class="fas" [ngClass]="type.icon"></i>
+            </div>
+            <div class="type-info">
+              <span class="type-name">{{ type.label }}</span>
+              <span class="type-desc">{{ type.description }}</span>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Benefits Card -->
+      <div class="benefits-card">
+        <div class="benefits-header">
+          <i class="fas fa-star"></i>
+          <h4>Certification Benefits</h4>
+        </div>
+        <ul class="benefits-list">
+          <li>
+            <i class="fas fa-check"></i>
+            Increased buyer trust and credibility
+          </li>
+          <li>
+            <i class="fas fa-check"></i>
+            Higher search visibility on platform
+          </li>
+          <li>
+            <i class="fas fa-check"></i>
+            Premium pricing for certified products
+          </li>
+          <li>
+            <i class="fas fa-check"></i>
+            Featured placement in categories
+          </li>
+          <li>
+            <i class="fas fa-check"></i>
+            Access to exclusive seller programs
+          </li>
+        </ul>
+      </div>
+
+      <!-- Help Card -->
+      <div class="help-card">
+        <i class="fas fa-question-circle"></i>
+        <div class="help-content">
+          <h4>Need Help?</h4>
+          <p>Contact our certification support team for assistance</p>
+          <button class="btn-help">Get Support</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </ng-container>
+</div>

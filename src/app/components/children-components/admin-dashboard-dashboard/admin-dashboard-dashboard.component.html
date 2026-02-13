@@ -1,0 +1,211 @@
+<!-- Main Content Area -->
+  <!-- [class.sidebar-collapsed]="sidebarCollapsed" -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="header-title">
+          <h1>Welcome back, Admin</h1>
+          <p class="header-subtitle">Here's the platform status overview</p>
+        </div>
+        <div class="header-actions">
+          <div class="notification-wrapper">
+            <button class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">3</span>
+            </button>
+          </div>
+          <div class="profile-dropdown">
+            <button class="profile-btn">
+              <img [src]="userState.admin?.profilePicturePath || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'" alt="Admin" class="profile-avatar">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+      <!-- Overview Cards -->
+      <section class="overview-cards">
+        <div class="card-grid">
+          <div class="stat-card" *ngFor="let card of dashboardCards">
+            <div class="card-icon">
+              <i class="fas" [class]="'fas ' + card.icon"></i>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">{{ card.title }}</h3>
+              <div class="card-value">{{ card.value }}</div>
+              <div class="card-change" [class]="getChangeClass(card.changeType)">
+                <i class="fas" [class.fa-arrow-up]="card.changeType === 'positive'" 
+                   [class.fa-arrow-down]="card.changeType === 'negative'"></i>
+                {{ card.change }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts and Analytics -->
+      <section class="analytics-section">
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3>Sales Overview</h3>
+            <!-- <div class="time-filters">
+              <button class="filter-btn" 
+                      [class.active]="selectedTimeRange === '7 days'"
+                      (click)="changeTimeRange('7 days')">7 Days</button>
+              <button class="filter-btn" 
+                      [class.active]="selectedTimeRange === '30 days'"
+                      (click)="changeTimeRange('30 days')">30 Days</button>
+              <button class="filter-btn" 
+                      [class.active]="selectedTimeRange === 'custom'"
+                      (click)="changeTimeRange('custom')">Custom</button>
+            </div> -->
+            <div class="chart-controls">
+              <div class="period-selector">
+                <button class="period-btn active">6M</button>
+                <button class="period-btn">1Y</button>
+                <button class="period-btn">All</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-area">
+            <canvas id="salesChart" width="400" height="200"></canvas>
+             <!-- <div class="premium-chart-container">
+  <div class="chart-header">
+    <div class="chart-title-wrapper">
+      <h3 class="chart-title">Sales Performance</h3>
+      <p class="chart-subtitle">Monthly revenue overview • Jan - Jun 2024</p>
+    </div>
+    <div class="chart-controls">
+      <div class="period-selector">
+        <button class="period-btn active">6M</button>
+        <button class="period-btn">1Y</button>
+        <button class="period-btn">All</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="chart-wrapper">
+    <div class="chart-area">
+      <canvas id="salesChart"></canvas>
+    </div>
+    
+    <div class="chart-stats">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Growth Rate</span>
+          <span class="stat-value">+23.5%</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Total Revenue</span>
+          <span class="stat-value">$15.8K</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Active Users</span>
+          <span class="stat-value">2.4K</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Row - Activity & Logins -->
+      <section class="bottom-section">
+        <div class="section-grid">
+          <!-- System Activity Panel -->
+          <div class="activity-panel">
+            <div class="panel-header">
+              <h3>System Activity</h3>
+              <button class="view-all-btn">View All</button>
+            </div>
+            <div class="activity-list">
+              <div class="activity-item" *ngFor="let activity of activityLogs">
+                <div class="activity-icon" [class]="getActivityTypeClass(activity.type)">
+                  <i class="fas fa-circle"></i>
+                </div>
+                <div class="activity-content">
+                  <p class="activity-action">{{ activity.action }}</p>
+                  <div class="activity-meta">
+                    <span class="activity-user">{{ activity.user }}</span>
+                    <span class="activity-time">{{ activity.timestamp }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Logins -->
+          <div class="logins-panel">
+            <div class="panel-header">
+              <h3>Recent Logins</h3>
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input
+                  type="text"
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="filterLogins()"
+                  placeholder="Search users..."
+                  class="search-bar"
+                />
+              </div>
+            </div>
+            <div class="logins-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Location</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody *ngIf="filteredLogins.length > 0">
+                  <tr *ngFor="let login of filteredLogins.slice(0, 5)">
+                    <td class="username">{{ login.username }}</td>
+                    <td class="role">{{ login.role }}</td>
+                    <td class="location">{{ login.location }}</td>
+                    <td class="time">{{ login.time }}</td>
+                    <td class="status">
+                      <span class="status-badge" [class]="getStatusClass(login.status || '')">
+                        {{ (login.status != undefined) ? login.status : 'Inactive' }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+                <p *ngIf="filteredLogins.length === 0" style="margin: 15px; text-align: center;">No users found.</p>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>

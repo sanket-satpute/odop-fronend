@@ -1,0 +1,254 @@
+<div class="order-returns-page">
+  <!-- Hero Section -->
+  <section class="returns-hero">
+    <div class="container">
+      <h1>Returns & Refunds</h1>
+      <p>Easy returns on most items within 15 days</p>
+    </div>
+  </section>
+
+  <!-- Return Policy Cards -->
+  <section class="policy-section">
+    <div class="container">
+      <div class="policy-grid">
+        <div class="policy-card" *ngFor="let policy of policies">
+          <div class="policy-icon">
+            <i class="fas" [ngClass]="policy.icon"></i>
+          </div>
+          <h3>{{ policy.title }}</h3>
+          <p>{{ policy.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="main-content">
+    <div class="container">
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="loading-spinner">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Loading your returns...</p>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div class="error-state" *ngIf="!isLoading && errorMessage">
+        <div class="error-content">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p>{{ errorMessage }}</p>
+          <button class="retry-btn" (click)="retryLoad()">
+            <i class="fas fa-redo"></i> Try Again
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" *ngIf="!isLoading && !errorMessage">
+        <button 
+          class="tab-btn"
+          [class.active]="activeTab === 'eligible'"
+          (click)="setActiveTab('eligible')">
+          <i class="fas fa-undo"></i>
+          Eligible Items
+          <span class="badge" *ngIf="eligibleItems.length">{{ eligibleItems.length }}</span>
+        </button>
+        <button 
+          class="tab-btn"
+          [class.active]="activeTab === 'history'"
+          (click)="setActiveTab('history')">
+          <i class="fas fa-history"></i>
+          Return History
+          <span class="badge" *ngIf="returnHistory.length">{{ returnHistory.length }}</span>
+        </button>
+      </div>
+
+      <!-- Eligible Items Tab -->
+      <div class="tab-content" *ngIf="!isLoading && !errorMessage && activeTab === 'eligible'">
+        <div class="returns-list" *ngIf="eligibleItems.length > 0">
+          <div class="return-item" *ngFor="let item of eligibleItems">
+            <div class="item-image">
+              <img [src]="item.productImage" [alt]="item.productName">
+            </div>
+            <div class="item-details">
+              <div class="item-header">
+                <h3>{{ item.productName }}</h3>
+                <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+                  {{ getStatusText(item.status) }}
+                </span>
+              </div>
+              <div class="item-meta">
+                <span><i class="fas fa-store"></i> {{ item.vendorName }}</span>
+                <span><i class="fas fa-receipt"></i> {{ item.orderId }}</span>
+                <span><i class="fas fa-calendar"></i> Ordered: {{ formatDate(item.orderDate) }}</span>
+              </div>
+              <div class="item-pricing">
+                <span class="price">{{ formatPrice(item.price) }}</span>
+                <span class="quantity">Qty: {{ item.quantity }}</span>
+              </div>
+              <div class="return-window">
+                <i class="fas fa-clock"></i>
+                <span *ngIf="getDaysRemaining(item.orderDate) > 0">
+                  {{ getDaysRemaining(item.orderDate) }} days left to return
+                </span>
+                <span *ngIf="getDaysRemaining(item.orderDate) === 0" class="warning">
+                  Last day to return!
+                </span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="return-btn" (click)="openReturnForm(item)">
+                <i class="fas fa-undo"></i> Request Return
+              </button>
+              <button class="view-order-btn" (click)="navigateToOrder(item.orderId)">
+                View Order
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="empty-state" *ngIf="eligibleItems.length === 0">
+          <div class="empty-icon">
+            <i class="fas fa-box-open"></i>
+          </div>
+          <h3>No Eligible Returns</h3>
+          <p>You don't have any items eligible for return at this time.</p>
+          <button class="browse-btn" routerLink="/products">
+            <i class="fas fa-shopping-bag"></i> Continue Shopping
+          </button>
+        </div>
+      </div>
+
+      <!-- Return History Tab -->
+      <div class="tab-content" *ngIf="!isLoading && !errorMessage && activeTab === 'history'">
+        <div class="returns-list" *ngIf="returnHistory.length > 0">
+          <div class="return-item history-item" *ngFor="let item of returnHistory">
+            <div class="item-image">
+              <img [src]="item.productImage" [alt]="item.productName">
+            </div>
+            <div class="item-details">
+              <div class="item-header">
+                <h3>{{ item.productName }}</h3>
+                <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+                  {{ getStatusText(item.status) }}
+                </span>
+              </div>
+              <div class="item-meta">
+                <span><i class="fas fa-store"></i> {{ item.vendorName }}</span>
+                <span><i class="fas fa-receipt"></i> {{ item.orderId }}</span>
+                <span *ngIf="item.returnDate">
+                  <i class="fas fa-undo"></i> Returned: {{ formatDate(item.returnDate) }}
+                </span>
+              </div>
+              <div class="return-reason" *ngIf="item.reason">
+                <strong>Reason:</strong> {{ item.reason }}
+              </div>
+              <div class="item-pricing">
+                <span class="price">{{ formatPrice(item.price) }}</span>
+                <span class="refund" *ngIf="item.refundAmount">
+                  <i class="fas fa-check-circle"></i> Refunded: {{ formatPrice(item.refundAmount) }}
+                </span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="view-order-btn" (click)="navigateToOrder(item.orderId)">
+                View Order
+              </button>
+              <button class="support-btn" (click)="navigateToSupport()" *ngIf="item.status === 'rejected'">
+                <i class="fas fa-headset"></i> Contact Support
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="returnHistory.length === 0">
+          <div class="empty-icon">
+            <i class="fas fa-history"></i>
+          </div>
+          <h3>No Return History</h3>
+          <p>You havent made any return requests yet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Help Section -->
+  <section class="help-section">
+    <div class="container">
+      <div class="help-content">
+        <div class="help-text">
+          <h2>Need Help with a Return?</h2>
+          <p>Our customer support team is here to help you with any questions about returns, refunds, or exchanges.</p>
+        </div>
+        <div class="help-actions">
+          <button class="support-btn primary" (click)="navigateToSupport()">
+            <i class="fas fa-headset"></i> Contact Support
+          </button>
+          <button class="faq-btn" routerLink="/faq">
+            <i class="fas fa-question-circle"></i> View FAQs
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Return Form Modal -->
+  <div class="modal-overlay" *ngIf="showReturnForm" (click)="closeReturnForm()">
+    <div class="return-form-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Request Return</h2>
+        <button class="close-btn" (click)="closeReturnForm()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="currentReturnItem">
+        <div class="product-summary">
+          <img [src]="currentReturnItem.productImage" [alt]="currentReturnItem.productName">
+          <div class="product-info">
+            <h3>{{ currentReturnItem.productName }}</h3>
+            <p>{{ formatPrice(currentReturnItem.price) }} x {{ currentReturnItem.quantity }}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Reason for Return <span class="required">*</span></label>
+          <select [(ngModel)]="returnReason" required>
+            <option value="">Select a reason</option>
+            <option *ngFor="let reason of returnReasons" [value]="reason">
+              {{ reason }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Additional Comments</label>
+          <textarea 
+            [(ngModel)]="additionalComments"
+            placeholder="Provide any additional details about your return..."
+            rows="4">
+          </textarea>
+        </div>
+
+        <div class="refund-info">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <strong>Estimated Refund:</strong> {{ formatPrice(currentReturnItem.price) }}
+            <p>Refund will be processed to your original payment method within 5-7 business days after we receive the returned item.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="cancel-btn" (click)="closeReturnForm()">Cancel</button>
+        <button 
+          class="submit-btn" 
+          (click)="submitReturn()"
+          [disabled]="!returnReason">
+          <i class="fas fa-check"></i> Submit Return Request
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

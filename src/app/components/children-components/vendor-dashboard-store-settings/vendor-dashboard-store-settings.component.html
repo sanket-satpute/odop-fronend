@@ -1,0 +1,511 @@
+<div class="settings-container">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner-ring"></div>
+      <span>Loading settings...</span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="loadError && !isLoading">
+    <div class="error-content">
+      <div class="error-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3>Unable to Load Settings</h3>
+      <p>{{ loadError }}</p>
+      <button class="retry-btn" (click)="refreshSettings()">
+        <i class="fas fa-redo"></i>
+        Try Again
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <ng-container *ngIf="!isLoading && !loadError">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-store-alt"></i>
+        Store Settings
+      </h1>
+      <p class="page-subtitle">Manage your shop profile, business information, and preferences</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="refreshSettings()" [disabled]="isLoading" [class.rotating]="isLoading">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+      <div class="save-indicator" *ngIf="saveMessage">
+        <i class="fas fa-check-circle"></i>
+        {{ saveMessage }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Layout -->
+  <div class="settings-layout">
+    <!-- Settings Navigation -->
+    <div class="settings-nav">
+      <button class="nav-item" [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')">
+        <i class="fas fa-store"></i>
+        <span>Shop Profile</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'business'" (click)="setActiveTab('business')">
+        <i class="fas fa-building"></i>
+        <span>Business Info</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'payment'" (click)="setActiveTab('payment')">
+        <i class="fas fa-credit-card"></i>
+        <span>Payment Settings</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'shipping'" (click)="setActiveTab('shipping')">
+        <i class="fas fa-truck"></i>
+        <span>Shipping Zones</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'policies'" (click)="setActiveTab('policies')">
+        <i class="fas fa-file-contract"></i>
+        <span>Policies</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'notifications'" (click)="setActiveTab('notifications')">
+        <i class="fas fa-bell"></i>
+        <span>Notifications</span>
+      </button>
+    </div>
+
+    <!-- Settings Content -->
+    <div class="settings-content">
+      
+      <!-- Shop Profile Tab -->
+      <div class="settings-panel" *ngIf="activeTab === 'profile'">
+        <div class="panel-header">
+          <h2>Shop Profile</h2>
+          <p>Customize how your shop appears to customers</p>
+        </div>
+
+        <div class="form-section">
+          <!-- Logo & Banner -->
+          <div class="media-uploads">
+            <div class="upload-box">
+              <label>Shop Logo</label>
+              <div class="upload-area logo" (click)="uploadLogo()">
+                <div class="upload-placeholder" *ngIf="!shopProfile.logo">
+                  <i class="fas fa-camera"></i>
+                  <span>Upload Logo</span>
+                  <small>200x200 px recommended</small>
+                </div>
+              </div>
+            </div>
+            <div class="upload-box banner">
+              <label>Shop Banner</label>
+              <div class="upload-area banner-area" (click)="uploadBanner()">
+                <div class="upload-placeholder" *ngIf="!shopProfile.banner">
+                  <i class="fas fa-image"></i>
+                  <span>Upload Banner Image</span>
+                  <small>1200x300 px recommended</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shop Details -->
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label>Shop Name <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="shopProfile.shopName" placeholder="Enter your shop name">
+            </div>
+            <div class="form-group full-width">
+              <label>Tagline</label>
+              <input type="text" [(ngModel)]="shopProfile.tagline" placeholder="A short catchy phrase about your shop">
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select [(ngModel)]="shopProfile.category">
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Year Established</label>
+              <input type="text" [(ngModel)]="shopProfile.established" placeholder="e.g., 2019">
+            </div>
+            <div class="form-group full-width">
+              <label>Shop Description</label>
+              <textarea [(ngModel)]="shopProfile.description" rows="4" placeholder="Tell customers about your shop, your craft, and what makes your products special..."></textarea>
+              <span class="char-count">{{ shopProfile.description.length }} / 500 characters</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <button class="btn btn-primary" (click)="saveProfile()" [disabled]="isSaving">
+            <i class="fas fa-save" *ngIf="!isSaving"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <!-- Business Info Tab -->
+      <div class="settings-panel" *ngIf="activeTab === 'business'">
+        <div class="panel-header">
+          <h2>Business Information</h2>
+          <p>Your business details for invoicing and verification</p>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-title">Contact Details</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Owner / Contact Name <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="businessInfo.ownerName" placeholder="Full name">
+            </div>
+            <div class="form-group">
+              <label>Email Address <span class="required">*</span></label>
+              <input type="email" [(ngModel)]="businessInfo.email" placeholder="business@email.com">
+            </div>
+            <div class="form-group">
+              <label>Phone Number <span class="required">*</span></label>
+              <input type="tel" [(ngModel)]="businessInfo.phone" placeholder="+91 98765 43210">
+            </div>
+            <div class="form-group">
+              <label>Alternate Phone</label>
+              <input type="tel" [(ngModel)]="businessInfo.alternatePhone" placeholder="+91 87654 32109">
+            </div>
+          </div>
+
+          <h3 class="section-title">Business Address</h3>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label>Street Address <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="businessInfo.address" placeholder="Street address, building, floor">
+            </div>
+            <div class="form-group">
+              <label>City <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="businessInfo.city" placeholder="City">
+            </div>
+            <div class="form-group">
+              <label>State <span class="required">*</span></label>
+              <select [(ngModel)]="businessInfo.state">
+                <option *ngFor="let state of states" [value]="state">{{ state }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>PIN Code <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="businessInfo.pincode" placeholder="6-digit PIN">
+            </div>
+          </div>
+
+          <h3 class="section-title">Tax Information</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>GST Number</label>
+              <input type="text" [(ngModel)]="businessInfo.gstNumber" placeholder="22AAAAA0000A1Z5">
+              <span class="helper-text">Optional for small businesses</span>
+            </div>
+            <div class="form-group">
+              <label>PAN Number <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="businessInfo.panNumber" placeholder="ABCDE1234F">
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <button class="btn btn-primary" (click)="saveBusinessInfo()" [disabled]="isSaving">
+            <i class="fas fa-save" *ngIf="!isSaving"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <!-- Payment Settings Tab -->
+      <div class="settings-panel" *ngIf="activeTab === 'payment'">
+        <div class="panel-header">
+          <h2>Payment Settings</h2>
+          <p>Configure your payout preferences and bank details</p>
+        </div>
+
+        <div class="form-section">
+          <!-- Bank Account Card -->
+          <div class="bank-card">
+            <div class="bank-header">
+              <div class="bank-icon">
+                <i class="fas fa-university"></i>
+              </div>
+              <div class="bank-info">
+                <h4>{{ paymentSettings.bankName }}</h4>
+                <p>Account: {{ paymentSettings.accountNumber }}</p>
+                <p>IFSC: {{ paymentSettings.ifscCode }}</p>
+              </div>
+              <span class="verified-badge">
+                <i class="fas fa-check-circle"></i>
+                Verified
+              </span>
+            </div>
+            <button class="btn btn-outline" (click)="updateBankDetails()">
+              <i class="fas fa-edit"></i>
+              Update Bank Details
+            </button>
+          </div>
+
+          <h3 class="section-title">Payout Preferences</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Payout Frequency</label>
+              <select [(ngModel)]="paymentSettings.payoutFrequency">
+                <option *ngFor="let freq of payoutFrequencies" [value]="freq.value">{{ freq.label }}</option>
+              </select>
+              <span class="helper-text">How often you receive payouts</span>
+            </div>
+            <div class="form-group">
+              <label>Minimum Payout Amount (₹)</label>
+              <input type="number" [(ngModel)]="paymentSettings.minimumPayout" min="100">
+              <span class="helper-text">Payouts below this amount will be held</span>
+            </div>
+            <div class="form-group">
+              <label>UPI ID (Optional)</label>
+              <input type="text" [(ngModel)]="paymentSettings.upiId" placeholder="yourname@upi">
+              <span class="helper-text">For instant payouts</span>
+            </div>
+          </div>
+
+          <!-- Payout Schedule Info -->
+          <div class="info-card">
+            <i class="fas fa-info-circle"></i>
+            <div class="info-content">
+              <h4>Payout Schedule</h4>
+              <p>Based on your settings, payouts are processed every <strong>{{ paymentSettings.payoutFrequency }}</strong>. 
+                 Minimum payout threshold is <strong>₹{{ paymentSettings.minimumPayout }}</strong>.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <button class="btn btn-primary" (click)="savePaymentSettings()" [disabled]="isSaving">
+            <i class="fas fa-save" *ngIf="!isSaving"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <!-- Shipping Zones Tab -->
+      <div class="settings-panel" *ngIf="activeTab === 'shipping'">
+        <div class="panel-header">
+          <h2>Shipping Zones</h2>
+          <p>Configure shipping rates for different regions</p>
+        </div>
+
+        <div class="form-section">
+          <div class="shipping-zones">
+            <div class="zone-card" *ngFor="let zone of shippingZones" [class.inactive]="!zone.isActive">
+              <div class="zone-header">
+                <div class="zone-toggle">
+                  <label class="switch">
+                    <input type="checkbox" [checked]="zone.isActive" (change)="toggleShippingZone(zone)">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="zone-title">
+                  <input type="text" [(ngModel)]="zone.name" class="zone-name-input">
+                  <span class="zone-states">{{ zone.states.join(', ') }}</span>
+                </div>
+                <button class="btn-remove" (click)="removeShippingZone(zone)" title="Remove Zone">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <div class="zone-details">
+                <div class="zone-field">
+                  <label>Base Rate (₹)</label>
+                  <input type="number" [(ngModel)]="zone.baseRate" min="0">
+                </div>
+                <div class="zone-field">
+                  <label>Free Shipping Above (₹)</label>
+                  <input type="number" [(ngModel)]="zone.freeAbove" min="0">
+                </div>
+                <div class="zone-field">
+                  <label>Delivery Time</label>
+                  <input type="text" [(ngModel)]="zone.estimatedDays" placeholder="e.g., 3-5 days">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-outline add-zone-btn" (click)="addShippingZone()">
+            <i class="fas fa-plus"></i>
+            Add Shipping Zone
+          </button>
+        </div>
+
+        <div class="panel-footer">
+          <button class="btn btn-primary" (click)="saveShippingSettings()" [disabled]="isSaving">
+            <i class="fas fa-save" *ngIf="!isSaving"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <!-- Policies Tab -->
+      <div class="settings-panel" *ngIf="activeTab === 'policies'">
+        <div class="panel-header">
+          <h2>Store Policies</h2>
+          <p>Define your return, shipping, and other policies</p>
+        </div>
+
+        <div class="form-section">
+          <div class="policy-group">
+            <div class="policy-header">
+              <h3><i class="fas fa-undo-alt"></i> Return Policy</h3>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Return Window (Days)</label>
+                <input type="number" [(ngModel)]="policySettings.returnDays" min="0" max="30">
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label>Return Policy Description</label>
+              <textarea [(ngModel)]="policySettings.returnPolicy" rows="4" placeholder="Describe your return policy..."></textarea>
+            </div>
+          </div>
+
+          <div class="policy-group">
+            <div class="policy-header">
+              <h3><i class="fas fa-truck"></i> Shipping Policy</h3>
+            </div>
+            <div class="form-group full-width">
+              <textarea [(ngModel)]="policySettings.shippingPolicy" rows="4" placeholder="Describe your shipping policy..."></textarea>
+            </div>
+          </div>
+
+          <div class="policy-group">
+            <div class="policy-header">
+              <h3><i class="fas fa-shield-alt"></i> Privacy Policy</h3>
+            </div>
+            <div class="form-group full-width">
+              <textarea [(ngModel)]="policySettings.privacyPolicy" rows="4" placeholder="Your privacy policy..."></textarea>
+            </div>
+          </div>
+
+          <div class="policy-group">
+            <div class="policy-header">
+              <h3><i class="fas fa-file-contract"></i> Terms & Conditions</h3>
+            </div>
+            <div class="form-group full-width">
+              <textarea [(ngModel)]="policySettings.termsConditions" rows="4" placeholder="Terms and conditions..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <button class="btn btn-primary" (click)="savePolicies()" [disabled]="isSaving">
+            <i class="fas fa-save" *ngIf="!isSaving"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <!-- Notifications Tab -->
+      <div class="settings-panel" *ngIf="activeTab === 'notifications'">
+        <div class="panel-header">
+          <h2>Notification Preferences</h2>
+          <p>Choose what notifications you want to receive</p>
+        </div>
+
+        <div class="form-section">
+          <div class="notification-list">
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>New Order Notifications</h4>
+                <p>Get notified when you receive a new order</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="notificationSettings.orderNotifications">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>Customer Messages</h4>
+                <p>Receive alerts when customers send you messages</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="notificationSettings.messageNotifications">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>New Reviews</h4>
+                <p>Get notified when customers leave reviews</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="notificationSettings.reviewNotifications">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>Low Stock Alerts</h4>
+                <p>Alert when product inventory is running low</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="notificationSettings.lowStockAlerts">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>Payout Notifications</h4>
+                <p>Get notified when payouts are processed</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="notificationSettings.payoutNotifications">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>Weekly Performance Report</h4>
+                <p>Receive a weekly summary of your store performance</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="notificationSettings.weeklyReport">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>Promotional Emails</h4>
+                <p>Receive tips, offers, and platform updates</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="notificationSettings.promotionalEmails">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <button class="btn btn-primary" (click)="saveNotifications()" [disabled]="isSaving">
+            <i class="fas fa-save" *ngIf="!isSaving"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  </ng-container>
+</div>

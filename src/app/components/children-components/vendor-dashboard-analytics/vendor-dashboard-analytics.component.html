@@ -1,0 +1,851 @@
+<!-- Premium Analytics Dashboard -->
+<div class="analytics-container" [class.loading]="isLoading">
+  
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loader-content">
+      <div class="loader-spinner"></div>
+      <p class="loader-text">Loading analytics...</p>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="breadcrumb">
+        <span class="breadcrumb-item">Dashboard</span>
+        <svg class="breadcrumb-separator" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+        <span class="breadcrumb-item active">Analytics</span>
+      </div>
+      <div class="title-section">
+        <div class="title-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 21H4a1 1 0 0 1-1-1V3"></path>
+            <path d="M7 14l4-4 4 4 6-6"></path>
+          </svg>
+        </div>
+        <div class="title-text">
+          <h1>Analytics Dashboard</h1>
+          <p>Deep insights into your store performance</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <!-- Time Range Selector -->
+      <div class="time-range-selector">
+        <div class="range-buttons">
+          <button 
+            *ngFor="let range of timeRanges.slice(0, 5)" 
+            class="range-btn"
+            [class.active]="selectedTimeRange === range.id"
+            (click)="onTimeRangeChange(range.id)">
+            {{ range.label }}
+          </button>
+        </div>
+        <button class="range-btn custom-btn" [class.active]="selectedTimeRange === 'custom'" (click)="onTimeRangeChange('custom')">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="header-actions">
+        <button class="action-btn refresh-btn" (click)="refreshData()" title="Refresh Data">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+        
+        <div class="export-dropdown">
+          <button class="action-btn export-btn" [class.loading]="isExporting">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" *ngIf="!isExporting">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span class="btn-spinner" *ngIf="isExporting"></span>
+            Export
+          </button>
+          <div class="dropdown-menu">
+            <button class="dropdown-item" (click)="exportData('pdf')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              Export as PDF
+            </button>
+            <button class="dropdown-item" (click)="exportData('excel')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              Export as Excel
+            </button>
+            <button class="dropdown-item" (click)="exportData('csv')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+              Export as CSV
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Custom Date Picker Modal -->
+  <div class="date-picker-modal" *ngIf="showDatePicker" (click)="showDatePicker = false">
+    <div class="date-picker-content" (click)="$event.stopPropagation()">
+      <h3>Select Custom Range</h3>
+      <div class="date-inputs">
+        <div class="date-field">
+          <label>Start Date</label>
+          <input type="date" [(ngModel)]="customStartDate">
+        </div>
+        <div class="date-field">
+          <label>End Date</label>
+          <input type="date" [(ngModel)]="customEndDate">
+        </div>
+      </div>
+      <div class="date-picker-actions">
+        <button class="cancel-btn" (click)="showDatePicker = false">Cancel</button>
+        <button class="apply-btn" (click)="applyCustomDateRange()">Apply Range</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section Navigation -->
+  <nav class="section-nav">
+    <button 
+      class="nav-tab" 
+      [class.active]="activeSection === 'overview'"
+      (click)="setActiveSection('overview')">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      Overview
+    </button>
+    <button 
+      class="nav-tab" 
+      [class.active]="activeSection === 'products'"
+      (click)="setActiveSection('products')">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>
+      Products
+    </button>
+    <button 
+      class="nav-tab" 
+      [class.active]="activeSection === 'customers'"
+      (click)="setActiveSection('customers')">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      Customers
+    </button>
+    <button 
+      class="nav-tab" 
+      [class.active]="activeSection === 'traffic'"
+      (click)="setActiveSection('traffic')">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+      </svg>
+      Traffic
+    </button>
+  </nav>
+
+  <!-- Metrics Cards Grid -->
+  <section class="metrics-section">
+    <div class="metrics-grid">
+      <div 
+        *ngFor="let metric of metricCards" 
+        class="metric-card"
+        [attr.data-color]="metric.color">
+        <div class="metric-header">
+          <div class="metric-icon" [attr.data-color]="metric.color">
+            <svg *ngIf="metric.icon === 'revenue'" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <svg *ngIf="metric.icon === 'orders'" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <svg *ngIf="metric.icon === 'conversion'" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+              <polyline points="16 7 22 7 22 13"></polyline>
+            </svg>
+            <svg *ngIf="metric.icon === 'aov'" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            <svg *ngIf="metric.icon === 'customers'" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <line x1="19" y1="8" x2="19" y2="14"></line>
+              <line x1="22" y1="11" x2="16" y2="11"></line>
+            </svg>
+            <svg *ngIf="metric.icon === 'rating'" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <div class="metric-trend" [class.positive]="metric.change >= 0" [class.negative]="metric.change < 0">
+            <svg *ngIf="metric.change >= 0" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+            <svg *ngIf="metric.change < 0" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            <span>{{ metric.change >= 0 ? '+' : '' }}{{ metric.change }}%</span>
+          </div>
+        </div>
+        <div class="metric-body">
+          <span class="metric-title">{{ metric.title }}</span>
+          <span class="metric-value">{{ formatMetricValue(metric) }}</span>
+          <span class="metric-label">{{ metric.changeLabel }}</span>
+        </div>
+        <div class="metric-sparkline" [attr.data-color]="metric.color"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Overview Section -->
+  <section class="content-section" *ngIf="activeSection === 'overview'">
+    <div class="charts-grid">
+      <!-- Revenue Chart -->
+      <div class="chart-card revenue-chart-card">
+        <div class="card-header">
+          <div class="card-title-section">
+            <h3>Revenue Trends</h3>
+            <p>Monthly revenue performance</p>
+          </div>
+          <div class="card-actions">
+            <div class="chart-type-toggle">
+              <button 
+                class="toggle-btn" 
+                [class.active]="revenueChartView === 'area'" 
+                (click)="setRevenueChartView('area')"
+                title="Area Chart">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+              </button>
+              <button 
+                class="toggle-btn" 
+                [class.active]="revenueChartView === 'bar'" 
+                (click)="setRevenueChartView('bar')"
+                title="Bar Chart">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="20" x2="18" y2="10"></line>
+                  <line x1="12" y1="20" x2="12" y2="4"></line>
+                  <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+              </button>
+              <button 
+                class="toggle-btn" 
+                [class.active]="revenueChartView === 'line'" 
+                (click)="setRevenueChartView('line')"
+                title="Line Chart">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container large">
+          <canvas #revenueChart></canvas>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <span class="legend-dot" style="background: #f59e0b;"></span>
+            <span>Revenue</span>
+          </div>
+          <div class="legend-summary">
+            <span class="legend-total">Total: {{ formatCurrency(totalRevenue) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Chart -->
+      <div class="chart-card orders-chart-card">
+        <div class="card-header">
+          <div class="card-title-section">
+            <h3>Orders by Day</h3>
+            <p>Weekly order distribution</p>
+          </div>
+          <div class="card-actions">
+            <div class="chart-type-toggle">
+              <button 
+                class="toggle-btn" 
+                [class.active]="ordersChartView === 'bar'" 
+                (click)="setOrdersChartView('bar')">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="20" x2="18" y2="10"></line>
+                  <line x1="12" y1="20" x2="12" y2="4"></line>
+                  <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+              </button>
+              <button 
+                class="toggle-btn" 
+                [class.active]="ordersChartView === 'line'" 
+                (click)="setOrdersChartView('line')">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container medium">
+          <canvas #ordersChart></canvas>
+        </div>
+      </div>
+
+      <!-- Sales by Channel -->
+      <div class="chart-card channel-chart-card">
+        <div class="card-header">
+          <div class="card-title-section">
+            <h3>Sales by Channel</h3>
+            <p>Traffic source breakdown</p>
+          </div>
+        </div>
+        <div class="chart-container doughnut-container">
+          <canvas #channelChart></canvas>
+          <div class="doughnut-center">
+            <span class="center-value">{{ formatCompactNumber(totalChannelRevenue) }}</span>
+            <span class="center-label">Total Revenue</span>
+          </div>
+        </div>
+        <div class="channel-legend">
+          <div class="channel-item" *ngFor="let channel of channelData">
+            <div class="channel-info">
+              <span class="channel-dot" [style.background]="channel.color"></span>
+              <span class="channel-name">{{ channel.channel }}</span>
+            </div>
+            <span class="channel-value">{{ channel.percentage }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regional Performance -->
+      <div class="chart-card regional-card">
+        <div class="card-header">
+          <div class="card-title-section">
+            <h3>Regional Performance</h3>
+            <p>Sales by region</p>
+          </div>
+        </div>
+        <div class="regional-list">
+          <div class="regional-item" *ngFor="let region of regionalData; let i = index">
+            <div class="regional-rank">{{ i + 1 }}</div>
+            <div class="regional-info">
+              <span class="regional-name">{{ region.region }}</span>
+              <div class="regional-bar-container">
+                <div class="regional-bar" [style.width.%]="region.percentage"></div>
+              </div>
+            </div>
+            <div class="regional-stats">
+              <span class="regional-revenue">{{ formatCurrency(region.revenue) }}</span>
+              <span class="regional-growth" [class.positive]="region.growth >= 0" [class.negative]="region.growth < 0">
+                {{ region.growth >= 0 ? '+' : '' }}{{ region.growth }}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights & Activity Row -->
+    <div class="insights-activity-grid">
+      <!-- AI Insights -->
+      <div class="insights-card">
+        <div class="card-header">
+          <div class="card-title-section">
+            <h3>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              Smart Insights
+            </h3>
+            <p>AI-powered recommendations</p>
+          </div>
+        </div>
+        <div class="insights-list">
+          <div class="insight-item" *ngFor="let insight of insights" [attr.data-type]="insight.type">
+            <div class="insight-icon" [attr.data-type]="insight.type">
+              <svg *ngIf="insight.type === 'success'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                <polyline points="16 7 22 7 22 13"></polyline>
+              </svg>
+              <svg *ngIf="insight.type === 'warning'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <svg *ngIf="insight.type === 'info'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <svg *ngIf="insight.type === 'tip'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="9" y1="18" x2="15" y2="18"></line>
+                <line x1="10" y1="22" x2="14" y2="22"></line>
+                <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path>
+              </svg>
+            </div>
+            <div class="insight-content">
+              <h4>{{ insight.title }}</h4>
+              <p>{{ insight.description }}</p>
+              <button *ngIf="insight.actionLabel" class="insight-action" (click)="handleInsightAction(insight)">
+                {{ insight.actionLabel }}
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Activity Feed -->
+      <div class="activity-card">
+        <div class="card-header">
+          <div class="card-title-section">
+            <h3>
+              <span class="live-indicator">
+                <span class="live-dot"></span>
+                Live
+              </span>
+              Recent Activity
+            </h3>
+            <p>Real-time store updates</p>
+          </div>
+          <div class="activity-filters">
+            <button 
+              class="filter-chip" 
+              [class.active]="activityFilter === 'all'"
+              (click)="filterActivities('all')">All</button>
+            <button 
+              class="filter-chip" 
+              [class.active]="activityFilter === 'orders'"
+              (click)="filterActivities('orders')">Orders</button>
+            <button 
+              class="filter-chip" 
+              [class.active]="activityFilter === 'deliveries'"
+              (click)="filterActivities('deliveries')">Deliveries</button>
+          </div>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item" *ngFor="let activity of filteredActivities" [attr.data-type]="activity.type">
+            <div class="activity-icon" [attr.data-type]="activity.type">
+              <svg *ngIf="activity.type === 'order'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+              <svg *ngIf="activity.type === 'delivery'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="3" width="15" height="13"></rect>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+              </svg>
+              <svg *ngIf="activity.type === 'review'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <svg *ngIf="activity.type === 'alert'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <svg *ngIf="activity.type === 'return'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              </svg>
+            </div>
+            <div class="activity-content">
+              <p class="activity-message">{{ activity.message }}</p>
+              <div class="activity-meta">
+                <span class="activity-time">{{ getTimeAgo(activity.timestamp) }}</span>
+                <span class="activity-amount" *ngIf="activity.amount">{{ formatCurrency(activity.amount) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section class="content-section" *ngIf="activeSection === 'products'">
+    <div class="products-analytics-card">
+      <div class="card-header">
+        <div class="card-title-section">
+          <h3>Top Performing Products</h3>
+          <p>Products ranked by performance metrics</p>
+        </div>
+        <div class="sort-controls">
+          <span class="sort-label">Sort by:</span>
+          <button 
+            class="sort-btn" 
+            [class.active]="productSortBy === 'revenue'"
+            (click)="sortProducts('revenue')">
+            Revenue
+            <svg *ngIf="productSortBy === 'revenue'" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline [attr.points]="productSortOrder === 'desc' ? '6 9 12 15 18 9' : '18 15 12 9 6 15'"></polyline>
+            </svg>
+          </button>
+          <button 
+            class="sort-btn" 
+            [class.active]="productSortBy === 'units'"
+            (click)="sortProducts('units')">
+            Units Sold
+            <svg *ngIf="productSortBy === 'units'" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline [attr.points]="productSortOrder === 'desc' ? '6 9 12 15 18 9' : '18 15 12 9 6 15'"></polyline>
+            </svg>
+          </button>
+          <button 
+            class="sort-btn" 
+            [class.active]="productSortBy === 'rating'"
+            (click)="sortProducts('rating')">
+            Rating
+            <svg *ngIf="productSortBy === 'rating'" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline [attr.points]="productSortOrder === 'desc' ? '6 9 12 15 18 9' : '18 15 12 9 6 15'"></polyline>
+            </svg>
+          </button>
+          <button 
+            class="sort-btn" 
+            [class.active]="productSortBy === 'views'"
+            (click)="sortProducts('views')">
+            Views
+            <svg *ngIf="productSortBy === 'views'" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline [attr.points]="productSortOrder === 'desc' ? '6 9 12 15 18 9' : '18 15 12 9 6 15'"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="products-table">
+        <div class="table-header">
+          <span class="col-rank">#</span>
+          <span class="col-product">Product</span>
+          <span class="col-category">Category</span>
+          <span class="col-units">Units Sold</span>
+          <span class="col-revenue">Revenue</span>
+          <span class="col-rating">Rating</span>
+          <span class="col-views">Views</span>
+          <span class="col-trend">Trend</span>
+          <span class="col-stock">Stock</span>
+        </div>
+        <div class="table-body">
+          <div class="table-row" *ngFor="let product of topProducts; let i = index">
+            <span class="col-rank">
+              <span class="rank-badge" [class.top-3]="i < 3">{{ i + 1 }}</span>
+            </span>
+            <div class="col-product">
+              <div class="product-avatar">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                </svg>
+              </div>
+              <span class="product-name">{{ product.name }}</span>
+            </div>
+            <span class="col-category">
+              <span class="category-badge">{{ product.category }}</span>
+            </span>
+            <span class="col-units">{{ formatNumber(product.unitsSold) }}</span>
+            <span class="col-revenue">{{ formatCurrency(product.revenue) }}</span>
+            <span class="col-rating">
+              <span class="rating-badge">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="#f59e0b" stroke="none">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                {{ product.rating.toFixed(1) }}
+              </span>
+            </span>
+            <span class="col-views">{{ formatCompactNumber(product.views) }}</span>
+            <span class="col-trend">
+              <span class="trend-badge" [class.positive]="product.trend >= 0" [class.negative]="product.trend < 0">
+                <svg *ngIf="product.trend >= 0" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <svg *ngIf="product.trend < 0" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                {{ product.trend >= 0 ? '+' : '' }}{{ product.trend }}%
+              </span>
+            </span>
+            <span class="col-stock">
+              <span class="stock-badge" [class.low]="product.stock < 20" [class.medium]="product.stock >= 20 && product.stock < 50" [class.high]="product.stock >= 50">
+                {{ product.stock }} units
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Customers Section -->
+  <section class="content-section" *ngIf="activeSection === 'customers'">
+    <div class="customers-grid">
+      <!-- Customer Metrics Cards -->
+      <div class="customer-metric-card">
+        <div class="cmc-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="cmc-content">
+          <span class="cmc-value">{{ formatNumber(customerMetrics.totalCustomers) }}</span>
+          <span class="cmc-label">Total Customers</span>
+        </div>
+        <div class="cmc-chart"></div>
+      </div>
+
+      <div class="customer-metric-card">
+        <div class="cmc-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <line x1="19" y1="8" x2="19" y2="14"></line>
+            <line x1="22" y1="11" x2="16" y2="11"></line>
+          </svg>
+        </div>
+        <div class="cmc-content">
+          <span class="cmc-value">{{ formatNumber(customerMetrics.newCustomers) }}</span>
+          <span class="cmc-label">New Customers</span>
+        </div>
+      </div>
+
+      <div class="customer-metric-card">
+        <div class="cmc-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+        </div>
+        <div class="cmc-content">
+          <span class="cmc-value">{{ customerMetrics.repeatPurchaseRate }}%</span>
+          <span class="cmc-label">Repeat Purchase Rate</span>
+        </div>
+      </div>
+
+      <div class="customer-metric-card">
+        <div class="cmc-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <div class="cmc-content">
+          <span class="cmc-value">{{ formatCurrency(customerMetrics.averageOrderValue) }}</span>
+          <span class="cmc-label">Avg Order Value</span>
+        </div>
+      </div>
+
+      <div class="customer-metric-card">
+        <div class="cmc-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </div>
+        <div class="cmc-content">
+          <span class="cmc-value">{{ formatCurrency(customerMetrics.customerLifetimeValue) }}</span>
+          <span class="cmc-label">Customer Lifetime Value</span>
+        </div>
+      </div>
+
+      <div class="customer-metric-card">
+        <div class="cmc-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        </div>
+        <div class="cmc-content">
+          <span class="cmc-value">{{ customerMetrics.cartAbandonmentRate }}%</span>
+          <span class="cmc-label">Cart Abandonment</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Behavior Chart -->
+    <div class="behavior-card">
+      <div class="card-header">
+        <div class="card-title-section">
+          <h3>Customer Behavior Insights</h3>
+          <p>Understanding your customer journey</p>
+        </div>
+      </div>
+      <div class="behavior-metrics">
+        <div class="behavior-item">
+          <div class="behavior-header">
+            <span class="behavior-title">Repeat Customers</span>
+            <span class="behavior-value">{{ customerMetrics.repeatPurchaseRate }}%</span>
+          </div>
+          <div class="behavior-bar">
+            <div class="behavior-fill" [style.width.%]="customerMetrics.repeatPurchaseRate" style="background: linear-gradient(90deg, #10b981, #059669);"></div>
+          </div>
+        </div>
+        <div class="behavior-item">
+          <div class="behavior-header">
+            <span class="behavior-title">New Customers</span>
+            <span class="behavior-value">{{ 100 - customerMetrics.repeatPurchaseRate }}%</span>
+          </div>
+          <div class="behavior-bar">
+            <div class="behavior-fill" [style.width.%]="100 - customerMetrics.repeatPurchaseRate" style="background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+          </div>
+        </div>
+        <div class="behavior-item">
+          <div class="behavior-header">
+            <span class="behavior-title">Cart Abandonment</span>
+            <span class="behavior-value">{{ customerMetrics.cartAbandonmentRate }}%</span>
+          </div>
+          <div class="behavior-bar">
+            <div class="behavior-fill" [style.width.%]="customerMetrics.cartAbandonmentRate" style="background: linear-gradient(90deg, #ef4444, #dc2626);"></div>
+          </div>
+        </div>
+        <div class="behavior-item">
+          <div class="behavior-header">
+            <span class="behavior-title">Average Rating</span>
+            <span class="behavior-value">{{ customerMetrics.averageRating }}/5</span>
+          </div>
+          <div class="behavior-bar">
+            <div class="behavior-fill" [style.width.%]="customerMetrics.averageRating * 20" style="background: linear-gradient(90deg, #8b5cf6, #7c3aed);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Traffic Section -->
+  <section class="content-section" *ngIf="activeSection === 'traffic'">
+    <div class="traffic-grid">
+      <!-- Traffic Metrics -->
+      <div class="traffic-metrics-grid">
+        <div class="traffic-metric-card">
+          <div class="tmc-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </div>
+          <div class="tmc-content">
+            <span class="tmc-value">{{ formatCompactNumber(trafficMetrics.totalVisits) }}</span>
+            <span class="tmc-label">Total Visits</span>
+          </div>
+        </div>
+
+        <div class="traffic-metric-card">
+          <div class="tmc-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div class="tmc-content">
+            <span class="tmc-value">{{ formatCompactNumber(trafficMetrics.uniqueVisitors) }}</span>
+            <span class="tmc-label">Unique Visitors</span>
+          </div>
+        </div>
+
+        <div class="traffic-metric-card">
+          <div class="tmc-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+          </div>
+          <div class="tmc-content">
+            <span class="tmc-value">{{ formatCompactNumber(trafficMetrics.pageViews) }}</span>
+            <span class="tmc-label">Page Views</span>
+          </div>
+        </div>
+
+        <div class="traffic-metric-card">
+          <div class="tmc-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="tmc-content">
+            <span class="tmc-value">{{ trafficMetrics.avgSessionDuration }}</span>
+            <span class="tmc-label">Avg Session Duration</span>
+          </div>
+        </div>
+
+        <div class="traffic-metric-card">
+          <div class="tmc-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+              <polyline points="16 7 22 7 22 13"></polyline>
+            </svg>
+          </div>
+          <div class="tmc-content">
+            <span class="tmc-value">{{ trafficMetrics.conversionRate }}%</span>
+            <span class="tmc-label">Conversion Rate</span>
+          </div>
+        </div>
+
+        <div class="traffic-metric-card">
+          <div class="tmc-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </div>
+          <div class="tmc-content">
+            <span class="tmc-value">{{ trafficMetrics.bounceRate }}%</span>
+            <span class="tmc-label">Bounce Rate</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Traffic Chart -->
+      <div class="traffic-chart-card">
+        <div class="card-header">
+          <div class="card-title-section">
+            <h3>Traffic by Hour</h3>
+            <p>Daily traffic pattern</p>
+          </div>
+        </div>
+        <div class="chart-container medium">
+          <canvas #trafficChart></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

@@ -1,0 +1,397 @@
+<header>
+    <div class="header-main">
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen" aria-label="Toggle menu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+
+        <!-- Left Section: Logo + Location -->
+        <div class="header-left">
+            <div class="logo-container">
+                <img src="https://res.cloudinary.com/lazerous/image/upload/v1634195883/pmfme-logo-website_y2qqqy.png" alt="ODOP Logo" class="logo">
+                <div class="heading_main">
+                    <h1>ODOP</h1>
+                    <p id="odop-text">Your Online Marketplace</p>
+                </div>
+            </div>
+
+            <!-- Location Indicator -->
+            <div class="location-indicator" 
+                 (click)="toggleLocationDropdown()" 
+                 [class.loading]="isLocationLoading"
+                 [class.has-location]="hasValidLocation()">
+                <div class="location-content">
+                    <i class="fas fa-check-circle location-tick" *ngIf="hasValidLocation() && !isLocationLoading"></i>
+                    <i class="fas fa-map-marker-alt location-pin" *ngIf="!hasValidLocation() && !isLocationLoading"></i>
+                    <i class="fas fa-spinner fa-spin location-loading" *ngIf="isLocationLoading"></i>
+                    <span class="location-text">{{ getLocationDisplayName() }}</span>
+                    <i class="fas fa-chevron-down location-arrow"></i>
+                </div>
+                
+                <!-- Location Dropdown -->
+                <div class="location-dropdown" *ngIf="showLocationDropdown">
+                    <div class="location-dropdown-header">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Your Location</span>
+                    </div>
+                    <div class="location-current" *ngIf="hasValidLocation()">
+                        <div class="location-detail">
+                            <strong>{{ currentLocation?.district || currentLocation?.city }}</strong>
+                            <span *ngIf="currentLocation?.state">, {{ currentLocation?.state }}</span>
+                        </div>
+                        <div class="location-pincode" *ngIf="currentLocation?.pincode">
+                            PIN: {{ currentLocation?.pincode }}
+                        </div>
+                    </div>
+                    <button class="location-refresh-btn" (click)="refreshLocation(); $event.stopPropagation()">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>{{ hasValidLocation() ? 'Update Location' : 'Detect My Location' }}</span>
+                    </button>
+                    <p class="location-note" *ngIf="currentLocation?.error">
+                        <i class="fas fa-info-circle"></i>
+                        {{ currentLocation?.error }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Section: Search -->
+        <div class="header-center">
+            <div class="search-container" [class.searching]="isSearching">
+            <input
+            type="text"
+            id="search-input"
+            [(ngModel)]="GLOBAL_SEARCH"
+            placeholder="Search products, vendors, categories..."
+            autocomplete="off"
+            (input)="onSearchInput($event)"
+            (keydown)="onSearchKeydown($event)"
+            (keyup.enter)="searchThing()"
+            (focus)="onSearchFocus()"
+            (blur)="onSearchBlur()"
+            />
+            <!-- Autocomplete Dropdown -->
+            <div class="autocomplete-dropdown" *ngIf="showAutocomplete && autocompleteSuggestions.length > 0">
+            <div
+            *ngFor="let suggestion of autocompleteSuggestions; let i = index"
+            class="autocomplete-item"
+            [class.selected]="i === selectedSuggestionIndex"
+            (mousedown)="selectSuggestion(suggestion)"
+            >
+            <i class="fas" [ngClass]="getSuggestionIcon(suggestion.type)"></i>
+            <span class="suggestion-text">{{ suggestion.text }}</span>
+            <span class="suggestion-type">{{ suggestion.type }}</span>
+            </div>
+              <div *ngIf="isLoadingAutocomplete" class="autocomplete-loading">
+                  <i class="fas fa-spinner fa-spin"></i> Loading...
+              </div>
+            </div>
+            <button
+                class="search-button"
+                type="button"
+                [class.loading]="isSearching"
+                (click)="searchThing()"
+                aria-label="Search"
+            >
+                <div class="search-button-content">
+                    <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                    <span class="search-text">Search</span>
+                </div>
+                <div class="loading-spinner"></div>
+            </button>
+            </div>
+        </div>
+
+        <!-- Right Section: Theme + Controls + User -->
+        <div class="header-right">
+            <!-- Theme Toggle -->
+            <div class="theme-toggle-wrapper">
+                <app-theme-toggle></app-theme-toggle>
+            </div>
+
+            <div class="user-controls" *ngIf="userState.customer">
+                <a (click)="openWishlistDialog($event)" class="control-item wishlist-item" style="cursor: pointer;">
+                    <i class="fas fa-heart"></i>
+                    <span class="count-badge">{{ userState.customer.wishlistProductIds?.length ?? 0 }}</span>
+                </a>
+
+                <a (click)="openCartDialog($event)" class="control-item cart-item" style="cursor: pointer;">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="count-badge">{{ userState.customer.cartProductIds?.length ?? 0 }}</span>
+                </a>
+            </div>
+
+
+            <!-- User Section -->
+            <div class="user-section">
+            <!-- Customer Block -->
+            <div class="dropdown" *ngIf="userState.customer" id="customer-block">
+                <div class="loggedin customer-block">
+                    <div class="name-box">
+                    <span>Customer</span>
+                    <h2>{{ getDisplayName(userState.customer?.fullName) }}</h2>
+                    </div>
+                    <div class="image-box" style="position: relative;">
+                        <img
+                            *ngIf="!isLoadingImage"
+                            [src]="customerProfileImageUrl || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'"
+                            alt="Customer Image"
+                        />
+                        <!-- Loader over image -->
+                        <div class="image-loader" *ngIf="isLoadingImage">
+                            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown-content">
+                    <a href="#" routerLink="customer-dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="#" (click)="openUpdateProfileCustomerDialog(); $event.preventDefault();"><i class="fas fa-user-edit"></i> Update Profile</a>
+                    <a href="#" (click)="openChangePasswordDialog(); $event.preventDefault();"><i class="fas fa-key"></i> Change Password</a>
+                    <a (click)="openLogoutDialog(); $event.preventDefault();"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+                </div>
+            </div>
+
+
+            <!-- Vendor Block -->
+            <div class="dropdown" *ngIf="userState.vendor" id="vendor-block">
+                <div class="loggedin vendor-block">
+                    <div class="name-box">
+                        <span>Vendor</span>
+                        <h2>{{ getDisplayName(userState.vendor?.shoppeeName) }}</h2>
+                    </div>
+                    <div class="image-box" style="position: relative;">
+                        <img
+                            *ngIf="!isLoadingVendorImage"
+                            [src]="vendorProfileImageUrl || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'"
+                            alt="Vendor Image"
+                        />
+                        <!-- Loader over image -->
+                        <div class="image-loader" *ngIf="isLoadingVendorImage">
+                            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown-content">
+                    <a href="#" routerLink="vendor-dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="#" (click)="openUpdateProfileVendorDialog(); $event.preventDefault();"><i class="fas fa-user-edit"></i> Update Profile</a>
+                    <a href="#" (click)="openChangePasswordDialog(); $event.preventDefault();"><i class="fas fa-key"></i> Change Password</a>
+                    <a href="#" (click)="openLogoutDialog(); $event.preventDefault();"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+                </div>
+            </div>
+
+            <!-- Admin Block -->
+            <div class="dropdown" *ngIf="userState.admin" id="admin-block">
+                <div class="loggedin admin-block">
+                    <div class="name-box">
+                        <span>Admin</span>
+                        <h2>{{ getDisplayName(userState.admin?.fullName) }}</h2>
+                    </div>
+                    <div class="image-box" style="position: relative;">
+                        <img
+                            *ngIf="!isLoadingAdminImage"
+                            [src]="adminProfileImageUrl || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'"
+                            alt="Admin Image"
+                        />
+                        <!-- Loader over image -->
+                        <div class="image-loader" *ngIf="isLoadingAdminImage">
+                            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown-content">
+                    <a href="#" routerLink="admin-dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="#" (click)="openUpdateProfileAdminDialog(); $event.preventDefault();"><i class="fas fa-user-edit"></i> Update Profile</a>
+                    <a href="#" (click)="openChangePasswordDialog(); $event.preventDefault();"><i class="fas fa-key"></i> Change Password</a>
+                    <a href="#" (click)="openLogoutDialog(); $event.preventDefault();"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+                </div>
+            </div>
+
+            <!-- Auth Buttons (Default) -->
+            <div class="auth-buttons" *ngIf="!userState.customer && !userState.vendor && !userState.admin" id="auth-buttons">
+                <div class="dropdown">
+                    <button class="dropbtn register" (click)="openRegisterDialog()">Register</button>
+                </div>
+                <div class="dropdown">
+                    <button class="dropbtn login" (click)="openLoginDialog()">Login</button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Desktop Navigation -->
+<nav class="desktop-nav">
+    <a
+    routerLink="/"
+    [ngClass]="{ 'active': activeTab === 'home' }"
+    class="nav-link"
+    (click)="tabChanged()"
+    >Home</a>
+
+    <a
+    *ngIf="!isVendorOnlySession()"
+    routerLink="/products"
+    [ngClass]="{ 'active': activeTab === 'products' }"
+    class="nav-link"
+    (click)="tabChanged()"
+    >Products</a>
+
+    <a
+    *ngIf="isVendorOnlySession()"
+    routerLink="/vendor-dashboard"
+    class="nav-link"
+    (click)="tabChanged()"
+    >My Store</a>
+
+    <a
+    (click)="navigateAndScroll('about')"
+    [ngClass]="{ 'active': activeTab === 'about' }"
+    class="nav-link"
+    >About Us</a>
+
+    <a
+    (click)="navigateAndScroll('impact')"
+    [ngClass]="{ 'active': activeTab === 'impact' }"
+    class="nav-link"
+    >Impact</a>
+
+    <a
+    routerLink="/contact_us"
+    [ngClass]="{ 'active': activeTab === 'contact' }"
+    class="nav-link"
+    (click)="tabChanged()"
+    >Contact Us</a>
+</nav>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-menu-overlay" [class.active]="isMobileMenuOpen" (click)="closeMobileMenu()"></div>
+
+<!-- Mobile Side Menu -->
+<div class="mobile-side-menu" [class.active]="isMobileMenuOpen">
+    <div class="mobile-menu-header">
+        <div class="mobile-logo">
+            <img src="https://res.cloudinary.com/lazerous/image/upload/v1634195883/pmfme-logo-website_y2qqqy.png" alt="ODOP Logo">
+            <span>ODOP</span>
+        </div>
+        <button class="close-menu-btn" (click)="closeMobileMenu()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Search -->
+    <div class="mobile-search">
+        <input
+            type="text"
+            [(ngModel)]="GLOBAL_SEARCH"
+            placeholder="Search..."
+            (keyup.enter)="searchThing()"
+        />
+        <button (click)="searchThing()">
+            <i class="fas fa-search"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Location Indicator -->
+    <div class="mobile-location" (click)="refreshLocation()">
+        <div class="mobile-location-icon">
+            <i class="fas fa-check-circle" *ngIf="hasValidLocation() && !isLocationLoading"></i>
+            <i class="fas fa-map-marker-alt" *ngIf="!hasValidLocation() && !isLocationLoading"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isLocationLoading"></i>
+        </div>
+        <div class="mobile-location-info">
+            <span class="mobile-location-label">Delivering to</span>
+            <span class="mobile-location-name">{{ getLocationDisplayName() }}</span>
+        </div>
+        <i class="fas fa-chevron-right mobile-location-arrow"></i>
+    </div>
+
+    <!-- Mobile Navigation Links -->
+    <nav class="mobile-nav-links">
+        <a routerLink="/" (click)="closeMobileMenu()" [class.active]="activeTab === 'home'">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a *ngIf="!isVendorOnlySession()" routerLink="/products" (click)="closeMobileMenu()" [class.active]="activeTab === 'products'">
+            <i class="fas fa-box"></i> Products
+        </a>
+        <a *ngIf="isVendorOnlySession()" routerLink="/vendor-dashboard" (click)="closeMobileMenu()">
+            <i class="fas fa-store"></i> My Store
+        </a>
+        <a (click)="navigateAndScroll('about')" [class.active]="activeTab === 'about'">
+            <i class="fas fa-info-circle"></i> About Us
+        </a>
+        <a (click)="navigateAndScroll('impact')" [class.active]="activeTab === 'impact'">
+            <i class="fas fa-chart-line"></i> Impact
+        </a>
+        <a routerLink="/contact_us" (click)="closeMobileMenu()" [class.active]="activeTab === 'contact'">
+            <i class="fas fa-envelope"></i> Contact Us
+        </a>
+
+        <div class="mobile-nav-divider"></div>
+
+        <!-- Customer Quick Links -->
+        <ng-container *ngIf="userState.customer">
+            <a (click)="openWishlistDialog($event)">
+                <i class="fas fa-heart"></i> Wishlist 
+                <span class="mobile-badge">{{ userState.customer.wishlistProductIds?.length ?? 0 }}</span>
+            </a>
+            <a (click)="openCartDialog($event)">
+                <i class="fas fa-shopping-cart"></i> Cart 
+                <span class="mobile-badge">{{ userState.customer.cartProductIds?.length ?? 0 }}</span>
+            </a>
+            <a routerLink="/customer-dashboard" (click)="closeMobileMenu()">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+        </ng-container>
+
+        <!-- Vendor Quick Links -->
+        <ng-container *ngIf="userState.vendor">
+            <a routerLink="/vendor-dashboard" (click)="closeMobileMenu()">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+        </ng-container>
+
+        <!-- Admin Quick Links -->
+        <ng-container *ngIf="userState.admin">
+            <a routerLink="/admin-dashboard" (click)="closeMobileMenu()">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+        </ng-container>
+    </nav>
+
+    <!-- Mobile User Section -->
+    <div class="mobile-user-section">
+        <ng-container *ngIf="userState.customer || userState.vendor || userState.admin; else guestButtons">
+            <div class="mobile-user-info">
+                <img [src]="customerProfileImageUrl || vendorProfileImageUrl || adminProfileImageUrl || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'" alt="Profile">
+                <div class="mobile-user-details">
+                    <span class="user-type">{{ userState.customer ? 'Customer' : userState.vendor ? 'Vendor' : 'Admin' }}</span>
+                    <span class="user-name">{{ userState.customer?.fullName || userState.vendor?.shoppeeName || userState.admin?.fullName }}</span>
+                </div>
+            </div>
+            <div class="mobile-user-actions">
+                <button (click)="openLogoutDialog()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </ng-container>
+        <ng-template #guestButtons>
+            <div class="mobile-auth-buttons">
+                <button class="login-btn" (click)="openLoginDialog()">Login</button>
+                <button class="register-btn" (click)="openRegisterDialog()">Register</button>
+            </div>
+        </ng-template>
+    </div>
+</div>
+
+<main>
+    <router-outlet></router-outlet>
+</main>
+
+<app-footer-component></app-footer-component>
+

@@ -1,0 +1,218 @@
+<div class="inventory-container">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner-ring"></div>
+      <span>Loading inventory...</span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="loadError && !isLoading">
+    <div class="error-content">
+      <div class="error-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3>Unable to Load Inventory</h3>
+      <p>{{ loadError }}</p>
+      <button class="retry-btn" (click)="refreshInventory()">
+        <i class="fas fa-redo"></i>
+        Try Again
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <ng-container *ngIf="!isLoading && !loadError">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-warehouse"></i>
+        Inventory Management
+      </h1>
+      <p class="page-subtitle">Track stock levels, manage restocking, and monitor inventory health</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="refreshInventory()" [disabled]="isLoading" [class.rotating]="isLoading">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+      <button class="btn btn-outline" (click)="exportInventory()">
+        <i class="fas fa-file-export"></i>
+        Export
+      </button>
+      <button class="btn btn-primary" (click)="bulkUpdate()">
+        <i class="fas fa-edit"></i>
+        Bulk Update
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-cards">
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <i class="fas fa-box"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{inventoryStats.totalProducts}}</span>
+        <span class="stat-label">Total Products</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon in-stock">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{inventoryStats.inStock}}</span>
+        <span class="stat-label">In Stock</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon low-stock">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{inventoryStats.lowStock}}</span>
+        <span class="stat-label">Low Stock</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon out-of-stock">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{inventoryStats.outOfStock}}</span>
+        <span class="stat-label">Out of Stock</span>
+      </div>
+    </div>
+    <div class="stat-card wide">
+      <div class="stat-icon value">
+        <i class="fas fa-rupee-sign"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">₹{{inventoryStats.totalValue | number}}</span>
+        <span class="stat-label">Total Inventory Value</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Main Inventory Table -->
+    <div class="inventory-section">
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search products or SKU..." [(ngModel)]="searchQuery">
+        </div>
+        <div class="filter-group">
+          <select [(ngModel)]="selectedCategory" class="filter-select">
+            <option value="all">All Categories</option>
+            <option *ngFor="let cat of categories" [value]="cat.toLowerCase()">{{cat}}</option>
+          </select>
+          <select [(ngModel)]="selectedStatus" class="filter-select">
+            <option value="all">All Status</option>
+            <option value="in-stock">In Stock</option>
+            <option value="low-stock">Low Stock</option>
+            <option value="out-of-stock">Out of Stock</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Inventory Table -->
+      <div class="inventory-table">
+        <div class="table-header">
+          <div class="th product">Product</div>
+          <div class="th sku">SKU</div>
+          <div class="th category">Category</div>
+          <div class="th stock">Stock Level</div>
+          <div class="th status">Status</div>
+          <div class="th actions">Actions</div>
+        </div>
+        <div class="table-body">
+          <div class="table-row" *ngFor="let item of filteredItems">
+            <div class="td product">
+              <img [src]="item.image" [alt]="item.name" class="product-img">
+              <div class="product-info">
+                <span class="product-name">{{item.name}}</span>
+                <span class="product-price">₹{{item.price | number}}</span>
+              </div>
+            </div>
+            <div class="td sku">{{item.sku}}</div>
+            <div class="td category">{{item.category}}</div>
+            <div class="td stock">
+              <div class="stock-info">
+                <span class="stock-count">{{item.currentStock}} / {{item.maxStock}}</span>
+                <div class="stock-bar">
+                  <div class="stock-fill" 
+                       [style.width.%]="getStockPercentage(item)"
+                       [ngClass]="item.status"></div>
+                </div>
+              </div>
+            </div>
+            <div class="td status">
+              <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+                {{item.status | titlecase}}
+              </span>
+            </div>
+            <div class="td actions">
+              <button class="action-btn" (click)="updateStock(item)" title="Update Stock">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn restock" (click)="restockItem(item)" title="Restock">
+                <i class="fas fa-plus-circle"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stock Alerts Sidebar -->
+    <div class="alerts-section">
+      <div class="alerts-header">
+        <h3>
+          <i class="fas fa-bell"></i>
+          Stock Alerts
+        </h3>
+        <span class="alerts-count">{{stockAlerts.length}}</span>
+      </div>
+      <div class="alerts-list">
+        <div class="alert-item" *ngFor="let alert of stockAlerts" [ngClass]="alert.urgency">
+          <div class="alert-icon">
+            <i class="fas" [ngClass]="alert.urgency === 'critical' ? 'fa-times-circle' : 'fa-exclamation-triangle'"></i>
+          </div>
+          <div class="alert-content">
+            <span class="alert-product">{{alert.productName}}</span>
+            <span class="alert-stock">
+              Stock: {{alert.currentStock}} (Min: {{alert.minStock}})
+            </span>
+          </div>
+          <button class="btn-restock">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <h4>Quick Actions</h4>
+        <button class="quick-action-btn">
+          <i class="fas fa-file-csv"></i>
+          Import Stock from CSV
+        </button>
+        <button class="quick-action-btn">
+          <i class="fas fa-sync"></i>
+          Sync with Warehouse
+        </button>
+        <button class="quick-action-btn">
+          <i class="fas fa-history"></i>
+          View Stock History
+        </button>
+      </div>
+    </div>
+  </div>
+  </ng-container>
+</div>

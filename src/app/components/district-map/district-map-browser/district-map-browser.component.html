@@ -1,0 +1,403 @@
+<!-- District Map Browser Page -->
+<div class="district-map-page">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-background">
+      <div class="hero-pattern"></div>
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-badge">
+          <i class="fas fa-map-marked-alt"></i>
+          One District One Product
+        </span>
+        <h1>Explore India's Craft Heritage</h1>
+        <p>Discover unique products from 761 districts across India. Each district, one signature product.</p>
+        
+        <!-- Stats Row -->
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-value">{{ formatNumber(mapStats.totalDistricts) }}</span>
+            <span class="stat-label">Districts</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ formatNumber(mapStats.totalProducts) }}</span>
+            <span class="stat-label">Products</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ formatNumber(mapStats.totalArtisans) }}</span>
+            <span class="stat-label">Artisans</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ mapStats.giTaggedProducts }}</span>
+            <span class="stat-label">GI Tagged</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search & Filters Bar -->
+  <section class="search-bar-section">
+    <div class="container">
+      <div class="search-bar-wrapper">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery"
+            (input)="onSearch()"
+            placeholder="Search by district, product, or state..."
+          >
+        </div>
+        
+        <div class="filter-group">
+          <select [(ngModel)]="filterOptions.productCategory" (change)="applyFilters()">
+            <option *ngFor="let cat of productCategories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+        
+        <div class="filter-toggles">
+          <label class="toggle-option" [class.active]="filterOptions.giTagged">
+            <input type="checkbox" [(ngModel)]="filterOptions.giTagged" (change)="applyFilters()">
+            <i class="fas fa-award"></i> GI Tagged
+          </label>
+          <label class="toggle-option" [class.active]="filterOptions.exportReady">
+            <input type="checkbox" [(ngModel)]="filterOptions.exportReady" (change)="applyFilters()">
+            <i class="fas fa-globe"></i> Export Ready
+          </label>
+        </div>
+        
+        <div class="view-toggle">
+          <button [class.active]="viewMode === 'map'" (click)="toggleView('map')">
+            <i class="fas fa-map"></i> Map
+          </button>
+          <button [class.active]="viewMode === 'list'" (click)="toggleView('list')">
+            <i class="fas fa-th-large"></i> Grid
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Loading ODOP Map...</p>
+      </div>
+
+      <!-- Map View -->
+      <div class="map-view" *ngIf="!isLoading && viewMode === 'map'">
+        <div class="map-layout">
+          <!-- States List Sidebar -->
+          <aside class="states-sidebar">
+            <div class="sidebar-header">
+              <h3>
+                <i class="fas fa-map"></i>
+                States & UTs
+              </h3>
+              <span class="count">{{ states.length }} States</span>
+            </div>
+            
+            <div class="states-list">
+              <div 
+                *ngFor="let state of states"
+                class="state-item"
+                [class.active]="selectedState?.code === state.code"
+                (click)="selectState(state)"
+                (mouseenter)="highlightState(state, true)"
+                (mouseleave)="highlightState(state, false)"
+              >
+                <div class="state-info">
+                  <h4>{{ state.name }}</h4>
+                  <p>{{ state.districtCount }} districts • {{ state.productCount }} products</p>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Map Container -->
+          <div class="map-container" #mapContainer>
+            <!-- India SVG Map -->
+            <div class="india-map-visual">
+              <div class="svg-map-wrapper">
+                <object 
+                  type="image/svg+xml" 
+                  data="assets/images/india-map.svg" 
+                  class="india-svg-map"
+                  (load)="onMapLoaded($event)"
+                >
+                  <!-- Fallback for browsers that don't support SVG -->
+                  <img src="assets/images/india-map.svg" alt="India ODOP Map" class="fallback-map">
+                </object>
+                
+                <!-- Interactive state markers overlay -->
+                <div class="state-markers-overlay">
+                  <div 
+                    *ngFor="let state of states"
+                    class="state-marker-overlay"
+                    [class.highlighted]="state.isHighlighted"
+                    [class.selected]="selectedState?.code === state.code"
+                    [ngClass]="getStateClass(state.code)"
+                    [attr.data-state]="state.code"
+                    (click)="selectState(state)"
+                    (mouseenter)="highlightState(state, true)"
+                    (mouseleave)="highlightState(state, false)"
+                    [ngStyle]="getStateMarkerPosition(state.code)"
+                  >
+                    <div class="marker-tooltip">
+                      <strong>{{ state.name }}</strong>
+                      <span>{{ state.productCount }} Products</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="map-legend">
+                <span class="legend-item high"><span class="dot"></span> High (40+ products)</span>
+                <span class="legend-item medium"><span class="dot"></span> Medium (25-40)</span>
+                <span class="legend-item low"><span class="dot"></span> Low (&lt;25)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Selected State/District Panel -->
+          <aside class="detail-panel" *ngIf="selectedState || selectedDistrict">
+            <!-- State Selected -->
+            <div class="panel-content state-panel" *ngIf="selectedState && !selectedDistrict">
+              <button class="close-panel" (click)="clearStateSelection()">
+                <i class="fas fa-times"></i>
+              </button>
+              
+              <div class="panel-header">
+                <h2>{{ selectedState.name }}</h2>
+                <p>{{ selectedState.districtCount }} Districts under ODOP</p>
+              </div>
+              
+              <div class="panel-stats">
+                <div class="stat">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>{{ selectedState.districtCount }} Districts</span>
+                </div>
+                <div class="stat">
+                  <i class="fas fa-box"></i>
+                  <span>{{ selectedState.productCount }} Products</span>
+                </div>
+              </div>
+              
+              <div class="top-products">
+                <h4>Top Products</h4>
+                <div class="product-tags">
+                  <span *ngFor="let product of selectedState.topProducts" class="product-tag">
+                    {{ product }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="districts-in-state">
+                <h4>Districts ({{ filteredDistricts.length }})</h4>
+                <div class="districts-list">
+                  <div 
+                    *ngFor="let district of filteredDistricts"
+                    class="district-mini-card"
+                    (click)="selectDistrict(district)"
+                  >
+                    <div class="district-info">
+                      <h5>{{ district.name }}</h5>
+                      <p>{{ district.odopProduct }}</p>
+                    </div>
+                    <div class="district-badges">
+                      <span class="badge gi" *ngIf="district.giTagged">GI</span>
+                      <span class="badge export" *ngIf="district.exportReady">
+                        <i class="fas fa-globe"></i>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- District Selected -->
+            <div class="panel-content district-panel" *ngIf="selectedDistrict">
+              <button class="back-btn" (click)="selectedDistrict = null">
+                <i class="fas fa-arrow-left"></i> Back to {{ selectedState?.name }}
+              </button>
+              
+              <div class="district-image">
+                <img [src]="selectedDistrict.imageUrl" [alt]="selectedDistrict.odopProduct">
+                <div class="image-overlay">
+                  <span class="category-tag">{{ selectedDistrict.productCategory }}</span>
+                </div>
+              </div>
+              
+              <div class="district-header">
+                <h2>{{ selectedDistrict.name }}</h2>
+                <p class="state-name">{{ selectedDistrict.state }}</p>
+              </div>
+              
+              <div class="odop-product-highlight">
+                <span class="label">ODOP Product</span>
+                <h3>{{ selectedDistrict.odopProduct }}</h3>
+              </div>
+              
+              <p class="district-description">{{ selectedDistrict.description }}</p>
+              
+              <div class="district-stats">
+                <div class="stat-card">
+                  <i class="fas fa-user-tie"></i>
+                  <span class="value">{{ formatNumber(selectedDistrict.artisanCount) }}</span>
+                  <span class="label">Artisans</span>
+                </div>
+                <div class="stat-card">
+                  <i class="fas fa-box-open"></i>
+                  <span class="value">{{ selectedDistrict.productCount }}</span>
+                  <span class="label">Products</span>
+                </div>
+              </div>
+              
+              <div class="district-badges-full">
+                <span class="badge-full gi" *ngIf="selectedDistrict.giTagged">
+                  <i class="fas fa-award"></i> GI Tagged Product
+                </span>
+                <span class="badge-full export" *ngIf="selectedDistrict.exportReady">
+                  <i class="fas fa-globe"></i> Export Ready
+                </span>
+              </div>
+              
+              <button class="btn btn-primary btn-block" (click)="viewDistrictProducts(selectedDistrict)">
+                <i class="fas fa-shopping-bag"></i>
+                View Products from {{ selectedDistrict.name }}
+              </button>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Grid View -->
+      <div class="grid-view" *ngIf="!isLoading && viewMode === 'list'">
+        <div class="grid-header">
+          <h2>All ODOP Districts</h2>
+          <p>Showing {{ filteredDistricts.length }} districts</p>
+        </div>
+        
+        <div class="districts-grid">
+          <div 
+            *ngFor="let district of filteredDistricts"
+            class="district-card"
+            (click)="selectDistrict(district)"
+          >
+            <div class="card-image">
+              <img [src]="district.imageUrl" [alt]="district.odopProduct">
+              <div class="card-badges">
+                <span class="badge gi" *ngIf="district.giTagged">
+                  <i class="fas fa-award"></i> GI
+                </span>
+                <span class="badge export" *ngIf="district.exportReady">
+                  <i class="fas fa-globe"></i>
+                </span>
+              </div>
+            </div>
+            <div class="card-content">
+              <span class="state-tag">{{ district.state }}</span>
+              <h3>{{ district.name }}</h3>
+              <div class="product-name">
+                <i class="fas fa-star"></i>
+                {{ district.odopProduct }}
+              </div>
+              <p class="category">{{ district.productCategory }}</p>
+              <div class="card-stats">
+                <span><i class="fas fa-user"></i> {{ formatNumber(district.artisanCount) }} artisans</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="filteredDistricts.length === 0">
+          <i class="fas fa-search"></i>
+          <h3>No districts found</h3>
+          <p>Try adjusting your search or filters</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Featured Products Section -->
+  <section class="featured-section">
+    <div class="container">
+      <div class="section-header">
+        <h2><i class="fas fa-crown"></i> Featured ODOP Products</h2>
+        <p>Discover the best of India's craft heritage</p>
+      </div>
+      
+      <div class="featured-grid">
+        <div class="featured-card large">
+          <div class="featured-image">
+            <img src="assets/images/featured/banarasi.jpg" alt="Banarasi Silk">
+          </div>
+          <div class="featured-content">
+            <span class="location"><i class="fas fa-map-marker-alt"></i> Varanasi, UP</span>
+            <h3>Banarasi Silk Sarees</h3>
+            <p>5000+ years of heritage weaving</p>
+            <button class="btn btn-outline" routerLink="/products" [queryParams]="{district: 'Varanasi'}">
+              Explore <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="featured-card">
+          <div class="featured-image">
+            <img src="assets/images/featured/madhubani.jpg" alt="Madhubani Art">
+          </div>
+          <div class="featured-content">
+            <span class="location"><i class="fas fa-map-marker-alt"></i> Madhubani, Bihar</span>
+            <h3>Madhubani Paintings</h3>
+          </div>
+        </div>
+        
+        <div class="featured-card">
+          <div class="featured-image">
+            <img src="assets/images/featured/blue-pottery.jpg" alt="Blue Pottery">
+          </div>
+          <div class="featured-content">
+            <span class="location"><i class="fas fa-map-marker-alt"></i> Jaipur, Rajasthan</span>
+            <h3>Blue Pottery</h3>
+          </div>
+        </div>
+        
+        <div class="featured-card">
+          <div class="featured-image">
+            <img src="assets/images/featured/channapatna.jpg" alt="Channapatna Toys">
+          </div>
+          <div class="featured-content">
+            <span class="location"><i class="fas fa-map-marker-alt"></i> Channapatna, Karnataka</span>
+            <h3>Lacquer Toys</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Support Local Artisans</h2>
+        <p>Every purchase supports traditional craftspeople and preserves India's heritage</p>
+        <div class="cta-buttons">
+          <button class="btn btn-primary" routerLink="/products">
+            <i class="fas fa-shopping-bag"></i> Shop ODOP Products
+          </button>
+          <button class="btn btn-outline" routerLink="/artisan-stories">
+            <i class="fas fa-users"></i> Meet the Artisans
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,194 @@
+<div class="variant-selector" [class.compact]="compactMode">
+  
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="skeleton-row" *ngFor="let i of [1, 2]">
+      <div class="skeleton skeleton-label"></div>
+      <div class="skeleton-options">
+        <div class="skeleton skeleton-option" *ngFor="let j of [1, 2, 3]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="errorMessage && !isLoading">
+    <span class="error-icon">⚠️</span>
+    <span class="error-text">{{ errorMessage }}</span>
+  </div>
+
+  <!-- Variant Options -->
+  <div class="variant-options" *ngIf="!isLoading && variants.length > 0">
+    
+    <!-- Iterate over attributes from variant data -->
+    <div class="attribute-group" *ngFor="let attrCode of (selectedVariant?.attributes | keyvalue); trackBy: trackByAttributeCode">
+      <div class="attribute-header">
+        <label class="attribute-label">{{ attrCode.key | titlecase }}:</label>
+        <span class="selected-value">{{ selectedAttributes[attrCode.key] || 'Select' }}</span>
+        
+        <!-- Size Guide Link (for size attributes) -->
+        <button 
+          class="size-guide-btn" 
+          *ngIf="attrCode.key.toLowerCase() === 'size'"
+          (click)="toggleSizeGuide()">
+          📏 Size Guide
+        </button>
+      </div>
+
+      <div class="attribute-values">
+        <ng-container [ngSwitch]="attrCode.key.toLowerCase()">
+          
+          <!-- Color Swatches -->
+          <ng-container *ngSwitchCase="'color'">
+            <button 
+              *ngFor="let value of getAttributeValues(attrCode.key); trackBy: trackByValue"
+              class="color-swatch"
+              [class.selected]="isAttributeSelected(attrCode.key, value.value)"
+              [class.unavailable]="!isAttributeAvailable(attrCode.key, value.value)"
+              [style.background-color]="value.colorCode || value.value"
+              [title]="value.label"
+              (click)="selectAttribute(attrCode.key, value.value)"
+              [disabled]="!isAttributeAvailable(attrCode.key, value.value)">
+              <span class="check-mark" *ngIf="isAttributeSelected(attrCode.key, value.value)">✓</span>
+            </button>
+          </ng-container>
+
+          <!-- Size Buttons -->
+          <ng-container *ngSwitchCase="'size'">
+            <button 
+              *ngFor="let value of getAttributeValues(attrCode.key); trackBy: trackByValue"
+              class="size-btn"
+              [class.selected]="isAttributeSelected(attrCode.key, value.value)"
+              [class.unavailable]="!isAttributeAvailable(attrCode.key, value.value)"
+              (click)="selectAttribute(attrCode.key, value.value)"
+              [disabled]="!isAttributeAvailable(attrCode.key, value.value)">
+              {{ value.label }}
+            </button>
+          </ng-container>
+
+          <!-- Default Buttons for other attributes -->
+          <ng-container *ngSwitchDefault>
+            <button 
+              *ngFor="let value of getAttributeValues(attrCode.key); trackBy: trackByValue"
+              class="option-btn"
+              [class.selected]="isAttributeSelected(attrCode.key, value.value)"
+              [class.unavailable]="!isAttributeAvailable(attrCode.key, value.value)"
+              (click)="selectAttribute(attrCode.key, value.value)"
+              [disabled]="!isAttributeAvailable(attrCode.key, value.value)">
+              {{ value.label }}
+            </button>
+          </ng-container>
+
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Price Display -->
+    <div class="price-section" *ngIf="showPrice && selectedVariant">
+      <div class="price-row">
+        <span class="current-price">{{ formatPrice(selectedVariant.price) }}</span>
+        <span class="original-price" *ngIf="selectedVariant.mrp > selectedVariant.price">
+          {{ formatPrice(selectedVariant.mrp) }}
+        </span>
+        <span class="discount-badge" *ngIf="getDiscountPercentage() > 0">
+          {{ getDiscountPercentage() }}% OFF
+        </span>
+      </div>
+      <p class="tax-info">Inclusive of all taxes</p>
+    </div>
+
+    <!-- Stock Status -->
+    <div class="stock-status" *ngIf="showStock && selectedVariant" [class]="getStockStatusClass()">
+      <span class="status-dot"></span>
+      <span class="status-text">{{ getStockStatus() }}</span>
+    </div>
+
+    <!-- Quantity Selector -->
+    <div class="quantity-section" *ngIf="selectedVariant && selectedVariant.availableStock > 0">
+      <label class="quantity-label">Quantity:</label>
+      <div class="quantity-controls">
+        <button class="qty-btn" (click)="decrementQuantity()" [disabled]="quantity <= 1">−</button>
+        <span class="qty-value">{{ quantity }}</span>
+        <button class="qty-btn" (click)="incrementQuantity()" [disabled]="quantity >= maxQuantity">+</button>
+      </div>
+    </div>
+
+    <!-- Add to Cart Button -->
+    <button 
+      class="add-to-cart-btn"
+      [class.disabled]="!selectedVariant || selectedVariant.availableStock === 0"
+      (click)="onAddToCart()"
+      [disabled]="!selectedVariant || selectedVariant.availableStock === 0">
+      <span class="cart-icon">🛒</span>
+      <span *ngIf="selectedVariant?.availableStock === 0">Out of Stock</span>
+      <span *ngIf="selectedVariant && selectedVariant.availableStock > 0">Add to Cart</span>
+      <span *ngIf="!selectedVariant">Select Options</span>
+    </button>
+
+    <!-- SKU Info -->
+    <div class="sku-info" *ngIf="selectedVariant?.sku">
+      <span>SKU: {{ selectedVariant?.sku }}</span>
+    </div>
+
+  </div>
+
+  <!-- No Variants Message -->
+  <div class="no-variants" *ngIf="!isLoading && variants.length === 0">
+    <p>This product is available in a single variant.</p>
+  </div>
+
+  <!-- Size Guide Modal -->
+  <div class="size-guide-overlay" *ngIf="showSizeGuide" (click)="toggleSizeGuide()">
+    <div class="size-guide-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Size Guide</h3>
+        <button class="close-btn" (click)="toggleSizeGuide()">✕</button>
+      </div>
+      <div class="modal-content">
+        <table class="size-table">
+          <thead>
+            <tr>
+              <th>Size</th>
+              <th>Chest (in)</th>
+              <th>Length (in)</th>
+              <th>Shoulder (in)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>S</td>
+              <td>36-38</td>
+              <td>26</td>
+              <td>16</td>
+            </tr>
+            <tr>
+              <td>M</td>
+              <td>38-40</td>
+              <td>27</td>
+              <td>17</td>
+            </tr>
+            <tr>
+              <td>L</td>
+              <td>40-42</td>
+              <td>28</td>
+              <td>18</td>
+            </tr>
+            <tr>
+              <td>XL</td>
+              <td>42-44</td>
+              <td>29</td>
+              <td>19</td>
+            </tr>
+            <tr>
+              <td>XXL</td>
+              <td>44-46</td>
+              <td>30</td>
+              <td>20</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="size-note">* Measurements may vary slightly. For handcrafted items, slight variations are natural.</p>
+      </div>
+    </div>
+  </div>
+
+</div>

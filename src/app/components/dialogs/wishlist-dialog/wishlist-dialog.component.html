@@ -1,0 +1,171 @@
+<div class="wishlist-overlay" [@overlayAnimation] (click)="closeDialog()">
+  <div class="wishlist-dialog" [@dialogAnimation] (click)="$event.stopPropagation()">
+    <!-- Header Section -->
+    <div class="dialog-header">
+      <div class="header-content">
+        <div class="title-section">
+          <svg class="wishlist-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <h2 class="dialog-title">My Wishlist</h2>
+          <span class="item-count">({{wishlistItems.length}} items)</span>
+        </div>
+        <button class="close-button" (click)="closeDialog()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="control-bar">
+      <div class="search-container">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="M21 21l-4.35-4.35"></path>
+        </svg>
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Search your wishlist..."
+          [(ngModel)]="searchQuery"
+          (input)="filterItems()"
+        >
+      </div>
+      <div class="filter-container">
+        <select class="filter-select" [(ngModel)]="selectedFilter" (change)="filterItems()">
+          <option value="all">All Items</option>
+          <option value="in-stock">In Stock</option>
+          <option value="discounted">On Sale</option>
+          <option value="recent">Recently Added</option>
+        </select>
+        <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <polyline points="6,9 12,15 18,9"></polyline>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Wishlist Content -->
+    <div class="wishlist-content">
+      <!-- Empty State -->
+      <div *ngIf="filteredItems.length === 0 && !isLoading" class="empty-state">
+        <div class="empty-illustration">
+          <svg viewBox="0 0 120 120" fill="none">
+            <circle cx="60" cy="60" r="50" stroke="#FFA500" stroke-width="2" fill="none" opacity="0.3"/>
+            <path d="M60 25C45 25 35 35 35 50C35 65 60 85 60 85S85 65 85 50C85 35 75 25 60 25Z" stroke="#FFA500" stroke-width="2" fill="#FFA500" opacity="0.1"/>
+          </svg>
+        </div>
+        <h3 class="empty-title">Your wishlist is empty</h3>
+        <p class="empty-description">Start exploring products and save your favorites here!</p>
+        <button class="explore-button" (click)="startShopping()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5.5M7 13l2.5 5.5M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6"/>
+          </svg>
+          Start Shopping
+        </button>
+      </div>
+
+      <!-- Wishlist Items Grid -->
+      <div *ngIf="filteredItems.length > 0" class="items-grid">
+        <div 
+          *ngFor="let item of filteredItems; trackBy: trackByItemId; let i = index" 
+          class="wishlist-item"
+          [style.animation-delay.ms]="i * 100"
+        >
+          <div class="item-image-container">
+            <img [src]="item.image" [alt]="item.name" class="item-image">
+            <div class="discount-badge" *ngIf="item.discountPercent > 0">
+              -{{item.discountPercent}}%
+            </div>
+            <div class="stock-indicator" [class.in-stock]="item.inStock" [class.out-of-stock]="!item.inStock">
+              <div class="stock-dot"></div>
+            </div>
+          </div>
+
+          <div class="item-details">
+            <div class="item-header">
+              <h3 class="item-name">{{item.name}}</h3>
+              <span class="vendor-name">by {{item.vendor}}</span>
+            </div>
+
+            <div class="price-section">
+              <span class="current-price">₹{{item.currentPrice | number:'1.0-0'}}</span>
+              <span *ngIf="item.originalPrice !== item.currentPrice" class="original-price">
+                ₹{{item.originalPrice | number:'1.0-0'}}
+              </span>
+            </div>
+
+            <div class="item-meta">
+              <div class="stock-status">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="1" y="3" width="15" height="13"></rect>
+                  <path d="M16 8h4l3 3v5h-7z"></path>
+                  <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                  <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                </svg>
+                <span [class]="item.inStock ? 'in-stock-text' : 'out-of-stock-text'">
+                  {{item.inStock ? 'In Stock' : 'Out of Stock'}}
+                </span>
+              </div>
+              <div class="date-added">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>{{item.dateAdded | date:'dd MMM yyyy'}}</span>
+              </div>
+            </div>
+
+            <div class="item-actions">
+              <button 
+                class="action-button primary"
+                [class.added]="isInCart(item.id)"
+                [disabled]="!item.inStock"
+                (click)="moveToCart(item)"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path *ngIf="!isInCart(item.id)" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5.5M7 13l2.5 5.5M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6"/>
+                  <path *ngIf="isInCart(item.id)" d="M20 6L9 17l-5-5"/>
+                </svg>
+                {{ isInCart(item.id) ? 'Added to Cart' : 'Add to Cart' }}
+              </button>
+              <button class="action-button secondary" (click)="viewDetails(item)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                View
+              </button>
+              <button class="action-button danger" (click)="removeItem(item.id)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <polyline points="3,6 5,6 21,6"></polyline>
+                  <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                </svg>
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="dialog-footer" *ngIf="filteredItems.length > 0">
+      <div class="footer-tip">
+        <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"></path>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span>Items in your wishlist are saved across all devices</span>
+      </div>
+      <button class="continue-shopping-button" (click)="continueShopping()">
+        Continue Shopping
+      </button>
+    </div>
+  </div>
+</div>

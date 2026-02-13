@@ -1,0 +1,118 @@
+<!-- dashboard.component.html -->
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h2 class="logo-text" *ngIf="!sidebarCollapsed">My Dashboard</h2>
+      </div>
+      <button class="collapse-btn" (click)="toggleSidebar()">
+        <i class="fas" [ngClass]="sidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        <li class="nav-item" 
+            *ngFor="let item of navigationItems" 
+            [class.active]="activeTab === item.key"
+            (click)="setActiveTab(item.key)">
+          <a class="nav-link">
+            <div class="nav-icon">
+              <i [class]="item.icon"></i>
+            </div>
+            <span class="nav-text" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+            <div class="active-indicator" *ngIf="activeTab === item.key"></div>
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-divider"></div>
+
+      <ul class="nav-list nav-bottom">
+        <li class="nav-item" 
+            *ngFor="let item of bottomNavigationItems" 
+            [class.active]="activeTab === item.key"
+            (click)="setActiveTab(item.key)">
+          <a class="nav-link" *ngIf="item.key == 'settings'">
+            <div class="nav-icon">
+              <i [class]="item.icon"></i>
+            </div>
+            <span class="nav-text" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+            <div class="active-indicator" *ngIf="activeTab === item.key"></div>
+          </a>
+          <a class="nav-link" *ngIf="item.key == 'logout'" (click)="openLogoutDialog(); $event.preventDefault();">
+            <div class="nav-icon">
+              <i [class]="item.icon"></i>
+            </div>
+            <span class="nav-text" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+            <div class="active-indicator" *ngIf="activeTab === item.key"></div>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+  <!-- Header -->
+  <header class="content-header">
+    <div class="header-left">
+      <button class="back-btn" *ngIf="canGoBack()" (click)="goBack()" title="Go Back">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <div class="greeting-container">
+        <h1 class="page-title">Welcome back, {{ getStringUntilFirstSpace(userState.customer?.fullName) }}</h1>
+        <p class="page-subtitle">Here's what's happening with your account today</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-actions">
+        <button class="notification-btn" (click)="toggleNotifications()">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge">3</span>
+        </button>
+        <div class="user-avatar" (click)="openUserMenu()">
+          <img [src]="userState.customer?.profilePicturePath || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'" alt="User Avatar">
+          <div class="status-indicator"></div>
+        </div>
+      </div>
+      
+      <!-- Notification Dropdown -->
+      <div class="notification-dropdown" *ngIf="showNotifications" [@slideInOut]>
+        <div class="notification-header">
+          <h3>Notifications</h3>
+          <button class="mark-all-read" (click)="markAllAsRead()">Mark all as read</button>
+        </div>
+        <div class="notification-list">
+          <div class="notification-item" *ngFor="let notification of notifications" [class.unread]="!notification.read">
+            <div class="notification-icon" [style.background-color]="notification.color + '20'">
+              <i [class]="notification.icon" [style.color]="notification.color"></i>
+            </div>
+            <div class="notification-content">
+              <h4>{{ notification.title }}</h4>
+              <p>{{ notification.message }}</p>
+              <span class="notification-time">{{ notification.time }}</span>
+            </div>
+            <div class="notification-actions">
+              <button class="dismiss-btn" (click)="dismissNotification(+notification.id)">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="notification-footer">
+          <button class="view-all-notifications" routerLink="/notifications">View all notifications</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- router outlet -->
+  <div class="dashboard-content">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+</div>

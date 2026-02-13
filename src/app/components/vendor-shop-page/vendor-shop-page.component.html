@@ -1,0 +1,759 @@
+<!-- Premium Vendor Shop Page -->
+<div class="vendor-shop-page">
+  
+  <!-- Premium Loading State -->
+  <div *ngIf="isLoading" class="premium-loader">
+    <div class="loader-content">
+      <div class="loader-spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+      </div>
+      <p class="loader-text">Discovering the artisan's story...</p>
+    </div>
+  </div>
+
+  <!-- Vendor Not Found -->
+  <div *ngIf="!isLoading && vendorNotFound" class="not-found-premium">
+    <div class="not-found-content">
+      <div class="not-found-icon">
+        <i class="fas fa-store-slash"></i>
+      </div>
+      <h2>Shop Not Found</h2>
+      <p>The artisan shop you're looking for doesn't exist or has been temporarily closed.</p>
+      <div class="not-found-actions">
+        <button class="btn-primary" routerLink="/products">
+          <i class="fas fa-compass"></i> Explore Products
+        </button>
+        <button class="btn-secondary" routerLink="/vendor-directory">
+          <i class="fas fa-store"></i> Browse All Shops
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <ng-container *ngIf="!isLoading && !vendorNotFound && vendor">
+    
+    <!-- Sticky Header (on scroll) -->
+    <div class="sticky-header" [class.visible]="isHeaderSticky">
+      <div class="sticky-container">
+        <div class="sticky-left">
+          <img [src]="vendor.profilePictureUrl || 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=100&h=100&fit=crop'" 
+               [alt]="vendor.shoppeeName" class="sticky-logo">
+          <div class="sticky-info">
+            <h3>{{ vendor.shoppeeName || vendor.businessName }}</h3>
+            <span class="sticky-location">
+              <i class="fas fa-map-marker-alt"></i>
+              {{ vendor.locationDistrict }}
+            </span>
+          </div>
+        </div>
+        <div class="sticky-actions">
+          <button class="btn-icon" (click)="contactVendor()" *ngIf="vendor.contactNumber">
+            <i class="fas fa-phone"></i>
+          </button>
+          <button class="btn-icon" (click)="whatsappVendor()" *ngIf="vendor.contactNumber">
+            <i class="fab fa-whatsapp"></i>
+          </button>
+          <button class="btn-follow" [class.following]="isFollowing" (click)="toggleFollow()">
+            <i class="fas" [class.fa-heart]="isFollowing" [class.fa-plus]="!isFollowing"></i>
+            {{ isFollowing ? 'Following' : 'Follow' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <!-- Ambient Background -->
+      <div class="hero-ambient">
+        <div class="ambient-gradient"></div>
+        <div class="ambient-pattern"></div>
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+      </div>
+
+      <div class="hero-container">
+        <!-- Shop Banner/Gallery Preview -->
+        <div class="shop-banner">
+          <div class="banner-gallery">
+            <img [src]="galleryImages[0]" alt="Shop" class="banner-main" 
+                 (click)="openGalleryModal(0)" *ngIf="galleryImages.length > 0">
+            <div class="banner-thumbnails" *ngIf="galleryImages.length > 1">
+              <div class="thumb" *ngFor="let img of galleryImages.slice(1, 4); let i = index"
+                   (click)="openGalleryModal(i + 1)">
+                <img [src]="img" alt="Shop">
+                <div class="thumb-overlay" *ngIf="i === 2 && galleryImages.length > 4">
+                  +{{ galleryImages.length - 4 }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shop Info Card -->
+        <div class="shop-info-card">
+          <!-- Shop Profile Section -->
+          <div class="shop-profile">
+            <div class="profile-image-wrapper">
+              <img [src]="vendor.profilePictureUrl || 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=200&h=200&fit=crop'" 
+                   [alt]="vendor.shoppeeName" class="profile-image"
+                   onerror="this.src='https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=200&h=200&fit=crop'">
+              <div class="verified-badge" *ngIf="vendor.isVerified">
+                <i class="fas fa-check"></i>
+              </div>
+            </div>
+
+            <div class="profile-details">
+              <!-- Badges -->
+              <div class="shop-badges">
+                <span class="badge badge-type" [class]="'type-' + (vendor.vendorType || 'default')">
+                  <i [class]="getVendorTypeIcon(vendor.vendorType)"></i>
+                  {{ getVendorTypeLabel(vendor.vendorType) }}
+                </span>
+                <span class="badge badge-gi" *ngIf="vendor.giTagCertified">
+                  <i class="fas fa-award"></i> GI Certified
+                </span>
+                <span class="badge badge-verified" *ngIf="vendor.isVerified">
+                  <i class="fas fa-shield-alt"></i> Verified
+                </span>
+              </div>
+
+              <!-- Shop Name -->
+              <h1 class="shop-name">{{ vendor.shoppeeName || vendor.businessName }}</h1>
+              
+              <!-- Owner Info -->
+              <p class="shop-owner">
+                <i class="fas fa-user-tie"></i>
+                Owned by <strong>{{ vendor.shopkeeperName || vendor.fullName }}</strong>
+              </p>
+
+              <!-- Location -->
+              <p class="shop-location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ vendor.locationDistrict }}, {{ vendor.locationState }}
+              </p>
+
+              <!-- Quick Stats -->
+              <div class="shop-stats">
+                <div class="stat">
+                  <span class="stat-value">{{ products.length }}</span>
+                  <span class="stat-label">Products</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-value">{{ averageShopRating | number:'1.1-1' }}</span>
+                  <span class="stat-label">Rating</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-value">{{ getYearsInBusiness() }}+</span>
+                  <span class="stat-label">Years</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-value">{{ totalShopReviews }}</span>
+                  <span class="stat-label">Reviews</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="shop-actions">
+            <button class="btn-primary-action" (click)="scrollToProducts()">
+              <i class="fas fa-shopping-bag"></i> View All Products
+            </button>
+            <button class="btn-secondary-action" [class.active]="isFollowing" (click)="toggleFollow()">
+              <i class="fas" [class.fa-heart]="isFollowing" [class.fa-heart-r]="!isFollowing"></i>
+              {{ isFollowing ? 'Following' : 'Follow Shop' }}
+            </button>
+            <div class="action-icons">
+              <button class="icon-btn" (click)="contactVendor()" *ngIf="vendor.contactNumber" title="Call">
+                <i class="fas fa-phone"></i>
+              </button>
+              <button class="icon-btn whatsapp" (click)="whatsappVendor()" *ngIf="vendor.contactNumber" title="WhatsApp">
+                <i class="fab fa-whatsapp"></i>
+              </button>
+              <button class="icon-btn" (click)="emailVendor()" *ngIf="vendor.emailAddress" title="Email">
+                <i class="fas fa-envelope"></i>
+              </button>
+              <div class="share-wrapper">
+                <button class="icon-btn" (click)="showShareMenu = !showShareMenu" title="Share">
+                  <i class="fas fa-share-alt"></i>
+                </button>
+                <div class="share-dropdown" *ngIf="showShareMenu">
+                  <button (click)="shareShop('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                  <button (click)="shareShop('facebook')"><i class="fab fa-facebook"></i> Facebook</button>
+                  <button (click)="shareShop('twitter')"><i class="fab fa-twitter"></i> Twitter</button>
+                  <button (click)="shareShop('copy')"><i class="fas fa-link"></i> Copy Link</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Indicators Section -->
+    <section class="trust-section">
+      <div class="trust-container">
+        <div class="trust-header">
+          <span class="trust-eyebrow">Why Trust Us</span>
+          <h2>Verified & Trusted Seller</h2>
+        </div>
+        <div class="trust-grid">
+          <div class="trust-card" *ngFor="let metric of trustMetrics">
+            <div class="trust-icon">
+              <i [class]="metric.icon"></i>
+            </div>
+            <div class="trust-content">
+              <span class="trust-value">{{ metric.value }}</span>
+              <span class="trust-label">{{ metric.label }}</span>
+              <span class="trust-desc">{{ metric.description }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <section class="tabs-section">
+      <div class="tabs-container">
+        <div class="tabs-nav">
+          <button class="tab-btn" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">
+            <i class="fas fa-box-open"></i> Products
+            <span class="tab-count">{{ products.length }}</span>
+          </button>
+          <button class="tab-btn" [class.active]="activeTab === 'about'" (click)="activeTab = 'about'">
+            <i class="fas fa-store"></i> About Shop
+          </button>
+          <button class="tab-btn" [class.active]="activeTab === 'reviews'" (click)="activeTab = 'reviews'">
+            <i class="fas fa-star"></i> Reviews
+            <span class="tab-count">{{ totalShopReviews }}</span>
+          </button>
+          <button class="tab-btn" [class.active]="activeTab === 'policies'" (click)="activeTab = 'policies'">
+            <i class="fas fa-file-contract"></i> Policies
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Products Tab Content -->
+    <section class="products-section" *ngIf="activeTab === 'products'">
+      <div class="products-container">
+        <!-- Filters Toolbar -->
+        <div class="filters-toolbar">
+          <div class="filter-left">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" 
+                     placeholder="Search in this shop...">
+            </div>
+            <div class="filter-select">
+              <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
+                <option value="all">All Categories</option>
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+            <div class="filter-select">
+              <select [(ngModel)]="sortBy" (change)="applyFilters()">
+                <option value="featured">Featured</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="rating">Best Rating</option>
+                <option value="newest">Newest First</option>
+                <option value="bestselling">Best Selling</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-right">
+            <span class="results-count">{{ filteredProducts.length }} products</span>
+            <div class="view-toggle">
+              <button [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'" title="Grid View">
+                <i class="fas fa-th"></i>
+              </button>
+              <button [class.active]="viewMode === 'list'" (click)="viewMode = 'list'" title="List View">
+                <i class="fas fa-list"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products Loading -->
+        <div *ngIf="productsLoading" class="products-loading">
+          <div class="loading-grid">
+            <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+              <div class="skeleton-image"></div>
+              <div class="skeleton-text"></div>
+              <div class="skeleton-text short"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div *ngIf="!productsLoading && paginatedProducts.length > 0" 
+             class="products-grid" [class.list-view]="viewMode === 'list'">
+          <div class="product-card" *ngFor="let product of paginatedProducts" 
+               (click)="viewProduct(product.productId)">
+            <!-- Product Image -->
+            <div class="product-image">
+              <img [src]="product.productImageURL || 'assets/placeholder-product.png'" 
+                   [alt]="product.productName">
+              
+              <!-- Badges -->
+              <div class="product-badges">
+                <span class="badge-gi" *ngIf="product.giTagCertified">
+                  <i class="fas fa-award"></i> GI Tagged
+                </span>
+                <span class="badge-discount" *ngIf="product.discount">
+                  -{{ product.discount }}%
+                </span>
+                <span class="badge-stock" *ngIf="product.productQuantity === 0">
+                  Out of Stock
+                </span>
+              </div>
+
+              <!-- Quick Actions -->
+              <div class="product-actions">
+                <button class="action-btn" (click)="addToWishlist(product, $event)" title="Add to Wishlist">
+                  <i class="far fa-heart"></i>
+                </button>
+                <button class="action-btn primary" (click)="addToCart(product, $event)" 
+                        [disabled]="product.productQuantity === 0" title="Add to Cart">
+                  <i class="fas fa-shopping-cart"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="product-info">
+              <span class="product-category">{{ product.subCategory || product.craftType }}</span>
+              <h3 class="product-name">{{ product.productName }}</h3>
+              
+              <div class="product-origin" *ngIf="product.originDistrict">
+                <i class="fas fa-map-pin"></i>
+                <span>{{ product.originDistrict }}</span>
+              </div>
+
+              <div class="product-rating" *ngIf="product.rating">
+                <div class="stars">
+                  <i class="fas fa-star" *ngFor="let star of getStars(product.rating)"></i>
+                </div>
+                <span class="rating-value">{{ product.rating | number:'1.1-1' }}</span>
+                <span class="sold-count" *ngIf="product.totalSold">({{ product.totalSold }} sold)</span>
+              </div>
+
+              <div class="product-price">
+                <span class="current-price">₹{{ calculateDiscountedPrice(product) | number }}</span>
+                <span class="original-price" *ngIf="product.discount">₹{{ product.price | number }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!productsLoading && filteredProducts.length === 0" class="empty-products">
+          <i class="fas fa-box-open"></i>
+          <h3>No Products Found</h3>
+          <p *ngIf="searchTerm || selectedCategory !== 'all'">Try adjusting your filters</p>
+          <p *ngIf="!searchTerm && selectedCategory === 'all'">This shop hasn't listed any products yet</p>
+          <button *ngIf="searchTerm || selectedCategory !== 'all'" class="btn-secondary"
+                  (click)="searchTerm = ''; selectedCategory = 'all'; applyFilters()">
+            Clear Filters
+          </button>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="page-numbers">
+            <button *ngFor="let page of [].constructor(totalPages); let i = index"
+                    class="page-num" [class.active]="currentPage === i + 1"
+                    (click)="goToPage(i + 1)">
+              {{ i + 1 }}
+            </button>
+          </div>
+          <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Tab Content -->
+    <section class="about-section" *ngIf="activeTab === 'about'">
+      <div class="about-container">
+        <div class="about-grid">
+          <!-- Shop Story -->
+          <div class="about-card story-card">
+            <div class="card-header">
+              <i class="fas fa-book-open"></i>
+              <h3>Our Story</h3>
+            </div>
+            <div class="card-content">
+              <p *ngIf="vendor.shopDescription">{{ vendor.shopDescription }}</p>
+              <p *ngIf="!vendor.shopDescription">
+                Welcome to {{ vendor.shoppeeName || 'our shop' }}! We are dedicated artisans from 
+                {{ vendor.locationDistrict }}, {{ vendor.locationState }}, preserving traditional 
+                crafts while bringing you the finest handcrafted products. Every piece tells a 
+                story of our heritage and skilled craftsmanship passed down through generations.
+              </p>
+              <div class="story-meta">
+                <span><i class="fas fa-calendar"></i> Established {{ getBusinessSince() }}</span>
+                <span><i class="fas fa-map-marker-alt"></i> {{ vendor.locationDistrict }}, {{ vendor.locationState }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shop Gallery -->
+          <div class="about-card gallery-card">
+            <div class="card-header">
+              <i class="fas fa-images"></i>
+              <h3>Shop Gallery</h3>
+            </div>
+            <div class="card-content">
+              <div class="gallery-grid">
+                <div class="gallery-item" *ngFor="let img of galleryImages; let i = index"
+                     (click)="openGalleryModal(i)">
+                  <img [src]="img" alt="Shop Gallery">
+                  <div class="gallery-overlay">
+                    <i class="fas fa-search-plus"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Location & Visit -->
+          <div class="about-card location-card">
+            <div class="card-header">
+              <i class="fas fa-map-marked-alt"></i>
+              <h3>Visit Our Shop</h3>
+            </div>
+            <div class="card-content">
+              <!-- Map -->
+              <div class="map-container">
+                <iframe [src]="getMapUrl() | safeUrl" width="100%" height="250" 
+                        style="border:0;" allowfullscreen="" loading="lazy">
+                </iframe>
+              </div>
+              
+              <!-- Address -->
+              <div class="location-details">
+                <div class="detail-item">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <div>
+                    <strong>Address</strong>
+                    <p>{{ getFullAddress() || 'Contact for address' }}</p>
+                  </div>
+                </div>
+                <div class="detail-item" *ngIf="vendor.isPhysicalVisitAllowed">
+                  <i class="fas fa-clock"></i>
+                  <div>
+                    <strong>Shop Timings</strong>
+                    <p>{{ vendor.shopTimings || '9:00 AM - 8:00 PM' }}</p>
+                    <span class="sub-text" *ngIf="vendor.shopClosedDays">Closed: {{ vendor.shopClosedDays }}</span>
+                  </div>
+                </div>
+                <div class="detail-item" *ngIf="!vendor.isPhysicalVisitAllowed">
+                  <i class="fas fa-info-circle"></i>
+                  <div>
+                    <strong>Visit Info</strong>
+                    <p>Online orders only. No physical visits.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="location-actions">
+                <button class="btn-directions" (click)="openMaps()">
+                  <i class="fas fa-directions"></i> Get Directions
+                </button>
+                <button class="btn-contact" (click)="contactVendor()" *ngIf="vendor.contactNumber">
+                  <i class="fas fa-phone"></i> Call Now
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Specializations -->
+          <div class="about-card specs-card" *ngIf="vendor.specializations && vendor.specializations.length > 0">
+            <div class="card-header">
+              <i class="fas fa-star"></i>
+              <h3>Our Specializations</h3>
+            </div>
+            <div class="card-content">
+              <div class="specs-list">
+                <span class="spec-tag" *ngFor="let spec of vendor.specializations">
+                  <i class="fas fa-check-circle"></i> {{ spec }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="about-card contact-card">
+            <div class="card-header">
+              <i class="fas fa-address-card"></i>
+              <h3>Contact Information</h3>
+            </div>
+            <div class="card-content">
+              <!-- Show contact info if available -->
+              <div class="contact-list" *ngIf="vendor.contactNumber || vendor.emailAddress || $any(vendor).whatsappNumber">
+                <div class="contact-item" *ngIf="vendor.contactNumber">
+                  <div class="contact-icon phone">
+                    <i class="fas fa-phone"></i>
+                  </div>
+                  <div class="contact-info">
+                    <span class="label">Phone</span>
+                    <a [href]="'tel:' + vendor.contactNumber">{{ vendor.contactNumber }}</a>
+                  </div>
+                  <button class="contact-action-btn phone-btn" (click)="contactVendor()">
+                    <i class="fas fa-phone-alt"></i> Call
+                  </button>
+                </div>
+                <div class="contact-item" *ngIf="vendor.emailAddress">
+                  <div class="contact-icon email">
+                    <i class="fas fa-envelope"></i>
+                  </div>
+                  <div class="contact-info">
+                    <span class="label">Email</span>
+                    <a [href]="'mailto:' + vendor.emailAddress">{{ vendor.emailAddress }}</a>
+                  </div>
+                  <a class="contact-action-btn email-btn" [href]="'mailto:' + vendor.emailAddress">
+                    <i class="fas fa-paper-plane"></i> Send
+                  </a>
+                </div>
+                <div class="contact-item" *ngIf="vendor.contactNumber || $any(vendor).whatsappNumber">
+                  <div class="contact-icon whatsapp">
+                    <i class="fab fa-whatsapp"></i>
+                  </div>
+                  <div class="contact-info">
+                    <span class="label">WhatsApp</span>
+                    <span class="wa-number">{{ $any(vendor).whatsappNumber || vendor.contactNumber }}</span>
+                  </div>
+                  <button class="contact-action-btn wa-action-btn" (click)="whatsappVendor()">
+                    <i class="fab fa-whatsapp"></i> Chat
+                  </button>
+                </div>
+                <!-- Website if available -->
+                <div class="contact-item" *ngIf="$any(vendor).websiteUrl">
+                  <div class="contact-icon website">
+                    <i class="fas fa-globe"></i>
+                  </div>
+                  <div class="contact-info">
+                    <span class="label">Website</span>
+                    <a [href]="$any(vendor).websiteUrl" target="_blank">{{ $any(vendor).websiteUrl | slice:0:35 }}...</a>
+                  </div>
+                  <a class="contact-action-btn web-btn" [href]="$any(vendor).websiteUrl" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Visit
+                  </a>
+                </div>
+              </div>
+              
+              <!-- No contact info available message -->
+              <div class="no-contact-info" *ngIf="!vendor.contactNumber && !vendor.emailAddress && !$any(vendor).whatsappNumber">
+                <div class="no-contact-icon">
+                  <i class="fas fa-user-secret"></i>
+                </div>
+                <h4>Contact Information Not Available</h4>
+                <p>Sorry, this vendor has not shared their contact information. You can still browse their products and place orders through our platform.</p>
+                <button class="btn-browse-products" (click)="activeTab = 'products'">
+                  <i class="fas fa-shopping-bag"></i> Browse Products Instead
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews Tab Content -->
+    <section class="reviews-section" *ngIf="activeTab === 'reviews'">
+      <div class="reviews-container">
+        <div class="reviews-grid">
+          <!-- Rating Summary -->
+          <div class="rating-summary-card">
+            <div class="rating-big">
+              <span class="rating-number">{{ averageShopRating | number:'1.1-1' }}</span>
+              <div class="rating-stars">
+                <i class="fas fa-star" *ngFor="let star of getStars(averageShopRating)"></i>
+              </div>
+              <span class="rating-count">{{ totalShopReviews }} reviews</span>
+            </div>
+            <div class="rating-bars">
+              <div class="bar-row" *ngFor="let stars of [5, 4, 3, 2, 1]">
+                <span class="bar-label">{{ stars }} <i class="fas fa-star"></i></span>
+                <div class="bar-track">
+                  <div class="bar-fill" [style.width.%]="getRatingPercentage(stars)"></div>
+                </div>
+                <span class="bar-count">{{ ratingDistribution[stars] }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reviews List -->
+          <div class="reviews-list">
+            <div class="review-card" *ngFor="let review of shopReviews">
+              <div class="review-header">
+                <img [src]="review.customerImage" [alt]="review.customerName" class="reviewer-image">
+                <div class="reviewer-info">
+                  <span class="reviewer-name">
+                    {{ review.customerName }}
+                    <i class="fas fa-badge-check verified-buyer" *ngIf="review.verified" title="Verified Buyer"></i>
+                  </span>
+                  <div class="review-meta">
+                    <div class="review-stars">
+                      <i class="fas fa-star" *ngFor="let star of getStars(review.rating)"></i>
+                    </div>
+                    <span class="review-date">{{ review.date | date:'mediumDate' }}</span>
+                  </div>
+                </div>
+              </div>
+              <p class="review-text">{{ review.comment }}</p>
+              <div class="review-footer">
+                <button class="helpful-btn" (click)="markReviewHelpful(review.id)">
+                  <i class="far fa-thumbs-up"></i> Helpful ({{ review.helpful }})
+                </button>
+              </div>
+            </div>
+
+            <!-- No Reviews State -->
+            <div class="no-reviews" *ngIf="shopReviews.length === 0">
+              <i class="fas fa-comments"></i>
+              <h3>No Reviews Yet</h3>
+              <p>Be the first to review this shop!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Policies Tab Content -->
+    <section class="policies-section" *ngIf="activeTab === 'policies'">
+      <div class="policies-container">
+        <div class="policies-grid">
+          <!-- Delivery Policy -->
+          <div class="policy-card">
+            <div class="policy-icon">
+              <i class="fas fa-truck"></i>
+            </div>
+            <h3>Delivery & Shipping</h3>
+            <div class="policy-content">
+              <div class="delivery-options" *ngIf="vendor.deliveryOptions && vendor.deliveryOptions.length > 0">
+                <h4>Available Options</h4>
+                <div class="options-list">
+                  <div class="option-item" *ngFor="let option of vendor.deliveryOptions">
+                    <i [class]="getDeliveryIcon(option)"></i>
+                    <span>{{ option | titlecase }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="delivery-info">
+                <p *ngIf="vendor.deliveryCharges"><strong>Delivery Charges:</strong> ₹{{ vendor.deliveryCharges }}</p>
+                <p *ngIf="vendor.freeDeliveryAbove" class="free-delivery">
+                  <i class="fas fa-gift"></i> Free delivery on orders above ₹{{ vendor.freeDeliveryAbove }}
+                </p>
+                <p *ngIf="vendor.deliveryAreas && vendor.deliveryAreas.length > 0">
+                  <strong>Delivers to:</strong> {{ vendor.deliveryAreas.join(', ') }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Return Policy -->
+          <div class="policy-card">
+            <div class="policy-icon">
+              <i class="fas fa-undo-alt"></i>
+            </div>
+            <h3>Return & Refund Policy</h3>
+            <div class="policy-content">
+              <p *ngIf="vendor.returnPolicy">{{ vendor.returnPolicy }}</p>
+              <p *ngIf="!vendor.returnPolicy">
+                We accept returns within 7 days of delivery for unused items in original condition. 
+                Handcrafted items may have slight variations. Please contact us before returning.
+              </p>
+            </div>
+          </div>
+
+          <!-- Terms & Conditions -->
+          <div class="policy-card">
+            <div class="policy-icon">
+              <i class="fas fa-file-contract"></i>
+            </div>
+            <h3>Terms & Conditions</h3>
+            <div class="policy-content">
+              <p *ngIf="vendor.termsAndServiceAgreement">{{ vendor.termsAndServiceAgreement }}</p>
+              <p *ngIf="!vendor.termsAndServiceAgreement">
+                By purchasing from this shop, you agree to our standard terms. All products are 
+                handcrafted and may have minor variations. Colors may vary slightly from images.
+              </p>
+            </div>
+          </div>
+
+          <!-- Payment Methods -->
+          <div class="policy-card">
+            <div class="policy-icon">
+              <i class="fas fa-credit-card"></i>
+            </div>
+            <h3>Payment Methods</h3>
+            <div class="policy-content">
+              <div class="payment-methods">
+                <span class="payment-badge"><i class="fas fa-credit-card"></i> Cards</span>
+                <span class="payment-badge"><i class="fas fa-mobile-alt"></i> UPI</span>
+                <span class="payment-badge"><i class="fas fa-university"></i> Net Banking</span>
+                <span class="payment-badge"><i class="fas fa-money-bill"></i> COD</span>
+              </div>
+              <p class="secure-badge">
+                <i class="fas fa-lock"></i> All payments are secure and encrypted
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Vendors Section -->
+    <section class="related-vendors-section" *ngIf="relatedVendors.length > 0">
+      <div class="related-container">
+        <div class="section-header">
+          <h2><i class="fas fa-store"></i> Similar Shops from {{ vendor.locationState }}</h2>
+          <a routerLink="/vendor-directory" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="vendors-grid">
+          <div class="vendor-mini-card" *ngFor="let v of relatedVendors" 
+               (click)="visitRelatedVendor(v.vendorId)">
+            <img [src]="v.profilePictureUrl || 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=150&h=150&fit=crop'" 
+                 [alt]="v.shoppeeName" class="vendor-thumb">
+            <div class="vendor-mini-info">
+              <h4>{{ v.shoppeeName || v.businessName }}</h4>
+              <p><i class="fas fa-map-marker-alt"></i> {{ v.locationDistrict }}</p>
+              <span class="verified-tag" *ngIf="v.isVerified">
+                <i class="fas fa-check-circle"></i> Verified
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </ng-container>
+
+  <!-- Gallery Modal -->
+  <div class="gallery-modal" *ngIf="showGalleryModal" (click)="closeGalleryModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeGalleryModal()">
+        <i class="fas fa-times"></i>
+      </button>
+      <button class="modal-nav prev" (click)="prevGalleryImage()">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <img [src]="galleryImages[galleryModalIndex]" alt="Gallery Image" class="modal-image">
+      <button class="modal-nav next" (click)="nextGalleryImage()">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <div class="modal-counter">{{ galleryModalIndex + 1 }} / {{ galleryImages.length }}</div>
+    </div>
+  </div>
+</div>

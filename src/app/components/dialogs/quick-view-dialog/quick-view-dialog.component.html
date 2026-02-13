@@ -1,0 +1,127 @@
+<div class="quick-view-dialog">
+  <!-- Close Button -->
+  <button class="close-btn" (click)="close()">
+    <i class="fas fa-times"></i>
+  </button>
+
+  <div class="dialog-content">
+    <!-- Product Image Section -->
+    <div class="product-images">
+      <div class="main-image">
+        <img [src]="selectedImage" [alt]="product.productName" 
+             onerror="this.src='assets/images/product-placeholder.svg'">
+        
+        <!-- Badges -->
+        <div class="badges">
+          <span class="badge gi-badge" *ngIf="product.giTagCertified">
+            <i class="fas fa-certificate"></i> GI Certified
+          </span>
+          <span class="badge discount-badge" *ngIf="getDiscountPercent() > 0">
+            -{{getDiscountPercent()}}%
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Details Section -->
+    <div class="product-details">
+      <!-- Category & Origin -->
+      <div class="meta-info">
+        <span class="category" *ngIf="product.categoryId">{{product.categoryId}}</span>
+        <span class="separator" *ngIf="product.categoryId && product.madeBy">•</span>
+        <span class="vendor" *ngIf="product.madeBy">By {{product.madeBy}}</span>
+      </div>
+
+      <!-- Product Name -->
+      <h2 class="product-name">{{product.productName}}</h2>
+
+      <!-- Rating -->
+      <div class="rating" *ngIf="product.rating">
+        <div class="stars">
+          <i *ngFor="let star of [1,2,3,4,5]" 
+             class="fas fa-star"
+             [class.filled]="star <= (product.rating || 0)"></i>
+        </div>
+        <span class="rating-count">({{product.totalSold || 0}} sold)</span>
+      </div>
+
+      <!-- Price -->
+      <div class="price-section">
+        <span class="current-price">₹{{product.price | number:'1.0-0'}}</span>
+        <span class="savings" *ngIf="getDiscountPercent() > 0">
+          Save {{getDiscountPercent()}}%
+        </span>
+      </div>
+
+      <!-- Description -->
+      <p class="description" *ngIf="product.productDescription">
+        {{product.productDescription | slice:0:200}}{{product.productDescription && product.productDescription.length > 200 ? '...' : ''}}
+      </p>
+
+      <!-- Location Info -->
+      <div class="location-info" *ngIf="product.originDistrict || product.originState">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>{{product.originDistrict}}<span *ngIf="product.originDistrict && product.originState">, </span>{{product.originState}}</span>
+      </div>
+
+      <!-- Stock Status -->
+      <div class="stock-status" [class.out-of-stock]="isOutOfStock()">
+        <i class="fas" [ngClass]="isOutOfStock() ? 'fa-times-circle' : 'fa-check-circle'"></i>
+        <span *ngIf="!isOutOfStock()">In Stock ({{product.productQuantity}} available)</span>
+        <span *ngIf="isOutOfStock()">Out of Stock</span>
+      </div>
+
+      <!-- Quantity Selector -->
+      <div class="quantity-selector" *ngIf="!isOutOfStock()">
+        <label>Quantity:</label>
+        <div class="quantity-controls">
+          <button (click)="decrementQuantity()" [disabled]="quantity <= 1">
+            <i class="fas fa-minus"></i>
+          </button>
+          <input type="number" [(ngModel)]="quantity" min="1" [max]="product.productQuantity || 10" readonly>
+          <button (click)="incrementQuantity()" [disabled]="quantity >= (product.productQuantity || 10)">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn-add-cart" (click)="addToCart()" [disabled]="isOutOfStock()">
+          <i class="fas fa-shopping-cart"></i>
+          Add to Cart
+        </button>
+        
+        <button class="btn-wishlist" 
+                (click)="toggleWishlist()" 
+                [class.active]="isInWishlist"
+                [disabled]="isWishlistLoading">
+          <i class="fas" [ngClass]="isInWishlist ? 'fa-heart' : 'fa-heart'"></i>
+          {{isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}}
+        </button>
+      </div>
+
+      <!-- View Full Details Link -->
+      <button class="btn-view-details" (click)="viewDetails()">
+        <i class="fas fa-external-link-alt"></i>
+        View Full Details
+      </button>
+
+      <!-- Quick Features -->
+      <div class="quick-features">
+        <div class="feature">
+          <i class="fas fa-truck"></i>
+          <span>Free Shipping</span>
+        </div>
+        <div class="feature">
+          <i class="fas fa-undo"></i>
+          <span>15-Day Returns</span>
+        </div>
+        <div class="feature">
+          <i class="fas fa-shield-alt"></i>
+          <span>Secure Payment</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

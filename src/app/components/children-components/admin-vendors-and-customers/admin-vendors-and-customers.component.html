@@ -1,0 +1,47 @@
+<div id="dashboard">
+    <div class="section">
+      <h2>Vendors</h2>
+      <div *ngIf="isLoadingVendors" class="loading-banner">
+        <i class="fas fa-spinner fa-spin"></i> Loading vendors...
+      </div>
+      <div *ngIf="errorVendors && !isLoadingVendors" class="error-banner">
+        <i class="fas fa-exclamation-triangle"></i> {{ errorVendors }}
+      </div>
+      <!-- Location Filter UI for Vendors -->
+      <div class="location-filter">
+        <label for="vendor-district">District:</label>
+        <input id="vendor-district" [(ngModel)]="filterDistrict" placeholder="Enter district" />
+        <label for="vendor-state">State:</label>
+        <input id="vendor-state" [(ngModel)]="filterState" placeholder="Enter state" />
+        <button (click)="filterVendorsByLocation()">Search by Location</button>
+        <button (click)="filterVendorsByState()">Search by State</button>
+        <button (click)="resetVendorFilter()">Reset</button>
+      </div>
+      <div class="customerBox" *ngFor="let vendor of vendors">
+        <img [src]="vendor.profilePictureUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'" alt="{{ vendor.shopkeeperName || vendor.fullName }}">
+        <div>
+          <span>{{ vendor.shopkeeperName || vendor.fullName }}</span><br>
+          <button (click)="seeVendor(vendor)" class="deleteButton" style="background-color: green;">See</button>
+          <button (click)="deleteVendor(vendor.vendorId)" class="deleteButton">Delete</button>
+        </div>
+      </div>
+    </div>
+  
+    <div class="section">
+      <h2>Customers</h2>
+      <div *ngIf="isLoadingCustomers" class="loading-banner">
+        <i class="fas fa-spinner fa-spin"></i> Loading customers...
+      </div>
+      <div *ngIf="errorCustomers && !isLoadingCustomers" class="error-banner">
+        <i class="fas fa-exclamation-triangle"></i> {{ errorCustomers }}
+      </div>
+      <div class="customerBox" *ngFor="let customer of customers">
+        <img src="{{ customer.profilePicturePath }}" alt="{{ customer.profilePicturePath }}">
+        <div>
+          <span>{{ customer.fullName }}</span><br>
+          <button (click)="seeCustomer(customer)" class="deleteButton" style="background-color: green;">See</button>
+          <button (click)="deleteCustomer(customer)" class="deleteButton">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>

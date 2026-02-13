@@ -1,0 +1,411 @@
+<div class="cms-container">
+        <!-- Header Section -->
+        <div class="cms-header">
+            <div class="header-content">
+                <h1>Content Management</h1>
+                <p>Create, update, and organize your site-wide content easily</p>
+            </div>
+            <button class="add-content-btn" onclick="openAddContentModal()">
+                <i class="fas fa-plus"></i>
+                Add New Content
+            </button>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="cms-tabs">
+            <button class="tab-btn active" onclick="showTab('pages')">Pages</button>
+            <button class="tab-btn" onclick="showTab('banners')">Banners</button>
+            <button class="tab-btn" onclick="showTab('faqs')">FAQs</button>
+            <button class="tab-btn" onclick="showTab('testimonials')">Testimonials</button>
+            <button class="tab-btn" onclick="showTab('seo')">SEO Settings</button>
+        </div>
+
+        <!-- Pages Tab -->
+        <div id="pages-tab" class="tab-content">
+            <div class="content-filters">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search pages...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <select class="filter-select">
+                    <option value="all">All Types</option>
+                    <option value="page">Pages</option>
+                    <option value="banner">Banners</option>
+                    <option value="faq">FAQs</option>
+                    <option value="blog">Blogs</option>
+                </select>
+            </div>
+
+            <div class="content-table">
+                <div class="table-header">
+                    <h3>Content Pages</h3>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Last Updated</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Homepage Banner</td>
+                                <td><span class="type-badge">Banner</span></td>
+                                <td>Jun 24, 2025</td>
+                                <td><span class="status-badge status-published">Published</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit-btn">
+                                            <i class="fas fa-edit"></i>
+                                            Edit
+                                        </button>
+                                        <button class="action-btn delete-btn">
+                                            <i class="fas fa-trash"></i>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>About Us</td>
+                                <td><span class="type-badge">Page</span></td>
+                                <td>May 30, 2025</td>
+                                <td><span class="status-badge status-draft">Draft</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit-btn">
+                                            <i class="fas fa-edit"></i>
+                                            Edit
+                                        </button>
+                                        <button class="action-btn publish-btn">
+                                            <i class="fas fa-upload"></i>
+                                            Publish
+                                        </button>
+                                        <button class="action-btn delete-btn">
+                                            <i class="fas fa-trash"></i>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Privacy Policy</td>
+                                <td><span class="type-badge">Page</span></td>
+                                <td>Jun 10, 2025</td>
+                                <td><span class="status-badge status-published">Published</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit-btn">
+                                            <i class="fas fa-edit"></i>
+                                            Edit
+                                        </button>
+                                        <button class="action-btn delete-btn">
+                                            <i class="fas fa-trash"></i>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Terms & Conditions</td>
+                                <td><span class="type-badge">Page</span></td>
+                                <td>Jun 05, 2025</td>
+                                <td><span class="status-badge status-published">Published</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit-btn">
+                                            <i class="fas fa-edit"></i>
+                                            Edit
+                                        </button>
+                                        <button class="action-btn delete-btn">
+                                            <i class="fas fa-trash"></i>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banners Tab -->
+        <div id="banners-tab" class="tab-content hidden">
+            <div class="banner-grid">
+                <div class="banner-card">
+                    <div class="banner-image">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <div class="banner-content">
+                        <h3 class="banner-title">Summer Sale Banner</h3>
+                        <p class="banner-url">Target: /summer-sale</p>
+                        <div class="banner-actions">
+                            <div class="toggle-switch active" onclick="toggleBanner(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="banner-card">
+                    <div class="banner-image">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <div class="banner-content">
+                        <h3 class="banner-title">Welcome Hero Banner</h3>
+                        <p class="banner-url">Target: /welcome</p>
+                        <div class="banner-actions">
+                            <div class="toggle-switch active" onclick="toggleBanner(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="banner-card">
+                    <div class="banner-image">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <div class="banner-content">
+                        <h3 class="banner-title">Product Launch Banner</h3>
+                        <p class="banner-url">Target: /new-products</p>
+                        <div class="banner-actions">
+                            <div class="toggle-switch" onclick="toggleBanner(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQs Tab -->
+        <div id="faqs-tab" class="tab-content hidden">
+            <div class="faq-section">
+                <div class="faq-header">
+                    <h3>Frequently Asked Questions</h3>
+                    <button class="add-content-btn">
+                        <i class="fas fa-plus"></i>
+                        Add FAQ
+                    </button>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How do I create a new account?</span>
+                        <div class="action-buttons">
+                            <div class="toggle-switch active" onclick="toggleBanner(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <button class="action-btn edit-btn">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        To create a new account, click on the "Sign Up" button at the top right corner of the page and fill in the required information. You'll receive a confirmation email to activate your account.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>What payment methods do you accept?</span>
+                        <div class="action-buttons">
+                            <div class="toggle-switch active" onclick="toggleBanner(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <button class="action-btn edit-btn">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        We accept all major credit cards, PayPal, Apple Pay, and Google Pay. All transactions are secure and encrypted.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How can I track my order?</span>
+                        <div class="action-buttons">
+                            <div class="toggle-switch active" onclick="toggleBanner(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <button class="action-btn edit-btn">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        Once your order is shipped, you'll receive a tracking number via email. You can use this number to track your package on our website or the carrier's website.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testimonials Tab -->
+        <div id="testimonials-tab" class="tab-content hidden">
+            <div class="faq-header">
+                <h3>Customer Testimonials</h3>
+                <button class="add-content-btn">
+                    <i class="fas fa-plus"></i>
+                    Add Testimonial
+                </button>
+            </div>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">SM</div>
+                        <div class="testimonial-info">
+                            <h4>Sarah Miller</h4>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleBanner(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">"Amazing customer support and fast delivery. The team goes above and beyond to ensure customer satisfaction."</p>
+                    <div class="action-buttons">
+                        <button class="action-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                            Edit
+                        </button>
+                        <button class="action-btn delete-btn">
+                            <i class="fas fa-trash"></i>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">RJ</div>
+                        <div class="testimonial-info">
+                            <h4>Robert Johnson</h4>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleBanner(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">"Great value for money and user-friendly interface. Highly recommend this platform to anyone looking for quality service."</p>
+                    <div class="action-buttons">
+                        <button class="action-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                            Edit
+                        </button>
+                        <button class="action-btn delete-btn">
+                            <i class="fas fa-trash"></i>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEO Settings Tab -->
+        <div id="seo-tab" class="tab-content hidden">
+            <div class="seo-panel">
+                <h3 style="margin-bottom: 24px; font-size: 1.5rem; color: #0f172a;">Global SEO Settings</h3>
+                <form class="seo-form">
+                    <div class="form-group">
+                        <label class="form-label">Homepage Title</label>
+                        <input type="text" class="form-input" placeholder="Enter homepage title" value="Your Website - Best Products Online">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Homepage Keywords</label>
+                        <input type="text" class="form-input" placeholder="Enter keywords separated by commas" value="ecommerce, online store, products">
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Homepage Meta Description</label>
+                        <textarea class="form-textarea" placeholder="Enter meta description">Discover amazing products at unbeatable prices. Shop now for the best deals on quality items with fast shipping and excellent customer service.</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Blog Title Template</label>
+                        <input type="text" class="form-input" placeholder="Blog title template" value="Blog - Your Website">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Blog Keywords</label>
+                        <input type="text" class="form-input" placeholder="Enter blog keywords" value="blog, news, updates, articles">
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Blog Meta Description</label>
+                        <textarea class="form-textarea" placeholder="Enter blog meta description">Stay updated with the latest news, tips, and insights from our blog. Discover valuable content and expert advice.</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category Title Template</label>
+                        <input type="text" class="form-input" placeholder="Category title template" value="{Category} - Your Website">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Default Author</label>
+                        <input type="text" class="form-input" placeholder="Default author name" value="Your Website Team">
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label">Robots.txt Content</label>
+                        <textarea class="form-textarea" placeholder="Enter robots.txt content">User-agent: *
+Disallow: /admin/
+Disallow: /private/
+Allow: /
+
+Sitemap: https://yourwebsite.com/sitemap.xml</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Google Analytics ID</label>
+                        <input type="text" class="form-input" placeholder="GA-XXXXXXXXX-X" value="GA-123456789-1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Google Search Console</label>
+                        <input type="text" class="form-input" placeholder="Verification code" value="abc123def456">
+                    </div>
+                </form>
+                <button class="save-btn">
+                    <i class="fas fa-save"></i>
+                    Save SEO Settings
+                </button>
+            </div>
+        </div>
+    </div>

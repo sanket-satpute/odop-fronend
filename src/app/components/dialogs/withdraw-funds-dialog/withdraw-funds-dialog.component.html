@@ -1,0 +1,139 @@
+<div class="withdraw-funds-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-icon">💸</div>
+    <div class="header-content">
+      <h2 class="dialog-title">Withdraw Funds</h2>
+      <p class="dialog-subtitle">Available Balance: ₹{{ data.currentBalance | number:'1.0-0' }}</p>
+    </div>
+    <button class="close-btn" (click)="onCancel()" [disabled]="isProcessing">
+      <span>✕</span>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="dialog-body">
+    <form [formGroup]="withdrawForm">
+      <!-- Amount Section -->
+      <div class="form-section">
+        <label class="section-label">Withdrawal Amount</label>
+        <div class="amount-input-wrapper" [class.invalid]="withdrawForm.get('amount')?.invalid && withdrawForm.get('amount')?.touched">
+          <span class="currency-symbol">₹</span>
+          <input 
+            type="number" 
+            class="amount-input"
+            formControlName="amount"
+            placeholder="0"
+            min="100"
+            [max]="data.currentBalance">
+        </div>
+        <p class="input-hint" *ngIf="withdrawForm.get('amount')?.invalid && withdrawForm.get('amount')?.touched">
+          <span>⚠️</span>
+          <span *ngIf="withdrawForm.get('amount')?.errors?.['required']">Amount is required</span>
+          <span *ngIf="withdrawForm.get('amount')?.errors?.['min']">Minimum withdrawal: ₹100</span>
+          <span *ngIf="withdrawForm.get('amount')?.errors?.['max']">Maximum withdrawal: ₹{{ data.currentBalance | number:'1.0-0' }}</span>
+        </p>
+        <p class="amount-range">Minimum: ₹100 • Maximum: ₹{{ data.currentBalance | number:'1.0-0' }}</p>
+      </div>
+
+      <!-- Quick Amounts -->
+      <div class="form-section" *ngIf="quickAmounts.length > 0">
+        <label class="section-label">Quick Select</label>
+        <div class="quick-amounts">
+          <button 
+            type="button"
+            *ngFor="let amount of quickAmounts"
+            class="quick-amount-btn"
+            [class.selected]="withdrawForm.get('amount')?.value === amount"
+            (click)="selectQuickAmount(amount)">
+            ₹{{ amount | number }}
+          </button>
+          <button 
+            type="button"
+            class="quick-amount-btn max-btn"
+            [class.selected]="withdrawForm.get('amount')?.value === data.currentBalance"
+            (click)="selectQuickAmount(data.currentBalance)">
+            Max ₹{{ data.currentBalance | number:'1.0-0' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Withdraw Method -->
+      <div class="form-section">
+        <label class="section-label">Withdraw To</label>
+        <div class="withdraw-methods">
+          <div 
+            *ngFor="let method of withdrawMethods"
+            class="withdraw-method-card"
+            [class.selected]="selectedMethod === method.id"
+            (click)="selectWithdrawMethod(method.id)">
+            <div class="method-icon">{{ method.icon }}</div>
+            <div class="method-info">
+              <span class="method-name">{{ method.name }}</span>
+              <span class="method-desc">{{ method.desc }}</span>
+              <span class="method-time">⏱️ {{ method.processingTime }}</span>
+            </div>
+            <div class="method-check" *ngIf="selectedMethod === method.id">✓</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Details -->
+      <div class="form-section">
+        <label class="section-label">{{ getAccountLabel() }}</label>
+        <div class="account-input-wrapper" [class.invalid]="withdrawForm.get('accountDetails')?.invalid && withdrawForm.get('accountDetails')?.touched">
+          <input 
+            type="text" 
+            class="account-input"
+            formControlName="accountDetails"
+            [placeholder]="getAccountPlaceholder()">
+        </div>
+        <p class="input-hint" *ngIf="withdrawForm.get('accountDetails')?.invalid && withdrawForm.get('accountDetails')?.touched">
+          <span>⚠️</span>
+          <span *ngIf="withdrawForm.get('accountDetails')?.errors?.['required']">{{ getAccountLabel() }} is required</span>
+          <span *ngIf="withdrawForm.get('accountDetails')?.errors?.['minlength']">Please enter valid {{ getAccountLabel().toLowerCase() }}</span>
+        </p>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-section">
+        <div class="summary-row">
+          <span class="summary-label">Withdrawal Amount</span>
+          <span class="summary-value">₹{{ withdrawForm.get('amount')?.value || 0 | number:'1.0-0' }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Transfer To</span>
+          <span class="summary-value">{{ getSelectedMethod()?.name }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Processing Time</span>
+          <span class="summary-value time">{{ getSelectedMethod()?.processingTime }}</span>
+        </div>
+        <div class="summary-row total">
+          <span class="summary-label">Remaining Balance</span>
+          <span class="summary-value highlight">₹{{ remainingBalance | number:'1.0-0' }}</span>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="cancel-btn" (click)="onCancel()" [disabled]="isProcessing">
+      Cancel
+    </button>
+    <button 
+      class="submit-btn" 
+      (click)="onSubmit()" 
+      [disabled]="!isFormValid || isProcessing">
+      <ng-container *ngIf="!isProcessing">
+        <span>💸</span>
+        <span>Withdraw ₹{{ withdrawForm.get('amount')?.value || 0 | number:'1.0-0' }}</span>
+      </ng-container>
+      <span *ngIf="isProcessing" class="processing">
+        <span class="spinner"></span>
+        Processing...
+      </span>
+    </button>
+  </div>
+</div>

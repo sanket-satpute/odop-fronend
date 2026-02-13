@@ -1,0 +1,222 @@
+<div class="wallet-rewards-container">
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+    <p class="loading-text">Loading wallet...</p>
+  </div>
+
+  <div class="wallet-error" *ngIf="!isLoading && loadError">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>{{ loadError }}</span>
+    <button type="button" (click)="loadWalletData()">Retry</button>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <!-- Header Section -->
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="fas fa-wallet"></i>
+        Wallet & Rewards
+      </h2>
+      <p class="section-subtitle">Manage your funds and track your earnings</p>
+    </div>
+
+    <!-- Top Balance Cards -->
+    <div class="balance-cards-grid">
+      <!-- Wallet Balance Card -->
+      <div class="balance-card wallet-card">
+        <div class="card-header">
+          <div class="card-icon wallet-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div class="card-badge" [ngClass]="{'active-badge': walletBalance > 0, 'empty-badge': walletBalance <= 0}">
+            {{ walletBalance > 0 ? 'Active' : 'Empty' }}
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Wallet Balance</h3>
+          <div class="amount-display">
+            <span class="currency">₹</span>
+            <span class="amount">{{ formatNumber(walletBalance) }}</span>
+          </div>
+          <p class="card-subtitle">Usable on your next order</p>
+        </div>
+        <button class="primary-btn add-money-btn" (click)="addMoney()">
+          <i class="fas fa-plus"></i>
+          Add Money
+        </button>
+      </div>
+
+      <!-- Reward Credits Card -->
+      <div class="balance-card rewards-card">
+        <div class="card-header">
+          <div class="card-icon rewards-icon">
+            <i class="fas fa-gift"></i>
+          </div>
+          <div class="card-badge rewards-badge">
+            {{ membershipTier | titlecase }}
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Reward Credits</h3>
+          <div class="amount-display">
+            <span class="currency">₹</span>
+            <span class="amount">{{ formatNumber(rewardCredits) }}</span>
+          </div>
+          <p class="card-subtitle">Earned through offers & referrals</p>
+        </div>
+        <button class="secondary-btn use-rewards-btn" (click)="useRewards()" [disabled]="rewardCredits <= 0">
+          <i class="fas fa-star"></i>
+          Use Rewards
+        </button>
+      </div>
+    </div>
+
+    <!-- Gamified Progress Section -->
+    <div class="progress-section" *ngIf="getNextTier()">
+      <div class="progress-card">
+        <div class="progress-header">
+          <div class="progress-icon" [style.color]="getCurrentTier().color">
+            <i [class]="getCurrentTier().icon"></i>
+          </div>
+          <div class="progress-info">
+            <h4 class="progress-title">Next Reward Milestone</h4>
+            <p class="progress-subtitle">
+              Spend ₹{{ formatNumber(targetSpending - currentSpending) }} more to earn ₹{{ formatNumber(nextReward) }} cashback
+            </p>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+          </div>
+          <span class="progress-text">₹{{ formatNumber(currentSpending) }} / ₹{{ formatNumber(targetSpending) }}</span>
+        </div>
+        <button class="tertiary-btn view-offers-btn" (click)="viewOffers()">
+          <i class="fas fa-bolt"></i>
+          View Offers
+        </button>
+      </div>
+    </div>
+
+    <!-- Max Tier Reached -->
+    <div class="progress-section max-tier" *ngIf="!getNextTier()">
+      <div class="progress-card platinum-card">
+        <div class="progress-header">
+          <div class="progress-icon platinum-icon">
+            <i class="fas fa-gem"></i>
+          </div>
+          <div class="progress-info">
+            <h4 class="progress-title">Platinum Member! 🎉</h4>
+            <p class="progress-subtitle">You've reached the highest tier. Enjoy exclusive benefits!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons Grid -->
+    <div class="actions-grid">
+      <button class="action-btn" (click)="addMoney()">
+        <div class="action-icon">
+          <i class="fas fa-plus-circle"></i>
+        </div>
+        <span>Add Money</span>
+      </button>
+      <button class="action-btn" (click)="withdrawFunds()" [disabled]="walletBalance <= 0">
+        <div class="action-icon">
+          <i class="fas fa-university"></i>
+        </div>
+        <span>Withdraw</span>
+      </button>
+      <button class="action-btn" (click)="applyVoucher()">
+        <div class="action-icon">
+          <i class="fas fa-ticket-alt"></i>
+        </div>
+        <span>Apply Voucher</span>
+      </button>
+      <button class="action-btn" (click)="viewOffers()">
+        <div class="action-icon">
+          <i class="fas fa-tags"></i>
+        </div>
+        <span>View Offers</span>
+      </button>
+    </div>
+
+    <!-- Transaction History -->
+    <div class="transaction-section" *ngIf="allTransactions.length > 0">
+      <div class="transaction-header">
+        <h3 class="transaction-title">Recent Transactions</h3>
+        <button class="view-all-btn" (click)="viewAllTransactions()" *ngIf="allTransactions.length > 5">
+          <span>{{ showAllTransactions ? 'Show Less' : 'View All' }}</span>
+          <i class="fas" [ngClass]="{'fa-arrow-right': !showAllTransactions, 'fa-arrow-up': showAllTransactions}"></i>
+        </button>
+      </div>
+      
+      <div class="transaction-list">
+        <div class="transaction-item" *ngFor="let transaction of recentTransactions">
+          <div class="transaction-icon" [ngClass]="transaction.type">
+            <i [class]="transaction.icon"></i>
+          </div>
+          <div class="transaction-details">
+            <h4 class="transaction-description">{{ transaction.description }}</h4>
+            <p class="transaction-date">{{ transaction.date | date:'dd MMM yyyy, hh:mm a' }}</p>
+          </div>
+          <div class="transaction-amount" [ngClass]="transaction.amountClass">
+            <span class="amount">{{ transaction.amount }}</span>
+            <div class="type-badge" [ngClass]="transaction.type">
+              {{ transaction.typeLabel }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Transactions State -->
+    <div class="no-transactions" *ngIf="allTransactions.length === 0 && !isWalletEmpty">
+      <div class="no-tx-icon">
+        <i class="fas fa-receipt"></i>
+      </div>
+      <h4>No transactions yet</h4>
+      <p>Your wallet transactions will appear here</p>
+    </div>
+
+    <!-- Referral Promo Card -->
+    <div class="referral-section">
+      <div class="referral-card">
+        <div class="referral-illustration">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="referral-content">
+          <h4 class="referral-title">Refer & Earn</h4>
+          <p class="referral-subtitle">Invite friends and earn ₹100 for each successful referral</p>
+          <div class="referral-code">
+            <input type="text" [value]="referralCode" readonly class="code-input">
+            <button class="copy-btn" (click)="copyReferralCode()">
+              <i class="fas fa-copy"></i>
+              Copy
+            </button>
+            <button class="share-btn" (click)="shareReferralCode()">
+              <i class="fas fa-share-alt"></i>
+              Share
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State (Show when wallet is empty) -->
+    <div class="empty-state" *ngIf="isWalletEmpty && allTransactions.length === 0">
+      <div class="empty-illustration">
+        <i class="fas fa-wallet"></i>
+      </div>
+      <h3 class="empty-title">Your wallet is empty</h3>
+      <p class="empty-subtitle">Add funds now to enjoy faster checkouts and exclusive offers</p>
+      <button class="primary-btn empty-cta" (click)="addFundsNow()">
+        <i class="fas fa-plus"></i>
+        Add Funds Now
+      </button>
+    </div>
+  </ng-container>
+</div>

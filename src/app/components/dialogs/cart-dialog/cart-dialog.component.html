@@ -1,0 +1,145 @@
+<div class="cart-dialog-overlay" [@overlayAnimation]>
+  <div class="cart-dialog" [@dialogAnimation]>
+    <!-- Header -->
+    <div class="dialog-header">
+      <div class="header-content">
+        <i class="fas fa-shopping-cart header-icon"></i>
+        <h2>Shopping Cart</h2>
+        <span class="item-count" *ngIf="totalItems > 0">{{ totalItems }} {{ totalItems === 1 ? 'item' : 'items' }}</span>
+      </div>
+      <button class="close-button" (click)="closeDialog()" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading your cart...</p>
+    </div>
+
+    <!-- Empty Cart State -->
+    <div class="empty-state" *ngIf="!isLoading && cartItems.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-shopping-cart"></i>
+      </div>
+      <h3>Your cart is empty</h3>
+      <p>Add items to your cart to see them here</p>
+      <button class="primary-button" (click)="continueShopping()">
+        <i class="fas fa-shopping-bag"></i>
+        Start Shopping
+      </button>
+    </div>
+
+    <!-- Cart Items -->
+    <div class="cart-content" *ngIf="!isLoading && cartItems.length > 0">
+      <div class="items-list" [@listAnimation]="cartItems.length">
+        <div 
+          *ngFor="let item of cartItems; trackBy: trackByItemId" 
+          class="cart-item"
+          [attr.data-item-id]="item.id">
+          
+          <div class="item-image">
+            <img [src]="item.image" [alt]="item.name">
+            <span class="discount-badge" *ngIf="item.discountPercent > 0">
+              -{{ item.discountPercent }}%
+            </span>
+          </div>
+
+          <div class="item-details">
+            <h4 class="item-name">{{ item.name }}</h4>
+            <p class="item-vendor">
+              <i class="fas fa-store"></i>
+              {{ item.vendor }}
+            </p>
+            <div class="item-category">
+              <span class="category-badge">{{ item.category }}</span>
+            </div>
+            
+            <div class="price-section">
+              <span class="current-price">₹{{ item.price }}</span>
+              <span class="original-price" *ngIf="item.originalPrice > item.price">
+                ₹{{ item.originalPrice }}
+              </span>
+            </div>
+
+            <div class="stock-status" [class.in-stock]="item.inStock" [class.out-of-stock]="!item.inStock">
+              <i class="fas" [class.fa-check-circle]="item.inStock" [class.fa-times-circle]="!item.inStock"></i>
+              {{ item.inStock ? 'In Stock' : 'Out of Stock' }}
+            </div>
+          </div>
+
+          <div class="item-actions">
+            <div class="quantity-controls">
+              <button 
+                class="qty-button" 
+                (click)="updateQuantity(item, -1)"
+                [disabled]="!item.inStock">
+                <i class="fas fa-minus"></i>
+              </button>
+              <span class="quantity">{{ item.quantity }}</span>
+              <button 
+                class="qty-button" 
+                (click)="updateQuantity(item, 1)"
+                [disabled]="!item.inStock">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+
+            <div class="item-total">
+              <span class="total-label">Total:</span>
+              <span class="total-price">₹{{ item.price * item.quantity }}</span>
+            </div>
+
+            <div class="action-buttons">
+              <button 
+                class="action-btn wishlist-btn"
+                [class.active]="isInWishlist(item.id)"
+                (click)="moveToWishlist(item)"
+                [title]="isInWishlist(item.id) ? 'Remove from Wishlist' : 'Add to Wishlist'">
+                <i class="fas" [class.fa-heart]="isInWishlist(item.id)" [class.fa-heart-broken]="!isInWishlist(item.id)"></i>
+                <span>{{ isInWishlist(item.id) ? 'Wishlisted' : 'Wishlist' }}</span>
+              </button>
+              <button 
+                class="action-btn remove-btn" 
+                (click)="removeItem(item)"
+                title="Remove">
+                <i class="fas fa-trash"></i>
+                <span>Remove</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cart Summary -->
+      <div class="cart-summary" [@fadeIn]>
+        <div class="summary-row">
+          <span>Subtotal ({{ totalItems }} items):</span>
+          <span class="amount">₹{{ subtotal }}</span>
+        </div>
+        <div class="summary-row savings" *ngIf="totalSavings > 0">
+          <span>Total Savings:</span>
+          <span class="amount savings-amount">-₹{{ totalSavings }}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total:</span>
+          <span class="amount">₹{{ subtotal }}</span>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="dialog-footer">
+        <button class="secondary-button" (click)="continueShopping()">
+          <i class="fas fa-arrow-left"></i>
+          Continue Shopping
+        </button>
+        <button class="primary-button" (click)="proceedToCheckout()">
+          Proceed to Checkout
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

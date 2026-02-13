@@ -1,0 +1,193 @@
+<!-- Analytics Dialog Container -->
+<div class="analytics-dialog" [@fadeIn]>
+  
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <i class="fas fa-chart-pie"></i>
+      </div>
+      <div class="header-text">
+        <h2 class="dialog-title">Your Analytics</h2>
+        <p class="dialog-subtitle">Track your shopping trends and spending patterns</p>
+      </div>
+    </div>
+    <button class="close-btn" (click)="closeDialog()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Period Selector -->
+  <div class="period-selector">
+    <button 
+      class="period-btn" 
+      [class.active]="selectedPeriod === '1month'"
+      (click)="changePeriod('1month')">
+      1 Month
+    </button>
+    <button 
+      class="period-btn" 
+      [class.active]="selectedPeriod === '3months'"
+      (click)="changePeriod('3months')">
+      3 Months
+    </button>
+    <button 
+      class="period-btn" 
+      [class.active]="selectedPeriod === '6months'"
+      (click)="changePeriod('6months')">
+      6 Months
+    </button>
+    <button 
+      class="period-btn" 
+      [class.active]="selectedPeriod === '1year'"
+      (click)="changePeriod('1year')">
+      1 Year
+    </button>
+  </div>
+
+  <!-- Dialog Body -->
+  <div class="dialog-body" [@staggerCards]>
+    
+    <!-- Analytics Cards Grid -->
+    <div class="analytics-cards-grid">
+      <div 
+        class="analytics-card" 
+        *ngFor="let card of analyticsCards"
+        [style.--card-color]="card.color">
+        <div class="card-icon" [style.background]="card.color + '15'" [style.color]="card.color">
+          <i [class]="card.icon"></i>
+        </div>
+        <div class="card-content">
+          <span class="card-title">{{ card.title }}</span>
+          <span class="card-value">{{ card.value }}</span>
+          <div class="card-footer">
+            <span class="card-subtitle">{{ card.subtitle }}</span>
+            <span class="card-trend" *ngIf="card.trend > 0" [style.color]="'#10B981'">
+              <i class="fas fa-arrow-up"></i> {{ card.trend }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+      
+      <!-- Spending by Category -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="fas fa-tags"></i>
+            Spending by Category
+          </h3>
+        </div>
+        <div class="category-chart">
+          <div class="category-list">
+            <div 
+              class="category-item" 
+              *ngFor="let category of spendingCategories">
+              <div class="category-info">
+                <div class="category-icon" [style.background]="category.color + '15'" [style.color]="category.color">
+                  <i [class]="category.icon"></i>
+                </div>
+                <div class="category-details">
+                  <span class="category-name">{{ category.name }}</span>
+                  <span class="category-amount">₹{{ formatNumber(category.amount) }}</span>
+                </div>
+              </div>
+              <div class="category-bar-container">
+                <div 
+                  class="category-bar" 
+                  [style.width.%]="category.percentage"
+                  [style.background]="category.color">
+                </div>
+                <span class="category-percentage">{{ category.percentage }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Spending Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="fas fa-chart-bar"></i>
+            Monthly Spending
+          </h3>
+        </div>
+        <div class="bar-chart">
+          <div class="bars-container">
+            <div 
+              class="bar-item" 
+              *ngFor="let item of monthlySpending">
+              <div class="bar-wrapper">
+                <div 
+                  class="bar" 
+                  [style.height.%]="getBarHeight(item.amount)"
+                  [class.highest]="item.amount === getMaxMonthlySpend()">
+                  <span class="bar-value">₹{{ formatNumber(item.amount) }}</span>
+                </div>
+              </div>
+              <span class="bar-label">{{ item.month }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Insights Section -->
+    <div class="insights-section">
+      <h3 class="section-title">
+        <i class="fas fa-lightbulb"></i>
+        Smart Insights
+      </h3>
+      <div class="insights-grid">
+        <div class="insight-card">
+          <div class="insight-icon" style="background: #DBEAFE; color: #3B82F6;">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div class="insight-content">
+            <span class="insight-title">Most Active Day</span>
+            <span class="insight-value">Saturday</span>
+            <span class="insight-desc">You shop most on weekends</span>
+          </div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-icon" style="background: #D1FAE5; color: #10B981;">
+            <i class="fas fa-piggy-bank"></i>
+          </div>
+          <div class="insight-content">
+            <span class="insight-title">Total Savings</span>
+            <span class="insight-value">₹{{ formatNumber(totalSpent * 0.15) }}</span>
+            <span class="insight-desc">From discounts & offers</span>
+          </div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-icon" style="background: #FEF3C7; color: #F59E0B;">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <div class="insight-content">
+            <span class="insight-title">Top Category</span>
+            <span class="insight-value">Handicrafts</span>
+            <span class="insight-desc">Your favorite category</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Dialog Footer -->
+  <div class="dialog-footer">
+    <button class="download-btn" (click)="downloadReport()">
+      <i class="fas fa-download"></i>
+      Download Report
+    </button>
+    <button class="close-dialog-btn" (click)="closeDialog()">
+      Close
+    </button>
+  </div>
+
+</div>

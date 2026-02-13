@@ -1,0 +1,205 @@
+<div class="vendor-directory-page">
+  <!-- Hero Section -->
+  <section class="directory-hero">
+    <div class="hero-content">
+      <h1>Discover Artisan Vendors</h1>
+      <p>Explore authentic GI-tagged products from skilled craftspeople across India</p>
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search vendors, locations, or specialties...">
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-number">{{ allVendors.length }}+</span>
+        <span class="stat-label">Verified Vendors</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">15+</span>
+        <span class="stat-label">States Covered</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">50+</span>
+        <span class="stat-label">Product Categories</span>
+      </div>
+    </div>
+    <div class="hero-decoration">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+    </div>
+  </section>
+
+  <!-- Filters Section -->
+  <section class="filters-section">
+    <div class="container">
+      <div class="filters-wrapper">
+        <div class="filter-group">
+          <label>State</label>
+          <select [(ngModel)]="selectedState" (ngModelChange)="onStateChange()">
+            <option value="all">All States</option>
+            <option *ngFor="let state of states" [value]="state">{{ state }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Category</label>
+          <select [(ngModel)]="selectedCategory">
+            <option value="all">All Categories</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Sort By</label>
+          <select [(ngModel)]="sortBy">
+            <option value="name">Name A-Z</option>
+            <option value="newest">Newest First</option>
+            <option value="verified">Verified First</option>
+          </select>
+        </div>
+        <div class="view-toggle">
+          <button [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'">
+            <i class="fas fa-th-large"></i>
+          </button>
+          <button [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">
+            <i class="fas fa-list"></i>
+          </button>
+        </div>
+      </div>
+      <div class="results-count">
+        Showing <strong>{{ filteredVendors.length }}</strong> vendors
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  <section class="vendors-section" *ngIf="isLoading">
+    <div class="container">
+      <div class="loading-state">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Loading vendors...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Error State -->
+  <section class="vendors-section" *ngIf="errorMessage && !isLoading">
+    <div class="container">
+      <div class="error-state">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>{{ errorMessage }}</p>
+        <button class="retry-btn" (click)="retryLoad()">
+          <i class="fas fa-redo"></i> Retry
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vendors Grid/List -->
+  <section class="vendors-section" *ngIf="!isLoading">
+    <div class="container">
+      <!-- Grid View -->
+      <div class="vendors-grid" *ngIf="viewMode === 'grid' && filteredVendors.length > 0">
+        <article class="vendor-card" *ngFor="let vendor of filteredVendors">
+          <div class="card-cover">
+            <img [src]="getVendorCoverImage(vendor)" [alt]="vendor.shoppeeName || vendor.businessName">
+            <div class="vendor-badges">
+              <span class="badge verified" *ngIf="vendor.isVerified">
+                <i class="fas fa-check-circle"></i> Verified
+              </span>
+              <span class="badge gi-tag" *ngIf="vendor.giTagCertified">
+                <i class="fas fa-award"></i> GI Tag
+              </span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="vendor-avatar">
+              <img [src]="getVendorImage(vendor)" [alt]="vendor.shopkeeperName || vendor.fullName">
+            </div>
+            <h3>{{ vendor.shoppeeName || vendor.businessName || 'Unnamed Shop' }}</h3>
+            <p class="vendor-location">
+              <i class="fas fa-map-marker-alt"></i> {{ getVendorLocation(vendor) }}
+            </p>
+            <p class="vendor-category">{{ getVendorCategory(vendor) }}</p>
+            <p class="vendor-description">{{ vendor.shopDescription || 'Authentic handcrafted products from skilled artisans.' }}</p>
+            <div class="specialties" *ngIf="getSpecialties(vendor).length > 0">
+              <span *ngFor="let specialty of getSpecialties(vendor).slice(0, 3)">{{ specialty }}</span>
+            </div>
+            <div class="vendor-info-row">
+              <div class="vendor-type" *ngIf="vendor.vendorType">
+                <i class="fas fa-store"></i> {{ vendor.vendorType | titlecase }} Shop
+              </div>
+              <div class="delivery-info" *ngIf="vendor.deliveryOptions?.length">
+                <i class="fas fa-truck"></i> Delivers
+              </div>
+            </div>
+            <button class="visit-shop-btn" (click)="visitShop(vendor.vendorId)">
+              Visit Shop <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <!-- List View -->
+      <div class="vendors-list" *ngIf="viewMode === 'list' && filteredVendors.length > 0">
+        <article class="vendor-list-item" *ngFor="let vendor of filteredVendors">
+          <div class="list-cover">
+            <img [src]="getVendorCoverImage(vendor)" [alt]="vendor.shoppeeName || vendor.businessName">
+          </div>
+          <div class="list-content">
+            <div class="list-header">
+              <div class="vendor-info">
+                <img [src]="getVendorImage(vendor)" [alt]="vendor.shopkeeperName" class="avatar">
+                <div>
+                  <h3>{{ vendor.shoppeeName || vendor.businessName || 'Unnamed Shop' }}</h3>
+                  <p class="location"><i class="fas fa-map-marker-alt"></i> {{ getVendorLocation(vendor) }}</p>
+                </div>
+              </div>
+              <div class="badges">
+                <span class="badge verified" *ngIf="vendor.isVerified"><i class="fas fa-check-circle"></i> Verified</span>
+                <span class="badge gi-tag" *ngIf="vendor.giTagCertified"><i class="fas fa-award"></i> GI Tag</span>
+              </div>
+            </div>
+            <p class="description">{{ vendor.shopDescription || 'Authentic handcrafted products from skilled artisans.' }}</p>
+            <div class="specialties" *ngIf="getSpecialties(vendor).length > 0">
+              <span *ngFor="let specialty of getSpecialties(vendor)">{{ specialty }}</span>
+            </div>
+            <div class="list-footer">
+              <div class="stats">
+                <div class="vendor-type" *ngIf="vendor.vendorType">
+                  <i class="fas fa-store"></i> {{ vendor.vendorType | titlecase }} Shop
+                </div>
+                <div class="delivery-info" *ngIf="vendor.deliveryOptions?.length">
+                  <i class="fas fa-truck"></i> Delivers to {{ vendor.deliveryAreas?.length || 0 }} areas
+                </div>
+              </div>
+              <button class="visit-btn" (click)="visitShop(vendor.vendorId)">
+                Visit Shop <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- No Results -->
+      <div class="no-results" *ngIf="filteredVendors.length === 0 && !isLoading">
+        <i class="fas fa-store-slash"></i>
+        <h3>No vendors found</h3>
+        <p>Try adjusting your filters or search query</p>
+        <button (click)="selectedState = 'all'; selectedCategory = 'all'; searchQuery = ''">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="become-vendor-cta">
+    <div class="cta-content">
+      <i class="fas fa-handshake"></i>
+      <h2>Are You an Artisan?</h2>
+      <p>Join our platform and reach millions of customers who appreciate authentic Indian craftsmanship</p>
+      <a routerLink="/register/vendor" class="cta-button">
+        Become a Vendor <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </section>
+</div>

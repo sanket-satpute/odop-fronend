@@ -1,0 +1,188 @@
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">Welcome to Seller Support</h1>
+        <p class="hero-subtitle">Your growth is our priority. Get all the help and tools you need to succeed on our government-backed platform.</p>
+        <button class="cta-button" (click)="startSelling()">
+          <span>Start Selling Now</span>
+          <i class="arrow-icon">→</i>
+        </button>
+      </div>
+      <div class="hero-image">
+        <div class="vendor-illustration">
+          <div class="vendor-avatar"></div>
+          <div class="shop-elements">
+            <div class="product-box"></div>
+            <div class="product-box"></div>
+            <div class="product-box"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Support Areas Grid -->
+<section class="support-areas">
+  <div class="container">
+    <h2 class="section-title">How Can We Help You?</h2>
+    <div class="support-grid">
+      <div class="support-card" *ngFor="let area of supportAreas" (click)="navigateToSupport(area.id)">
+        <div class="card-icon">
+          <i [innerHTML]="area.icon"></i>
+        </div>
+        <h3 class="card-title">{{ area.title }}</h3>
+        <p class="card-description">{{ area.description }}</p>
+        <div class="card-arrow">→</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Onboarding Steps -->
+<section class="onboarding-section">
+  <div class="container">
+    <div class="onboarding-content">
+      <div class="onboarding-text">
+        <h2 class="section-title">New to the Platform?</h2>
+        <p class="section-subtitle">Get started in just 4 simple steps</p>
+        <div class="steps-container">
+          <div class="step" *ngFor="let step of onboardingSteps; let i = index">
+            <div class="step-number">{{ i + 1 }}</div>
+            <div class="step-content">
+              <h4 class="step-title">{{ step.title }}</h4>
+              <p class="step-description">{{ step.description }}</p>
+            </div>
+          </div>
+        </div>
+        <button class="tutorial-button" (click)="watchTutorial()">
+          <span>Watch Tutorial</span>
+          <i class="play-icon">▶</i>
+        </button>
+      </div>
+      <div class="onboarding-visual">
+        <div class="progress-circle">
+          <div class="circle-progress"></div>
+          <div class="circle-content">
+            <span class="progress-text">Quick Setup</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- G-tag Section -->
+<section class="gtag-section">
+  <div class="container">
+    <div class="gtag-content">
+      <div class="gtag-badge">
+        <span class="badge-icon">🏷️</span>
+        <span class="badge-text">Government Approved</span>
+      </div>
+      <h2 class="gtag-title">G-tag Registration</h2>
+      <p class="gtag-description">Boost your product visibility and credibility with government verification</p>
+      <div class="gtag-benefits">
+        <div class="benefit-item" *ngFor="let benefit of gtagBenefits">
+          <div class="benefit-icon">✓</div>
+          <span class="benefit-text">{{ benefit }}</span>
+        </div>
+      </div>
+      <button class="gtag-button" (click)="applyGtag()">Get Help with G-tag Application</button>
+    </div>
+  </div>
+</section>
+
+<!-- Support Channels -->
+<section class="support-channels">
+  <div class="container">
+    <h2 class="section-title">Get in Touch</h2>
+    <div class="channels-grid">
+      <div class="channel-card" *ngFor="let channel of supportChannels">
+        <div class="channel-icon">
+          <i [innerHTML]="channel.icon"></i>
+        </div>
+        <h3 class="channel-title">{{ channel.title }}</h3>
+        <p class="channel-info">{{ channel.info }}</p>
+        <button class="channel-button" (click)="contactSupport(channel.type)">
+          {{ channel.buttonText }}
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQs Section -->
+<section class="faq-section">
+  <div class="container">
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <div class="faq-container">
+      <div class="faq-item" *ngFor="let faq of faqs; let i = index">
+        <div class="faq-question" (click)="toggleFaq(i)" [class.active]="faq.isOpen">
+          <span class="question-text">{{ faq.question }}</span>
+          <span class="faq-toggle" [class.rotated]="faq.isOpen">+</span>
+        </div>
+        <div class="faq-answer" [class.open]="faq.isOpen">
+          <p>{{ faq.answer }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Download Resources -->
+<section class="resources-section">
+  <div class="container">
+    <h2 class="section-title">Download Resources</h2>
+    <div class="resources-grid">
+      <div class="resource-card" *ngFor="let resource of resources" (click)="downloadResource(resource.url)">
+        <div class="resource-icon">
+          <i [innerHTML]="resource.icon"></i>
+        </div>
+        <h3 class="resource-title">{{ resource.title }}</h3>
+        <p class="resource-description">{{ resource.description }}</p>
+        <div class="download-button">
+          <span>Download</span>
+          <i class="download-icon">↓</i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Success Stories Carousel -->
+<section class="success-stories">
+  <div class="container">
+    <h2 class="section-title">Success Stories</h2>
+    <div class="carousel-container">
+      <div class="carousel-track" [style.transform]="'translateX(' + carouselTransform + 'px)'">
+        <div class="story-card" *ngFor="let story of successStories">
+          <div class="story-header">
+            <div class="vendor-info">
+              <div class="vendor-avatar-small"></div>
+              <div class="vendor-details">
+                <h4 class="vendor-name">{{ story.vendorName }}</h4>
+                <p class="vendor-location">{{ story.location }}</p>
+              </div>
+            </div>
+            <div class="story-rating">
+              <span class="stars">★★★★★</span>
+              <span class="rating-text">{{ story.rating }}</span>
+            </div>
+          </div>
+          <p class="story-quote">"{{ story.quote }}"</p>
+          <div class="story-product">
+            <span class="product-name">{{ story.product }}</span>
+            <span class="gtag-badge-small" *ngIf="story.hasGtag">G-tag</span>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <button class="carousel-btn prev" (click)="previousStory()">‹</button>
+        <button class="carousel-btn next" (click)="nextStory()">›</button>
+      </div>
+    </div>
+  </div>
+</section>

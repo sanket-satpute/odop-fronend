@@ -1,0 +1,480 @@
+<!-- Festival Detail Page -->
+<div class="festival-detail-page" *ngIf="!isLoading && festival" [ngClass]="festival.colorScheme || 'warm'">
+  
+  <!-- Back Navigation -->
+  <button class="back-btn" (click)="goBack()">
+    <i class="fas fa-arrow-left"></i> Back to Festivals
+  </button>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-background" 
+         [style.backgroundImage]="'url(' + (festival.bannerUrl || 'assets/images/festival-banner.jpg') + ')'">
+      <div class="hero-overlay"></div>
+    </div>
+    
+    <div class="hero-content">
+      <div class="container">
+        <!-- Status Badge -->
+        <div class="status-badge live" *ngIf="isLive">
+          <span class="pulse"></span> LIVE NOW
+        </div>
+        <div class="status-badge upcoming" *ngIf="!isLive && countdown.days > 0">
+          <i class="fas fa-calendar"></i> Starting in {{ countdown.days }} days
+        </div>
+        
+        <!-- Festival Info -->
+        <span class="festival-type">{{ festival.festivalType }}</span>
+        <h1 class="festival-title">{{ festival.name }}</h1>
+        <p class="festival-tagline">{{ festival.tagline }}</p>
+        
+        <!-- Date Range -->
+        <div class="date-range">
+          <i class="fas fa-calendar-alt"></i>
+          {{ festival.startDate | date:'MMM d' }} - {{ festival.endDate | date:'MMM d, yyyy' }}
+        </div>
+        
+        <!-- Countdown -->
+        <div class="countdown-section" *ngIf="isLive">
+          <p class="countdown-label">Sale ends in</p>
+          <div class="countdown-timer">
+            <div class="countdown-item">
+              <span class="value">{{ countdown.days }}</span>
+              <span class="label">Days</span>
+            </div>
+            <span class="separator">:</span>
+            <div class="countdown-item">
+              <span class="value">{{ countdown.hours }}</span>
+              <span class="label">Hours</span>
+            </div>
+            <span class="separator">:</span>
+            <div class="countdown-item">
+              <span class="value">{{ countdown.minutes }}</span>
+              <span class="label">Mins</span>
+            </div>
+            <span class="separator">:</span>
+            <div class="countdown-item">
+              <span class="value">{{ countdown.seconds }}</span>
+              <span class="label">Secs</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Discount Banner -->
+        <div class="discount-banner" *ngIf="festival.maxDiscount">
+          <span class="discount-text">Up to</span>
+          <span class="discount-value">{{ festival.maxDiscount }}%</span>
+          <span class="discount-text">OFF on Handcrafted Treasures</span>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="hero-actions">
+          <button class="btn btn-primary" *ngIf="isLive" (click)="switchTab('products')">
+            <i class="fas fa-shopping-bag"></i> Shop Collection
+          </button>
+          <button class="btn btn-primary" *ngIf="!isLive" (click)="notifyMe()">
+            <i class="fas fa-bell"></i> Notify Me
+          </button>
+          <button class="btn btn-secondary" (click)="switchTab('gift-guide')">
+            <i class="fas fa-gift"></i> Gift Guide
+          </button>
+          <button class="btn btn-outline" (click)="shareFestival()">
+            <i class="fas fa-share-alt"></i> Share
+          </button>
+        </div>
+        
+        <!-- Stats -->
+        <div class="hero-stats" *ngIf="isLive">
+          <div class="stat-item">
+            <span class="stat-value">{{ festival.totalProducts }}+</span>
+            <span class="stat-label">Products</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ festival.totalVendors }}+</span>
+            <span class="stat-label">Artisans</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ festival.regions?.length || 0 }}</span>
+            <span class="stat-label">Regions</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tab Navigation -->
+  <section class="tabs-section">
+    <div class="container">
+      <div class="tab-nav">
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'products'"
+          (click)="switchTab('products')">
+          <i class="fas fa-box"></i> Products
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'gift-guide'"
+          (click)="switchTab('gift-guide')">
+          <i class="fas fa-gift"></i> Gift Guide
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'vendors'"
+          (click)="switchTab('vendors')">
+          <i class="fas fa-store"></i> Artisans
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="activeTab === 'about'"
+          (click)="switchTab('about')">
+          <i class="fas fa-info-circle"></i> About
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Tab -->
+  <section class="products-section tab-content" *ngIf="activeTab === 'products'">
+    <div class="container">
+      <div class="products-layout">
+        
+        <!-- Sidebar Categories -->
+        <aside class="sidebar">
+          <h3>Categories</h3>
+          <ul class="category-list">
+            <li 
+              class="category-item"
+              [class.active]="selectedCategory === null"
+              (click)="filterByCategory(null)">
+              <i class="fas fa-th-large"></i>
+              All Products
+              <span class="count">{{ products.length }}</span>
+            </li>
+            <li 
+              *ngFor="let category of festival.categories; trackBy: trackByCategory"
+              class="category-item"
+              [class.active]="selectedCategory === category.id"
+              (click)="filterByCategory(category.id)">
+              <i [class]="category.icon"></i>
+              {{ category.name }}
+              <span class="count">{{ category.productCount }}</span>
+            </li>
+          </ul>
+          
+          <!-- Price Filter -->
+          <div class="filter-section">
+            <h3>Price Range</h3>
+            <div class="price-inputs">
+              <input type="number" [(ngModel)]="selectedPriceRange[0]" placeholder="Min">
+              <span>to</span>
+              <input type="number" [(ngModel)]="selectedPriceRange[1]" placeholder="Max">
+            </div>
+            <button class="btn btn-sm" (click)="applyPriceFilter()">Apply</button>
+          </div>
+        </aside>
+        
+        <!-- Products Grid -->
+        <div class="products-content">
+          <!-- Toolbar -->
+          <div class="products-toolbar">
+            <div class="results-count">
+              {{ filteredProducts.length }} Products
+            </div>
+            
+            <div class="toolbar-actions">
+              <!-- Sort -->
+              <select [(ngModel)]="sortBy" (change)="sortProducts()">
+                <option value="relevance">Relevance</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="discount">Highest Discount</option>
+                <option value="newest">Newest First</option>
+                <option value="popular">Most Popular</option>
+              </select>
+              
+              <!-- View Mode -->
+              <div class="view-toggle">
+                <button 
+                  [class.active]="viewMode === 'grid'" 
+                  (click)="setViewMode('grid')">
+                  <i class="fas fa-th-large"></i>
+                </button>
+                <button 
+                  [class.active]="viewMode === 'list'" 
+                  (click)="setViewMode('list')">
+                  <i class="fas fa-list"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Loading -->
+          <div class="loading" *ngIf="productsLoading">
+            <div class="spinner"></div>
+            <p>Loading products...</p>
+          </div>
+          
+          <!-- Products Grid -->
+          <div class="products-grid" [class.list-view]="viewMode === 'list'" *ngIf="!productsLoading">
+            <div 
+              class="product-card"
+              *ngFor="let product of filteredProducts; trackBy: trackByProduct"
+              (click)="viewProduct(product)">
+              
+              <div class="product-image">
+                <img [src]="product.imageUrl || 'assets/images/product-placeholder.jpg'" 
+                     [alt]="product.name">
+                
+                <!-- Discount Tag -->
+                <span class="discount-tag" *ngIf="product.discount">
+                  -{{ product.discount }}%
+                </span>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                  <button class="action-btn" (click)="addToWishlist(product); $event.stopPropagation()">
+                    <i class="far fa-heart"></i>
+                  </button>
+                  <button class="action-btn" (click)="addToCart(product); $event.stopPropagation()">
+                    <i class="fas fa-shopping-cart"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="product-info">
+                <span class="product-craft">{{ product.craftType }}</span>
+                <h4 class="product-name">{{ product.name }}</h4>
+                <p class="product-vendor">by {{ product.vendorName }}</p>
+                
+                <div class="product-pricing">
+                  <span class="current-price">₹{{ getDiscountedPrice(product.price, product.discount || 0) | number }}</span>
+                  <span class="original-price" *ngIf="product.discount">₹{{ product.price | number }}</span>
+                </div>
+                
+                <div class="product-rating" *ngIf="product.rating">
+                  <i class="fas fa-star"></i>
+                  <span>{{ product.rating }}</span>
+                  <span class="reviews">({{ product.reviewCount }})</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- No Results -->
+          <div class="no-results" *ngIf="!productsLoading && filteredProducts.length === 0">
+            <i class="fas fa-box-open"></i>
+            <h3>No products found</h3>
+            <p>Try adjusting your filters</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gift Guide Tab -->
+  <section class="gift-guide-section tab-content" *ngIf="activeTab === 'gift-guide'">
+    <div class="container">
+      <div class="gift-guide-header">
+        <h2>{{ festival.name }} Gift Guide</h2>
+        <p>Find the perfect gift for your loved ones</p>
+      </div>
+      
+      <!-- Gift Categories -->
+      <div class="gift-categories-nav">
+        <button 
+          *ngFor="let category of festival.giftGuide; let i = index"
+          class="gift-cat-btn"
+          [class.active]="activeGiftCategory === i"
+          (click)="selectGiftCategory(i)">
+          <i [class]="category.icon"></i>
+          {{ category.name }}
+        </button>
+      </div>
+      
+      <!-- Gift Category Content -->
+      <div class="gift-category-content" *ngIf="festival.giftGuide && festival.giftGuide[activeGiftCategory]">
+        <div class="category-header">
+          <h3>{{ festival.giftGuide[activeGiftCategory].name }}</h3>
+          <p>{{ festival.giftGuide[activeGiftCategory].description }}</p>
+        </div>
+        
+        <div class="gift-products-grid">
+          <div 
+            class="gift-product-card"
+            *ngFor="let product of festival.giftGuide[activeGiftCategory].products"
+            (click)="viewProduct(product)">
+            
+            <div class="gift-image">
+              <img [src]="product.imageUrl" [alt]="product.name">
+              <span class="gift-tag"><i class="fas fa-gift"></i> Perfect Gift</span>
+            </div>
+            
+            <div class="gift-info">
+              <h4>{{ product.name }}</h4>
+              <p class="gift-reason">{{ product.giftReason }}</p>
+              <div class="gift-price">
+                <span class="price">₹{{ product.price | number }}</span>
+                <button class="btn-add" (click)="addToCart(product); $event.stopPropagation()">
+                  <i class="fas fa-plus"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vendors/Artisans Tab -->
+  <section class="vendors-section tab-content" *ngIf="activeTab === 'vendors'">
+    <div class="container">
+      <div class="section-header">
+        <h2>Featured Artisans</h2>
+        <p>Meet the talented craftspeople behind these creations</p>
+      </div>
+      
+      <div class="vendors-grid">
+        <div 
+          class="vendor-card"
+          *ngFor="let vendor of festival.featuredVendors; trackBy: trackByVendor"
+          (click)="viewVendor(vendor)">
+          
+          <div class="vendor-image">
+            <img [src]="vendor.imageUrl || 'assets/images/artisan-placeholder.jpg'" 
+                 [alt]="vendor.name">
+            <div class="vendor-badge" *ngIf="vendor.isVerified">
+              <i class="fas fa-check-circle"></i> Verified
+            </div>
+          </div>
+          
+          <div class="vendor-info">
+            <h3>{{ vendor.name }}</h3>
+            <p class="craft-type">{{ vendor.craftType }}</p>
+            <p class="location">
+              <i class="fas fa-map-marker-alt"></i> {{ vendor.location }}
+            </p>
+            
+            <div class="vendor-stats">
+              <span><strong>{{ vendor.productCount }}</strong> Products</span>
+              <span><i class="fas fa-star"></i> {{ vendor.rating }}</span>
+            </div>
+            
+            <p class="vendor-bio">{{ vendor.shortBio }}</p>
+            
+            <button class="btn btn-outline-primary">View Store</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Tab -->
+  <section class="about-section tab-content" *ngIf="activeTab === 'about'">
+    <div class="container">
+      <div class="about-grid">
+        <!-- Main Content -->
+        <div class="about-main">
+          <h2>About {{ festival.name }}</h2>
+          <div class="festival-description" [innerHTML]="festival.description"></div>
+          
+          <!-- Significance -->
+          <div class="about-block" *ngIf="festival.significance">
+            <h3><i class="fas fa-star"></i> Significance</h3>
+            <p>{{ festival.significance }}</p>
+          </div>
+          
+          <!-- Traditions -->
+          <div class="about-block" *ngIf="festival.traditions && festival.traditions.length > 0">
+            <h3><i class="fas fa-hands"></i> Traditions</h3>
+            <ul class="traditions-list">
+              <li *ngFor="let tradition of festival.traditions">{{ tradition }}</li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <aside class="about-sidebar">
+          <!-- Regions -->
+          <div class="sidebar-block" *ngIf="festival.regions && festival.regions.length > 0">
+            <h4><i class="fas fa-map"></i> Celebrated In</h4>
+            <div class="regions-tags">
+              <span class="region-tag" *ngFor="let region of festival.regions">
+                {{ region }}
+              </span>
+            </div>
+          </div>
+          
+          <!-- Quick Stats -->
+          <div class="sidebar-block stats-block">
+            <h4><i class="fas fa-chart-bar"></i> Festival Stats</h4>
+            <div class="quick-stats">
+              <div class="stat">
+                <span class="stat-value">{{ festival.totalProducts }}</span>
+                <span class="stat-label">Products</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">{{ festival.totalVendors }}</span>
+                <span class="stat-label">Artisans</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">{{ festival.maxDiscount }}%</span>
+                <span class="stat-label">Max Discount</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- CTA -->
+          <div class="sidebar-block cta-block">
+            <h4>Don't Miss Out!</h4>
+            <p>Explore our curated collection of handcrafted products.</p>
+            <button class="btn btn-primary btn-block" (click)="switchTab('products')">
+              Shop Now
+            </button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Festivals -->
+  <section class="related-section" *ngIf="relatedFestivals.length > 0">
+    <div class="container">
+      <h2>Other Festivals You May Like</h2>
+      
+      <div class="related-grid">
+        <div 
+          class="related-card"
+          *ngFor="let related of relatedFestivals.slice(0, 4)"
+          (click)="viewRelatedFestival(related)">
+          
+          <div class="related-image">
+            <img [src]="related.thumbnailUrl || 'assets/images/festival-thumb.jpg'" 
+                 [alt]="related.name">
+          </div>
+          
+          <div class="related-info">
+            <span class="type">{{ related.festivalType }}</span>
+            <h4>{{ related.name }}</h4>
+            <p>{{ related.startDate | date:'MMM d' }} - {{ related.endDate | date:'MMM d' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Loading State -->
+<div class="loading-page" *ngIf="isLoading">
+  <div class="spinner"></div>
+  <p>Loading festival...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-page" *ngIf="error">
+  <i class="fas fa-exclamation-triangle"></i>
+  <h2>Oops!</h2>
+  <p>{{ error }}</p>
+  <button class="btn btn-primary" (click)="goBack()">Go Back</button>
+</div>

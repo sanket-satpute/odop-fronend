@@ -1,0 +1,135 @@
+<div class="view-offers-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-icon">🎁</div>
+    <div class="header-content">
+      <h2 class="dialog-title">Available Offers</h2>
+      <p class="dialog-subtitle">{{ allOffers.length }} offers available for you</p>
+    </div>
+    <button class="close-btn" (click)="onClose()">
+      <span>✕</span>
+    </button>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <button 
+      class="filter-tab"
+      [class.active]="activeTab === 'all'"
+      (click)="filterOffers('all')">
+      <span class="tab-icon">🏷️</span>
+      <span class="tab-label">All</span>
+      <span class="tab-count">{{ getOfferCount('all') }}</span>
+    </button>
+    <button 
+      class="filter-tab"
+      [class.active]="activeTab === 'discount'"
+      (click)="filterOffers('discount')">
+      <span class="tab-icon">💰</span>
+      <span class="tab-label">Discounts</span>
+      <span class="tab-count">{{ getOfferCount('discount') }}</span>
+    </button>
+    <button 
+      class="filter-tab"
+      [class.active]="activeTab === 'cashback'"
+      (click)="filterOffers('cashback')">
+      <span class="tab-icon">💸</span>
+      <span class="tab-label">Cashback</span>
+      <span class="tab-count">{{ getOfferCount('cashback') }}</span>
+    </button>
+    <button 
+      class="filter-tab"
+      [class.active]="activeTab === 'freebie'"
+      (click)="filterOffers('freebie')">
+      <span class="tab-icon">🎊</span>
+      <span class="tab-label">Freebies</span>
+      <span class="tab-count">{{ getOfferCount('freebie') }}</span>
+    </button>
+  </div>
+
+  <!-- Offers List -->
+  <div class="dialog-body">
+    <div class="offers-list">
+      <div 
+        *ngFor="let offer of filteredOffers"
+        class="offer-card"
+        [style.--offer-color]="offer.color">
+        
+        <!-- Offer Badge -->
+        <div class="offer-badges">
+          <span class="new-badge" *ngIf="offer.isNew">NEW</span>
+          <span class="expiring-badge" *ngIf="isExpiringSoon(offer.validTill)">
+            ⏰ {{ getDaysRemaining(offer.validTill) }} days left
+          </span>
+        </div>
+        
+        <!-- Left Section - Icon & Discount -->
+        <div class="offer-left">
+          <div class="offer-icon" [style.background]="offer.color + '20'">
+            <span>{{ offer.icon }}</span>
+          </div>
+          <div class="offer-discount" [style.color]="offer.color">
+            {{ offer.discount }}
+          </div>
+        </div>
+        
+        <!-- Middle Section - Details -->
+        <div class="offer-middle">
+          <h3 class="offer-title">{{ offer.title }}</h3>
+          <p class="offer-description">{{ offer.description }}</p>
+          <div class="offer-meta">
+            <span class="meta-item" *ngIf="offer.minPurchase > 0">
+              <span class="meta-icon">🛒</span>
+              Min. ₹{{ offer.minPurchase }}
+            </span>
+            <span class="meta-item" *ngIf="offer.maxDiscount">
+              <span class="meta-icon">📊</span>
+              Max. ₹{{ offer.maxDiscount }}
+            </span>
+            <span class="meta-item">
+              <span class="meta-icon">📅</span>
+              Valid till {{ offer.validTill | date:'mediumDate' }}
+            </span>
+          </div>
+          <div class="offer-usage">
+            <span class="usage-icon">ℹ️</span>
+            {{ offer.usageLimit }}
+          </div>
+        </div>
+        
+        <!-- Right Section - Code & Copy -->
+        <div class="offer-right">
+          <div class="code-box">
+            <span class="code-label">Use Code</span>
+            <div class="code-value">{{ offer.code }}</div>
+          </div>
+          <button 
+            class="copy-btn"
+            [class.copied]="copiedCode === offer.code"
+            (click)="copyCode(offer.code)">
+            <span *ngIf="copiedCode !== offer.code">📋 Copy</span>
+            <span *ngIf="copiedCode === offer.code">✅ Copied!</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredOffers.length === 0">
+      <div class="empty-icon">🔍</div>
+      <h3>No offers found</h3>
+      <p>No offers available in this category right now</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <div class="footer-info">
+      <span class="info-icon">💡</span>
+      <span>Apply these codes at checkout or while adding money to wallet</span>
+    </div>
+    <button class="close-btn-footer" (click)="onClose()">
+      Got it!
+    </button>
+  </div>
+</div>

@@ -1,0 +1,755 @@
+<!-- Premium Loading State -->
+<div class="premium-loader" *ngIf="isLoadingProduct">
+    <div class="loader-content">
+        <div class="brand-spinner">
+            <div class="spinner-circle"></div>
+            <div class="spinner-circle"></div>
+            <div class="spinner-circle"></div>
+        </div>
+        <div class="loader-text">
+            <span class="letter" *ngFor="let char of 'ODOP'.split(''); let i = index" [style.animation-delay]="i * 0.1 + 's'">{{ char }}</span>
+        </div>
+        <p class="loader-subtext">Discovering Authentic Craftsmanship...</p>
+    </div>
+</div>
+
+<!-- Premium Error State -->
+<div class="premium-error" *ngIf="productLoadError && !isLoadingProduct">
+    <div class="error-content">
+        <div class="error-icon-wrapper">
+            <div class="error-pulse"></div>
+            <span class="error-icon">!</span>
+        </div>
+        <h2>We couldn't find this product</h2>
+        <p>{{ productLoadError }}</p>
+        <div class="error-actions">
+            <button class="btn-retry" (click)="loadProductDetails()">
+                <i class="fas fa-redo"></i> Try Again
+            </button>
+            <a routerLink="/products" class="btn-browse">Browse Products</a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Premium Content -->
+<main class="premium-product-page" *ngIf="!isLoadingProduct && !productLoadError && product">
+    
+    <!-- Ambient Background -->
+    <div class="ambient-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Premium Breadcrumb -->
+    <nav class="breadcrumb-premium" aria-label="breadcrumb">
+        <div class="breadcrumb-container">
+            <a routerLink="/" class="crumb home">
+                <i class="fas fa-home"></i>
+            </a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <a routerLink="/products" class="crumb">Products</a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <a [routerLink]="['/products']" [queryParams]="{category: product.categoryId}" class="crumb">{{ product.subCategory || 'Category' }}</a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <span class="crumb current">{{ getProductName() | slice:0:40 }}{{ getProductName().length > 40 ? '...' : '' }}</span>
+        </div>
+    </nav>
+
+    <!-- Hero Product Section -->
+    <section class="hero-showcase">
+        <div class="hero-container">
+            
+            <!-- Gallery Section -->
+            <div class="gallery-section">
+                <!-- Premium Badges -->
+                <div class="floating-badges">
+                    <span *ngIf="hasDiscount()" class="badge badge-sale animate-float">
+                        <span class="badge-icon">🔥</span>
+                        <span class="badge-text">{{ product.discount }}% OFF</span>
+                    </span>
+                    <span *ngIf="isGiTagged()" class="badge badge-gi animate-float" style="animation-delay: 0.1s">
+                        <span class="badge-icon">🏆</span>
+                        <span class="badge-text">GI Certified</span>
+                    </span>
+                    <span *ngIf="product.totalSold && product.totalSold > 50" class="badge badge-bestseller animate-float" style="animation-delay: 0.2s">
+                        <span class="badge-icon">⭐</span>
+                        <span class="badge-text">Bestseller</span>
+                    </span>
+                </div>
+
+                <!-- Main Image Display -->
+                <div class="main-image-container">
+                    <div class="image-frame">
+                        <img #mainProductImage
+                             [src]="getSelectedImage()" 
+                             [alt]="getProductName()" 
+                             class="hero-image"
+                             (click)="openLightbox(currentImageIndex)"
+                             (error)="mainProductImage.src='https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=800&fit=crop'">
+                        
+                        <!-- Zoom Indicator -->
+                        <div class="zoom-indicator">
+                            <i class="fas fa-search-plus"></i>
+                            <span>Click to view larger</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="image-actions">
+                        <button class="action-btn" (click)="toggleWishlist($event)" [class.active]="isInWishlist" title="Add to wishlist">
+                            <i class="fas" [ngClass]="isInWishlist ? 'fa-heart' : 'fa-heart'"></i>
+                        </button>
+                        <button class="action-btn" (click)="openShareModal()" title="Share">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        <button class="action-btn" (click)="openLightbox(0)" title="Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Thumbnail Strip -->
+                <div class="thumbnail-strip" *ngIf="productImages.length > 1">
+                    <button class="thumb-scroll-btn prev" *ngIf="productImages.length > 4">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="thumbnails-wrapper">
+                        <div class="thumbnail-item" 
+                             *ngFor="let img of productImages; let i = index"
+                             [class.active]="i === currentImageIndex"
+                             (click)="setCurrentImage(i)">
+                            <img [src]="img" [alt]="'View ' + (i + 1)">
+                        </div>
+                    </div>
+                    <button class="thumb-scroll-btn next" *ngIf="productImages.length > 4">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product Information -->
+            <div class="product-details-panel">
+                <!-- Category & Craft Type -->
+                <div class="meta-tags">
+                    <span class="meta-tag category">{{ product.subCategory || 'Handcraft' }}</span>
+                    <span *ngIf="product.craftType" class="meta-tag craft">{{ product.craftType | titlecase }}</span>
+                </div>
+
+                <!-- Product Title -->
+                <h1 class="product-title-premium">{{ getProductName() }}</h1>
+
+                <!-- Rating & Stats Row -->
+                <div class="stats-row">
+                    <div class="rating-display">
+                        <div class="stars-premium">
+                            <span *ngFor="let star of getStarsArray(getProductRating())" 
+                                  [class]="'star-icon ' + star">
+                                <i class="fas" [ngClass]="star === 'full' ? 'fa-star' : (star === 'half' ? 'fa-star-half-alt' : 'fa-star')"></i>
+                            </span>
+                        </div>
+                        <span class="rating-number">{{ getProductRating().toFixed(1) }}</span>
+                        <span class="rating-count">({{ getProductReviewCount() }} reviews)</span>
+                    </div>
+                    <div class="sales-badge" *ngIf="product.totalSold">
+                        <i class="fas fa-fire-alt"></i>
+                        <span>{{ product.totalSold }}+ sold</span>
+                    </div>
+                </div>
+
+                <!-- Origin Badge -->
+                <div class="origin-premium" *ngIf="product.originDistrict || product.originState">
+                    <div class="origin-map-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="origin-info">
+                        <span class="origin-label">Crafted in</span>
+                        <span class="origin-place">{{ getDistrict() }}</span>
+                    </div>
+                    <div class="india-flag">🇮🇳</div>
+                </div>
+
+                <!-- GI Tag Premium Badge -->
+                <div class="gi-tag-premium" *ngIf="isGiTagged()">
+                    <div class="gi-badge-container">
+                        <div class="gi-icon">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/GI_Tag_India.svg/200px-GI_Tag_India.svg.png" 
+                                 alt="GI Tag" 
+                                 onerror="this.style.display='none'">
+                        </div>
+                        <div class="gi-details">
+                            <span class="gi-title">Geographical Indication Certified</span>
+                            <span class="gi-number">Registration No: {{ getGiTagNumber() }}</span>
+                        </div>
+                        <div class="gi-verified">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price Section Premium -->
+                <div class="price-section-premium">
+                    <div class="price-main">
+                        <span class="currency">₹</span>
+                        <span class="price-value">{{ getProductPrice() | number }}</span>
+                    </div>
+                    <div class="price-details" *ngIf="hasDiscount()">
+                        <span class="original-price">₹{{ getOriginalPrice() | number }}</span>
+                        <span class="discount-pill">Save {{ product.discount }}%</span>
+                    </div>
+                    <p class="tax-info">Inclusive of all taxes | Free shipping above ₹499</p>
+                </div>
+
+                <!-- Stock Status Premium -->
+                <div class="stock-premium" [ngClass]="isInStock() ? 'in-stock' : 'out-of-stock'">
+                    <div class="stock-indicator">
+                        <span class="stock-dot"></span>
+                    </div>
+                    <div class="stock-text">
+                        <span *ngIf="isInStock()">In Stock</span>
+                        <span *ngIf="!isInStock()">Out of Stock</span>
+                        <span *ngIf="isInStock() && product.productQuantity && product.productQuantity <= 10" class="urgency">
+                            — Only {{ product.productQuantity }} left!
+                        </span>
+                    </div>
+                </div>
+                <!-- Quantity Selector Premium -->
+                <div class="quantity-premium" *ngIf="isInStock()">
+                    <span class="qty-label">Quantity</span>
+                    <div class="qty-controls-premium">
+                        <button class="qty-btn-premium minus" (click)="decreaseQuantity()" [disabled]="quantity <= 1">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="qty-display">{{ quantity }}</span>
+                        <button class="qty-btn-premium plus" (click)="increaseQuantity()" [disabled]="quantity >= 10">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons Premium -->
+                <div class="actions-premium">
+                    <button 
+                        class="btn-add-cart" 
+                        [class.added-to-cart]="isInCart"
+                        (click)="addToCart(product)" 
+                        [disabled]="!isInStock() || isInCart">
+                        <span class="btn-icon">
+                            <i class="fas" [ngClass]="isInCart ? 'fa-check' : 'fa-shopping-bag'"></i>
+                        </span>
+                        <span class="btn-text">{{ isInCart ? 'Added to Cart' : 'Add to Cart' }}</span>
+                        <span class="btn-shine" *ngIf="!isInCart"></span>
+                    </button>
+                    <button class="btn-buy-now" (click)="buyNow()" [disabled]="!isInStock()">
+                        <span class="btn-icon"><i class="fas fa-bolt"></i></span>
+                        <span class="btn-text">Buy Now</span>
+                    </button>
+                </div>
+
+                <!-- Trust Indicators Premium -->
+                <div class="trust-strip">
+                    <div class="trust-item">
+                        <div class="trust-icon"><i class="fas fa-certificate"></i></div>
+                        <span>100% Authentic</span>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon"><i class="fas fa-hands"></i></div>
+                        <span>Handcrafted</span>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon"><i class="fas fa-truck"></i></div>
+                        <span>Free Delivery</span>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon"><i class="fas fa-sync-alt"></i></div>
+                        <span>Easy Returns</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Artisan Heritage Section -->
+    <section class="artisan-heritage" *ngIf="product.madeBy || product.originStory">
+        <div class="heritage-container">
+            <div class="heritage-header">
+                <span class="heritage-eyebrow">The Craftsman</span>
+                <h2 class="heritage-title">Meet the Artisan Behind This Creation</h2>
+                <div class="heritage-divider">
+                    <span class="divider-ornament">✦</span>
+                </div>
+            </div>
+
+            <div class="artisan-showcase">
+                <!-- Artisan Profile Card -->
+                <div class="artisan-profile-card">
+                    <div class="profile-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face" 
+                             alt="{{ getVendorName() }}"
+                             class="profile-image"
+                             onerror="this.src='https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face'">
+                        <div class="verified-artisan-badge">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h3 class="artisan-name-premium">{{ getVendorName() }}</h3>
+                        <p class="artisan-title">Master Craftsman</p>
+                        <div class="artisan-location">
+                            <i class="fas fa-map-pin"></i>
+                            <span>{{ getDistrict() }}</span>
+                        </div>
+                        <div class="artisan-stats">
+                            <div class="stat">
+                                <span class="stat-value">{{ product.totalSold || '100' }}+</span>
+                                <span class="stat-label">Products</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">{{ getProductRating().toFixed(1) }}</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">15+</span>
+                                <span class="stat-label">Years Exp.</span>
+                            </div>
+                        </div>
+                        <button class="visit-shop-btn" [routerLink]="['/shop', product.vendorId]" *ngIf="product.vendorId">
+                            <i class="fas fa-store"></i>
+                            <span>Visit Shop</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Origin Story -->
+                <div class="origin-story-premium" *ngIf="getOriginStory()">
+                    <div class="story-icon">
+                        <i class="fas fa-quote-left"></i>
+                    </div>
+                    <div class="story-content">
+                        <h4>The Heritage Story</h4>
+                        <p>{{ getOriginStory() }}</p>
+                    </div>
+                    <div class="story-decoration"></div>
+                </div>
+
+                <!-- Materials Section -->
+                <div class="materials-premium" *ngIf="getMaterialsUsed()">
+                    <h4><i class="fas fa-leaf"></i> Crafted With</h4>
+                    <div class="materials-grid">
+                        <div class="material-chip" *ngFor="let material of getMaterialsArray()">
+                            <span class="material-icon">✦</span>
+                            <span>{{ material }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Details Premium Tabs -->
+    <section class="details-section-premium">
+        <div class="details-container">
+            <div class="tabs-premium">
+                <div class="tabs-navigation">
+                    <button class="tab-trigger" 
+                            [class.active]="activeTab === 'description'" 
+                            (click)="setActiveTab('description')">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Description</span>
+                    </button>
+                    <button class="tab-trigger" 
+                            [class.active]="activeTab === 'specifications'" 
+                            (click)="setActiveTab('specifications')">
+                        <i class="fas fa-list-ul"></i>
+                        <span>Specifications</span>
+                    </button>
+                    <button class="tab-trigger" 
+                            [class.active]="activeTab === 'shipping'" 
+                            (click)="setActiveTab('shipping')">
+                        <i class="fas fa-shipping-fast"></i>
+                        <span>Shipping & Returns</span>
+                    </button>
+                    <div class="tab-indicator"></div>
+                </div>
+
+                <div class="tabs-panels">
+                    <!-- Description Tab -->
+                    <div class="tab-panel-premium" [class.active]="activeTab === 'description'">
+                        <div class="panel-content description-panel">
+                            <p class="description-text">{{ getProductDescription() }}</p>
+                            
+                            <div class="product-tags-premium" *ngIf="getTagsArray().length > 0">
+                                <h5>Related Tags</h5>
+                                <div class="tags-cloud">
+                                    <span class="tag-chip" *ngFor="let tag of getTagsArray()">{{ tag }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Specifications Tab -->
+                    <div class="tab-panel-premium" [class.active]="activeTab === 'specifications'">
+                        <div class="panel-content specs-panel">
+                            <div class="specs-premium-grid">
+                                <div class="spec-card" *ngIf="product.categoryId">
+                                    <div class="spec-icon"><i class="fas fa-tag"></i></div>
+                                    <div class="spec-info">
+                                        <span class="spec-label">Category</span>
+                                        <span class="spec-value">{{ product.subCategory || product.categoryId }}</span>
+                                    </div>
+                                </div>
+                                <div class="spec-card" *ngIf="product.craftType">
+                                    <div class="spec-icon"><i class="fas fa-paint-brush"></i></div>
+                                    <div class="spec-info">
+                                        <span class="spec-label">Craft Type</span>
+                                        <span class="spec-value">{{ product.craftType | titlecase }}</span>
+                                    </div>
+                                </div>
+                                <div class="spec-card" *ngIf="product.originDistrict">
+                                    <div class="spec-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                    <div class="spec-info">
+                                        <span class="spec-label">Origin District</span>
+                                        <span class="spec-value">{{ product.originDistrict }}</span>
+                                    </div>
+                                </div>
+                                <div class="spec-card" *ngIf="product.originState">
+                                    <div class="spec-icon"><i class="fas fa-globe-asia"></i></div>
+                                    <div class="spec-info">
+                                        <span class="spec-label">Origin State</span>
+                                        <span class="spec-value">{{ product.originState }}</span>
+                                    </div>
+                                </div>
+                                <div class="spec-card" *ngIf="product.madeBy">
+                                    <div class="spec-icon"><i class="fas fa-user-tie"></i></div>
+                                    <div class="spec-info">
+                                        <span class="spec-label">Artisan</span>
+                                        <span class="spec-value">{{ product.madeBy }}</span>
+                                    </div>
+                                </div>
+                                <div class="spec-card" *ngIf="product.materialsUsed">
+                                    <div class="spec-icon"><i class="fas fa-leaf"></i></div>
+                                    <div class="spec-info">
+                                        <span class="spec-label">Materials</span>
+                                        <span class="spec-value">{{ product.materialsUsed }}</span>
+                                    </div>
+                                </div>
+                                <div class="spec-card" *ngIf="isGiTagged()">
+                                    <div class="spec-icon"><i class="fas fa-award"></i></div>
+                                    <div class="spec-info">
+                                        <span class="spec-label">GI Tag No.</span>
+                                        <span class="spec-value">{{ getGiTagNumber() }}</span>
+                                    </div>
+                                </div>
+                                <div class="spec-card" *ngIf="product.warranty">
+                                    <div class="spec-icon"><i class="fas fa-shield-alt"></i></div>
+                                    <div class="spec-info">
+                                        <span class="spec-label">Warranty</span>
+                                        <span class="spec-value">{{ product.warranty }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Shipping Tab -->
+                    <div class="tab-panel-premium" [class.active]="activeTab === 'shipping'">
+                        <div class="panel-content shipping-panel">
+                            <div class="shipping-cards">
+                                <div class="shipping-card">
+                                    <div class="ship-icon"><i class="fas fa-truck"></i></div>
+                                    <div class="ship-content">
+                                        <h5>Free Standard Delivery</h5>
+                                        <p>Free delivery on orders above ₹499. Delivery within 5-7 business days.</p>
+                                    </div>
+                                </div>
+                                <div class="shipping-card">
+                                    <div class="ship-icon"><i class="fas fa-rocket"></i></div>
+                                    <div class="ship-content">
+                                        <h5>Express Delivery</h5>
+                                        <p>Get it within 2-3 business days for ₹99 extra.</p>
+                                    </div>
+                                </div>
+                                <div class="shipping-card">
+                                    <div class="ship-icon"><i class="fas fa-undo-alt"></i></div>
+                                    <div class="ship-content">
+                                        <h5>Easy Returns</h5>
+                                        <p>7-day hassle-free return policy. No questions asked.</p>
+                                    </div>
+                                </div>
+                                <div class="shipping-card">
+                                    <div class="ship-icon"><i class="fas fa-box-open"></i></div>
+                                    <div class="ship-content">
+                                        <h5>Secure Packaging</h5>
+                                        <p>Premium packaging to ensure your product arrives safely.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer Reviews Section Premium -->
+    <section class="reviews-section-premium">
+        <div class="reviews-container">
+            <div class="reviews-header-premium">
+                <div class="header-left">
+                    <span class="section-eyebrow">What Customers Say</span>
+                    <h2 class="section-title-premium">Customer Reviews</h2>
+                </div>
+                <button class="btn-write-review-premium" (click)="showReviewForm = !showReviewForm">
+                    <i class="fas fa-pen"></i>
+                    <span>Write a Review</span>
+                </button>
+            </div>
+
+            <!-- Review Form Premium -->
+            <div class="review-form-premium" *ngIf="showReviewForm">
+                <div class="form-card">
+                    <div class="form-header">
+                        <h3>Share Your Experience</h3>
+                        <p>Your feedback helps other customers make better decisions</p>
+                    </div>
+                    
+                    <div class="star-rating-select">
+                        <span class="rating-label">Your Rating</span>
+                        <div class="stars-select">
+                            <button *ngFor="let i of [1,2,3,4,5]" 
+                                    class="star-btn" 
+                                    [class.selected]="i <= newReviewRating"
+                                    (click)="setReviewRating(i)">
+                                <i class="fas fa-star"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-fields">
+                        <div class="field-group">
+                            <label>Review Title <span class="optional">(Optional)</span></label>
+                            <input type="text" [(ngModel)]="newReviewTitle" placeholder="Sum up your experience" maxlength="100">
+                        </div>
+                        <div class="field-group">
+                            <label>Your Review</label>
+                            <textarea [(ngModel)]="newReviewComment" placeholder="Share details about your experience with this product..." rows="5"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-cancel" (click)="resetReviewForm()">Cancel</button>
+                        <button class="btn-submit" (click)="submitReview()" [disabled]="isSubmittingReview">
+                            <span *ngIf="!isSubmittingReview">Submit Review</span>
+                            <span *ngIf="isSubmittingReview"><i class="fas fa-circle-notch fa-spin"></i> Submitting...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews Overview -->
+            <div class="reviews-overview">
+                <div class="rating-summary-card">
+                    <div class="big-rating">
+                        <span class="rating-number">{{ getProductRating().toFixed(1) }}</span>
+                        <span class="rating-max">/5</span>
+                    </div>
+                    <div class="stars-display-premium">
+                        <i *ngFor="let star of getStarsArray(getProductRating())" 
+                           class="fas" 
+                           [ngClass]="star === 'full' ? 'fa-star' : (star === 'half' ? 'fa-star-half-alt' : 'fa-star empty')"></i>
+                    </div>
+                    <p class="total-reviews">Based on {{ getProductReviewCount() }} reviews</p>
+                </div>
+
+                <div class="rating-breakdown" *ngIf="productRating">
+                    <div class="breakdown-row" *ngFor="let i of [5,4,3,2,1]">
+                        <span class="star-label">{{ i }} <i class="fas fa-star"></i></span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" [style.width.%]="getRatingPercentage(i)"></div>
+                        </div>
+                        <span class="count-label">{{ getRatingCount(i) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews List Premium -->
+            <div class="reviews-list-premium">
+                <div *ngIf="isLoadingReviews" class="loading-reviews">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    <span>Loading reviews...</span>
+                </div>
+
+                <div *ngIf="!isLoadingReviews && reviews.length === 0" class="empty-reviews">
+                    <div class="empty-icon">💬</div>
+                    <h4>No Reviews Yet</h4>
+                    <p>Be the first to share your experience with this product!</p>
+                </div>
+
+                <div class="review-card-premium" *ngFor="let review of reviews; let i = index" [style.animation-delay]="i * 0.1 + 's'">
+                    <div class="review-top">
+                        <div class="reviewer-avatar-premium">
+                            {{ review.customerName.charAt(0).toUpperCase() }}
+                        </div>
+                        <div class="reviewer-details">
+                            <h5 class="reviewer-name-premium">{{ review.customerName || 'Anonymous' }}</h5>
+                            <div class="review-meta-premium">
+                                <div class="review-stars">
+                                    <i *ngFor="let s of [1,2,3,4,5]" 
+                                       class="fas fa-star" 
+                                       [class.filled]="s <= review.rating"></i>
+                                </div>
+                                <span class="review-date-premium">{{ formatReviewDate(review.createdAt) }}</span>
+                            </div>
+                        </div>
+                        <span *ngIf="review.isVerifiedPurchase" class="verified-purchase-badge">
+                            <i class="fas fa-badge-check"></i> Verified
+                        </span>
+                    </div>
+                    <h5 *ngIf="review.title" class="review-title-premium">{{ review.title }}</h5>
+                    <p class="review-text">{{ review.comment }}</p>
+                    <div class="review-footer">
+                        <button class="helpful-btn-premium" (click)="markReviewHelpful(review.reviewId)">
+                            <i class="far fa-thumbs-up"></i>
+                            <span>Helpful ({{ review.helpfulCount || 0 }})</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Related Products Premium -->
+    <section class="related-section-premium" *ngIf="relatedProducts.length > 0">
+        <div class="related-container">
+            <div class="section-header-premium">
+                <span class="section-eyebrow">Discover More</span>
+                <h2 class="section-title-premium">You May Also Like</h2>
+            </div>
+            
+            <div class="products-carousel">
+                <div class="product-card-premium" *ngFor="let relProduct of relatedProducts" (click)="viewProduct(relProduct.productId)">
+                    <div class="card-image-container">
+                        <img [src]="getImage(relProduct.productImageURL)" 
+                             [alt]="relProduct.productName"
+                             loading="lazy">
+                        <div class="card-overlay-premium">
+                            <button class="quick-add-btn">
+                                <i class="fas fa-eye"></i>
+                                <span>Quick View</span>
+                            </button>
+                        </div>
+                        <span *ngIf="relProduct.discount && relProduct.discount > 0" class="discount-chip">-{{ relProduct.discount }}%</span>
+                    </div>
+                    <div class="card-body-premium">
+                        <h4 class="card-title-premium">{{ relProduct.productName }}</h4>
+                        <p class="card-origin-premium" *ngIf="relProduct.originDistrict">
+                            <i class="fas fa-map-marker-alt"></i> {{ relProduct.originDistrict }}
+                        </p>
+                        <div class="card-footer-premium">
+                            <div class="card-price-premium">
+                                <span class="price-current">₹{{ relProduct.price | number }}</span>
+                                <span *ngIf="relProduct.discount && relProduct.discount > 0" class="price-was">
+                                    ₹{{ (relProduct.price || 0) / (1 - (relProduct.discount || 0) / 100) | number:'1.0-0' }}
+                                </span>
+                            </div>
+                            <div class="card-rating-premium">
+                                <i class="fas fa-star"></i>
+                                <span>{{ relProduct.rating || 4.5 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recently Viewed Premium -->
+    <section class="recently-viewed-premium" *ngIf="recentlyViewed.length > 0">
+        <div class="recently-container">
+            <div class="section-header-premium">
+                <span class="section-eyebrow">Your History</span>
+                <h2 class="section-title-premium">Recently Viewed</h2>
+            </div>
+            
+            <div class="recently-grid">
+                <div class="recently-card" *ngFor="let recentProduct of recentlyViewed" (click)="viewProduct(recentProduct.productId)">
+                    <div class="recently-image">
+                        <img [src]="getImage(recentProduct.productImageURL)" [alt]="recentProduct.productName" loading="lazy">
+                    </div>
+                    <div class="recently-info">
+                        <h5>{{ recentProduct.productName }}</h5>
+                        <span class="recently-price">₹{{ recentProduct.price | number }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Share Modal Premium -->
+    <div class="modal-overlay" *ngIf="showShareModal" (click)="closeShareModal()">
+        <div class="share-modal-premium" (click)="$event.stopPropagation()">
+            <div class="modal-header-premium">
+                <h3>Share This Product</h3>
+                <button class="modal-close" (click)="closeShareModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="share-options-premium">
+                <button class="share-option facebook" (click)="shareOnFacebook()">
+                    <i class="fab fa-facebook-f"></i>
+                    <span>Facebook</span>
+                </button>
+                <button class="share-option twitter" (click)="shareOnTwitter()">
+                    <i class="fab fa-twitter"></i>
+                    <span>Twitter</span>
+                </button>
+                <button class="share-option whatsapp" (click)="shareOnWhatsApp()">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>WhatsApp</span>
+                </button>
+                <button class="share-option copy" (click)="copyLink()">
+                    <i class="fas fa-link"></i>
+                    <span>Copy Link</span>
+                </button>
+            </div>
+            <div class="share-url">
+                <input type="text" [value]="getCurrentUrl()" readonly>
+                <button (click)="copyLink()"><i class="fas fa-copy"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Premium -->
+    <div class="lightbox-premium" *ngIf="isLightboxOpen" (click)="closeLightbox()">
+        <div class="lightbox-wrapper" (click)="$event.stopPropagation()">
+            <button class="lightbox-close-btn" (click)="closeLightbox()">
+                <i class="fas fa-times"></i>
+            </button>
+            <button class="lightbox-nav-btn prev" (click)="prevImage()" *ngIf="productImages.length > 1">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="lightbox-image-container">
+                <img [src]="productImages[currentImageIndex]" [alt]="getProductName()">
+            </div>
+            <button class="lightbox-nav-btn next" (click)="nextImage()" *ngIf="productImages.length > 1">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="lightbox-dots" *ngIf="productImages.length > 1">
+                <span *ngFor="let img of productImages; let i = index" 
+                      class="dot" 
+                      [class.active]="i === currentImageIndex"
+                      (click)="setCurrentImage(i)"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Actions Premium -->
+    <div class="floating-bar">
+        <button class="float-action cart" (click)="viewCart()">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+        </button>
+        <button class="float-action top" (click)="scrollToTop()">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+</main>

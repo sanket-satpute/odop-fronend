@@ -1,0 +1,125 @@
+<div class="notifications-container">
+    <!-- Header Section -->
+    <div class="notifications-header">
+      <div class="header-title">
+        <h2>Notifications</h2>
+        <span class="notification-count" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </div>
+      <div class="header-actions">
+        <button class="refresh-btn" (click)="refreshNotifications()" title="Refresh">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+        <button class="mark-all-read" (click)="markAllAsRead()" [disabled]="unreadCount === 0">
+          Mark all as read
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button 
+        class="filter-tab" 
+        [class.active]="activeFilter === 'all'"
+        (click)="setFilter('all')">
+        <i class="tab-icon fas fa-list-ul" aria-hidden="true"></i>
+        All
+      </button>
+      <button 
+        class="filter-tab" 
+        [class.active]="activeFilter === 'unread'"
+        (click)="setFilter('unread')">
+        <i class="tab-icon far fa-envelope-open" aria-hidden="true"></i>
+        Unread
+        <span class="tab-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
+      <button 
+        class="filter-tab" 
+        [class.active]="activeFilter === 'promotions'"
+        (click)="setFilter('promotions')">
+        <i class="tab-icon fas fa-tags" aria-hidden="true"></i>
+        Promotions
+      </button>
+      <button 
+        class="filter-tab" 
+        [class.active]="activeFilter === 'updates'"
+        (click)="setFilter('updates')">
+        <i class="tab-icon fas fa-box-open" aria-hidden="true"></i>
+        Updates
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="skeleton-loader" *ngFor="let item of [1,2,3,4,5]">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-content">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-message"></div>
+          <div class="skeleton-meta"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="notifications-list" *ngIf="!isLoading && filteredNotifications.length > 0">
+      <div 
+        class="notification-card" 
+        *ngFor="let notification of filteredNotifications; trackBy: trackByNotification"
+        [class.unread]="!notification.read"
+        (click)="markAsRead(notification)">
+        
+        <!-- Icon Section -->
+        <div class="notification-icon" [ngClass]="'icon-' + notification.type">
+          <span class="type-emoji">{{ getTypeIcon(notification.type) }}</span>
+        </div>
+
+        <!-- Content Section -->
+        <div class="notification-content">
+          <h4 class="notification-title">{{ notification.title }}</h4>
+          <p class="notification-message">{{ notification.message }}</p>
+          <div class="notification-meta">
+            <span class="timestamp">
+              <i class="far fa-clock time-icon" aria-hidden="true"></i>
+              {{ formatTime(notification.timestamp) }}
+            </span>
+            <span class="category">{{ notification.category }}</span>
+          </div>
+        </div>
+
+        <!-- Action Section -->
+        <div class="notification-actions">
+          <button 
+            class="action-btn" 
+            *ngIf="notification.actionText"
+            (click)="handleAction(notification, $event)">
+            {{ notification.actionText }}
+          </button>
+          <button 
+            class="delete-btn" 
+            (click)="deleteNotification(notification, $event)"
+            title="Delete notification">
+            <i class="fas fa-trash-alt" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <!-- Unread Indicator -->
+        <div class="unread-indicator" *ngIf="!notification.read"></div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && filteredNotifications.length === 0">
+      <div class="empty-icon">
+        <i class="far fa-bell" aria-hidden="true"></i>
+      </div>
+      <h3>{{ activeFilter === 'unread' ? 'No unread notifications' : 'You\'re all caught up!' }}</h3>
+      <p>
+        {{ activeFilter === 'unread' 
+           ? 'Great! You\'ve read all your notifications.' 
+           : 'We\'ll keep you posted with your latest updates.' }}
+      </p>
+      <button class="refresh-action-btn" (click)="refreshNotifications()" *ngIf="activeFilter !== 'all'">
+        View All Notifications
+      </button>
+    </div>
+  </div>

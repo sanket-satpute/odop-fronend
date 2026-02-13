@@ -1,0 +1,573 @@
+<div class="returns-page">
+  
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">🔄</span>
+        Returns & Refunds
+      </h1>
+      <p class="page-subtitle">Easy returns within {{ policy?.returnWindowDays || 15 }} days</p>
+    </div>
+  </header>
+
+  <!-- Summary Stats -->
+  <section class="summary-section" *ngIf="summary">
+    <div class="summary-card">
+      <span class="summary-value">{{ summary.totalReturns }}</span>
+      <span class="summary-label">Total Returns</span>
+    </div>
+    <div class="summary-card pending">
+      <span class="summary-value">{{ summary.pendingReturns }}</span>
+      <span class="summary-label">Pending</span>
+    </div>
+    <div class="summary-card success">
+      <span class="summary-value">{{ summary.completedReturns }}</span>
+      <span class="summary-label">Completed</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-value">{{ formatPrice(summary.totalRefundAmount) }}</span>
+      <span class="summary-label">Total Refunded</span>
+    </div>
+  </section>
+
+  <!-- Tab Navigation -->
+  <nav class="tab-nav">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'create'"
+      (click)="setActiveTab('create')">
+      <span class="tab-icon">➕</span>
+      New Return
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'track'"
+      (click)="setActiveTab('track')">
+      <span class="tab-icon">📋</span>
+      My Returns
+      <span class="badge" *ngIf="summary?.pendingReturns">{{ summary?.pendingReturns }}</span>
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'policy'"
+      (click)="setActiveTab('policy')">
+      <span class="tab-icon">📜</span>
+      Return Policy
+    </button>
+  </nav>
+
+  <!-- Error Message -->
+  <div class="alert error" *ngIf="errorMessage">
+    <span class="alert-icon">⚠️</span>
+    {{ errorMessage }}
+    <button class="alert-close" (click)="errorMessage = ''">✕</button>
+  </div>
+
+  <!-- Success Message -->
+  <div class="alert success" *ngIf="successMessage">
+    <span class="alert-icon">✅</span>
+    {{ successMessage }}
+    <button class="alert-close" (click)="successMessage = ''">✕</button>
+  </div>
+
+  <!-- Tab Content -->
+  <main class="tab-content">
+
+    <!-- CREATE RETURN TAB -->
+    <section class="create-return-tab" *ngIf="activeTab === 'create'">
+      
+      <!-- Progress Steps -->
+      <div class="progress-steps" *ngIf="currentStep !== 'confirmation'">
+        <div class="step" [class.active]="getStepNumber() >= 1" [class.completed]="getStepNumber() > 1">
+          <span class="step-number">1</span>
+          <span class="step-label">Order</span>
+        </div>
+        <div class="step-line" [class.active]="getStepNumber() > 1"></div>
+        <div class="step" [class.active]="getStepNumber() >= 2" [class.completed]="getStepNumber() > 2">
+          <span class="step-number">2</span>
+          <span class="step-label">Items</span>
+        </div>
+        <div class="step-line" [class.active]="getStepNumber() > 2"></div>
+        <div class="step" [class.active]="getStepNumber() >= 3" [class.completed]="getStepNumber() > 3">
+          <span class="step-number">3</span>
+          <span class="step-label">Reason</span>
+        </div>
+        <div class="step-line" [class.active]="getStepNumber() > 3"></div>
+        <div class="step" [class.active]="getStepNumber() >= 4" [class.completed]="getStepNumber() > 4">
+          <span class="step-number">4</span>
+          <span class="step-label">Pickup</span>
+        </div>
+        <div class="step-line" [class.active]="getStepNumber() > 4"></div>
+        <div class="step" [class.active]="getStepNumber() >= 5">
+          <span class="step-number">5</span>
+          <span class="step-label">Review</span>
+        </div>
+      </div>
+
+      <!-- Step 1: Select Order -->
+      <div class="step-content" *ngIf="currentStep === 'select-order'">
+        <h2 class="step-title">Enter Order ID</h2>
+        <p class="step-description">Find your order ID in your order confirmation email or order history.</p>
+        
+        <div class="order-lookup">
+          <div class="input-group">
+            <span class="input-icon">📦</span>
+            <input 
+              type="text" 
+              class="order-input"
+              [(ngModel)]="orderId"
+              placeholder="e.g., ORD-2026-12345"
+              (keyup.enter)="lookupOrder()">
+          </div>
+          <button 
+            class="lookup-btn" 
+            (click)="lookupOrder()"
+            [disabled]="!orderId.trim() || isLoading">
+            <span *ngIf="!isLoading">Find Order</span>
+            <span *ngIf="isLoading" class="spinner"></span>
+          </button>
+        </div>
+
+        <div class="quick-access">
+          <p>Or select from recent orders:</p>
+          <a routerLink="/customer-dashboard/cust-orders" class="link">View Order History →</a>
+        </div>
+      </div>
+
+      <!-- Step 2: Select Items -->
+      <div class="step-content" *ngIf="currentStep === 'select-items'">
+        <h2 class="step-title">Select Items to Return</h2>
+        <p class="step-description">Choose which items you want to return from order {{ orderId }}</p>
+
+        <div class="items-list">
+          <div 
+            *ngFor="let item of orderItems; trackBy: trackByItemId"
+            class="item-card"
+            [class.selected]="isItemSelected(item)"
+            [class.disabled]="!item.isReturnable">
+            
+            <div class="item-checkbox" *ngIf="item.isReturnable">
+              <input 
+                type="checkbox" 
+                [id]="'item-' + item.id"
+                [checked]="isItemSelected(item)"
+                (change)="toggleItemSelection(item)">
+              <label [for]="'item-' + item.id"></label>
+            </div>
+
+            <div class="item-image">
+              <img [src]="item.productImage" [alt]="item.productName">
+            </div>
+
+            <div class="item-details">
+              <h3 class="item-name">{{ item.productName }}</h3>
+              <p class="item-variant" *ngIf="item.variantInfo">{{ item.variantInfo }}</p>
+              <p class="item-price">{{ formatPrice(item.price) }}</p>
+            </div>
+
+            <div class="item-quantity" *ngIf="isItemSelected(item) && item.returnableQuantity > 1">
+              <label>Qty:</label>
+              <select 
+                [value]="getSelectedItemQuantity(item)"
+                (change)="updateItemQuantity(item, +$any($event.target).value)">
+                <option *ngFor="let q of [].constructor(item.returnableQuantity); let i = index" [value]="i + 1">
+                  {{ i + 1 }}
+                </option>
+              </select>
+            </div>
+
+            <div class="not-returnable" *ngIf="!item.isReturnable">
+              <span class="warning-icon">⚠️</span>
+              <span>Not eligible for return</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-secondary" (click)="previousStep()">← Back</button>
+          <button class="btn-primary" (click)="nextStep()" [disabled]="selectedItems.size === 0">
+            Continue →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Reason -->
+      <div class="step-content" *ngIf="currentStep === 'reason'">
+        <h2 class="step-title">Why are you returning?</h2>
+        
+        <form [formGroup]="returnReasonForm">
+          <!-- Return Type -->
+          <div class="form-section">
+            <label class="section-label">What would you like?</label>
+            <div class="return-type-options">
+              <label 
+                *ngFor="let type of returnTypes"
+                class="type-option"
+                [class.selected]="returnReasonForm.value.returnType === type.value">
+                <input type="radio" formControlName="returnType" [value]="type.value">
+                <span class="option-icon">{{ type.icon }}</span>
+                <span class="option-label">{{ type.label }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Reason -->
+          <div class="form-section">
+            <label class="section-label">Reason for return</label>
+            <div class="reason-options">
+              <label 
+                *ngFor="let reason of returnReasons"
+                class="reason-option"
+                [class.selected]="returnReasonForm.value.reason === reason.value">
+                <input type="radio" formControlName="reason" [value]="reason.value">
+                <span class="reason-icon">{{ reason.icon }}</span>
+                <span class="reason-text">{{ reason.label }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Additional Details -->
+          <div class="form-section">
+            <label class="section-label">Additional details (optional)</label>
+            <textarea 
+              formControlName="reasonDetails"
+              class="textarea"
+              rows="3"
+              placeholder="Please provide any additional information..."></textarea>
+          </div>
+
+          <!-- Upload Images -->
+          <div class="form-section">
+            <label class="section-label">Upload photos (optional)</label>
+            <div class="upload-area">
+              <span class="upload-icon">📷</span>
+              <p>Drag & drop images or click to upload</p>
+              <input type="file" multiple accept="image/*">
+            </div>
+          </div>
+        </form>
+
+        <div class="step-actions">
+          <button class="btn-secondary" (click)="previousStep()">← Back</button>
+          <button class="btn-primary" (click)="nextStep()" [disabled]="!returnReasonForm.valid">
+            Continue →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Pickup Address -->
+      <div class="step-content" *ngIf="currentStep === 'pickup'">
+        <h2 class="step-title">Pickup Details</h2>
+        <p class="step-description">Where should we pick up the item?</p>
+
+        <form [formGroup]="pickupForm" class="pickup-form">
+          <div class="form-row">
+            <div class="form-group full">
+              <label>Address Line 1 *</label>
+              <input type="text" formControlName="addressLine1" placeholder="House/Flat number, Building name">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full">
+              <label>Address Line 2</label>
+              <input type="text" formControlName="addressLine2" placeholder="Street, Area, Locality">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>City *</label>
+              <input type="text" formControlName="city" placeholder="City">
+            </div>
+            <div class="form-group">
+              <label>State *</label>
+              <input type="text" formControlName="state" placeholder="State">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>PIN Code *</label>
+              <input type="text" formControlName="pincode" placeholder="6-digit PIN" maxlength="6">
+            </div>
+            <div class="form-group">
+              <label>Contact Phone *</label>
+              <input type="tel" formControlName="contactPhone" placeholder="10-digit mobile" maxlength="10">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full">
+              <label>Landmark</label>
+              <input type="text" formControlName="landmark" placeholder="Nearby landmark">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Preferred Date</label>
+              <input type="date" formControlName="preferredDate">
+            </div>
+            <div class="form-group">
+              <label>Preferred Time</label>
+              <select formControlName="preferredTimeSlot">
+                <option value="">Select time slot</option>
+                <option *ngFor="let slot of timeSlots" [value]="slot">{{ slot }}</option>
+              </select>
+            </div>
+          </div>
+        </form>
+
+        <div class="step-actions">
+          <button class="btn-secondary" (click)="previousStep()">← Back</button>
+          <button class="btn-primary" (click)="nextStep()" [disabled]="!pickupForm.valid">
+            Continue →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 5: Review -->
+      <div class="step-content" *ngIf="currentStep === 'review'">
+        <h2 class="step-title">Review Your Return Request</h2>
+
+        <div class="review-section">
+          <h3>Items to Return</h3>
+          <div class="review-items">
+            <div *ngFor="let entry of selectedItems | keyvalue" class="review-item">
+              <ng-container *ngIf="orderItems | keyvalue as items">
+                <span>{{ entry.value }}x Item</span>
+              </ng-container>
+            </div>
+          </div>
+          <p class="refund-amount">Estimated Refund: <strong>{{ formatPrice(getTotalRefundAmount()) }}</strong></p>
+        </div>
+
+        <div class="review-section">
+          <h3>Return Details</h3>
+          <p><strong>Type:</strong> {{ returnReasonForm.value.returnType }}</p>
+          <p><strong>Reason:</strong> {{ returnReasonForm.value.reason }}</p>
+          <p *ngIf="returnReasonForm.value.reasonDetails"><strong>Details:</strong> {{ returnReasonForm.value.reasonDetails }}</p>
+        </div>
+
+        <div class="review-section">
+          <h3>Pickup Address</h3>
+          <p>{{ pickupForm.value.addressLine1 }}</p>
+          <p *ngIf="pickupForm.value.addressLine2">{{ pickupForm.value.addressLine2 }}</p>
+          <p>{{ pickupForm.value.city }}, {{ pickupForm.value.state }} - {{ pickupForm.value.pincode }}</p>
+          <p>Phone: {{ pickupForm.value.contactPhone }}</p>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn-secondary" (click)="previousStep()">← Back</button>
+          <button class="btn-primary submit-btn" (click)="submitReturn()" [disabled]="isSubmitting">
+            <span *ngIf="!isSubmitting">Submit Return Request</span>
+            <span *ngIf="isSubmitting" class="spinner"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirmation -->
+      <div class="step-content confirmation" *ngIf="currentStep === 'confirmation'">
+        <div class="success-icon">✅</div>
+        <h2>Return Request Submitted!</h2>
+        <p class="return-id">Return ID: <strong>{{ activeReturn?.returnId }}</strong></p>
+        <p class="confirmation-message">
+          We've received your return request. You'll receive pickup details shortly.
+        </p>
+        
+        <div class="next-steps">
+          <h3>What's Next?</h3>
+          <ol>
+            <li>Our team will review your request within 24 hours</li>
+            <li>You'll receive pickup schedule via SMS/email</li>
+            <li>Keep the item packed and ready for pickup</li>
+            <li>Refund will be processed after inspection</li>
+          </ol>
+        </div>
+
+        <div class="confirmation-actions">
+          <button class="btn-secondary" (click)="setActiveTab('track')">Track Return</button>
+          <button class="btn-primary" (click)="startNewReturn()">Start New Return</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TRACK RETURNS TAB -->
+    <section class="track-returns-tab" *ngIf="activeTab === 'track'">
+      
+      <div class="returns-list" *ngIf="myReturns.length > 0 && !activeReturn">
+        <div 
+          *ngFor="let returnReq of myReturns; trackBy: trackByReturnId"
+          class="return-card"
+          (click)="viewReturnDetails(returnReq)">
+          
+          <div class="return-header">
+            <span class="return-id">{{ returnReq.returnId }}</span>
+            <span class="return-status" [style.background-color]="getStatusColor(returnReq.status)">
+              {{ getStatusLabel(returnReq.status) }}
+            </span>
+          </div>
+
+          <div class="return-body">
+            <img [src]="returnReq.productImage" [alt]="returnReq.productName" class="product-thumb">
+            <div class="return-info">
+              <h4>{{ returnReq.productName }}</h4>
+              <p class="return-meta">
+                {{ returnReq.quantity }} item(s) • {{ formatPrice(returnReq.returnAmount) }}
+              </p>
+              <p class="return-date">Requested on {{ formatDate(returnReq.createdAt) }}</p>
+            </div>
+          </div>
+
+          <div class="return-footer">
+            <span class="view-details">View Details →</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Return Details Modal -->
+      <div class="return-details-modal" *ngIf="activeReturn">
+        <div class="modal-header">
+          <button class="back-btn" (click)="closeReturnDetails()">← Back to List</button>
+          <h3>Return Details</h3>
+        </div>
+
+        <div class="modal-body">
+          <div class="detail-section">
+            <div class="detail-row">
+              <span class="label">Return ID:</span>
+              <span class="value">{{ activeReturn.returnId }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Status:</span>
+              <span class="status-badge" [style.background-color]="getStatusColor(activeReturn.status)">
+                {{ getStatusLabel(activeReturn.status) }}
+              </span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Order ID:</span>
+              <span class="value">{{ activeReturn.orderId }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4>Product</h4>
+            <div class="product-detail">
+              <img [src]="activeReturn.productImage" [alt]="activeReturn.productName">
+              <div>
+                <p class="product-name">{{ activeReturn.productName }}</p>
+                <p class="product-variant" *ngIf="activeReturn.variantInfo">{{ activeReturn.variantInfo }}</p>
+                <p class="product-qty">Qty: {{ activeReturn.quantity }} • {{ formatPrice(activeReturn.returnAmount) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4>Reason</h4>
+            <p>{{ activeReturn.reason }}</p>
+            <p class="reason-details" *ngIf="activeReturn.reasonDetails">{{ activeReturn.reasonDetails }}</p>
+          </div>
+
+          <div class="detail-section" *ngIf="activeReturn.statusHistory?.length">
+            <h4>Status History</h4>
+            <div class="timeline">
+              <div *ngFor="let history of activeReturn.statusHistory" class="timeline-item">
+                <div class="timeline-dot" [style.background-color]="getStatusColor(history.status)"></div>
+                <div class="timeline-content">
+                  <span class="timeline-status">{{ getStatusLabel(history.status) }}</span>
+                  <span class="timeline-date">{{ formatDate(history.timestamp) }}</span>
+                  <p class="timeline-comment" *ngIf="history.comment">{{ history.comment }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section" *ngIf="activeReturn.refundDetails">
+            <h4>Refund Information</h4>
+            <div class="detail-row">
+              <span class="label">Refund Amount:</span>
+              <span class="value">{{ formatPrice(activeReturn.refundDetails.refundAmount) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Refund Method:</span>
+              <span class="value">{{ activeReturn.refundDetails.refundMethod }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Refund Status:</span>
+              <span class="value">{{ activeReturn.refundDetails.refundStatus }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="myReturns.length === 0 && !isLoading">
+        <span class="empty-icon">📦</span>
+        <h3>No returns yet</h3>
+        <p>You haven't made any return requests.</p>
+        <button class="btn-primary" (click)="setActiveTab('create')">Start a Return</button>
+      </div>
+
+    </section>
+
+    <!-- POLICY TAB -->
+    <section class="policy-tab" *ngIf="activeTab === 'policy'">
+      <div class="policy-content" *ngIf="policy">
+        
+        <div class="policy-card highlight">
+          <span class="policy-icon">📅</span>
+          <h3>{{ policy.returnWindowDays }} Days Return Window</h3>
+          <p>Return most items within {{ policy.returnWindowDays }} days of delivery for a full refund.</p>
+        </div>
+
+        <div class="policy-section">
+          <h3>Eligible Return Reasons</h3>
+          <ul class="policy-list">
+            <li *ngFor="let reason of policy.eligibleReasons">
+              <span class="check">✓</span> {{ reason }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="policy-section">
+          <h3>Non-Returnable Categories</h3>
+          <ul class="policy-list warning">
+            <li *ngFor="let category of policy.nonReturnableCategories">
+              <span class="cross">✕</span> {{ category }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="policy-section">
+          <h3>Required Documents</h3>
+          <ul class="policy-list">
+            <li *ngFor="let doc of policy.requiredDocuments">
+              <span class="bullet">•</span> {{ doc }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="policy-section">
+          <h3>Refund Processing</h3>
+          <p>{{ policy.refundProcessingTime }}</p>
+        </div>
+
+        <div class="policy-section">
+          <h3>Pickup Information</h3>
+          <p>{{ policy.pickupInfo }}</p>
+        </div>
+
+      </div>
+
+      <div class="policy-loading" *ngIf="!policy && isLoading">
+        <div class="spinner"></div>
+        <p>Loading policy...</p>
+      </div>
+    </section>
+
+  </main>
+
+</div>

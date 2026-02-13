@@ -1,0 +1,165 @@
+<div class="verification-page">
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading verification details...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <section class="hero-card">
+      <div class="hero-content">
+        <p class="hero-eyebrow">Vendor Trust Center</p>
+        <h2>{{ vendorName }}</h2>
+        <p class="hero-status">
+          <span class="status-chip" [class]="statusColor">
+            <i class="fas {{ statusIcon }}"></i>
+            {{ verificationStatus?.statusDisplayName || 'Not Started' }}
+          </span>
+        </p>
+        <p class="hero-message">
+          {{ verificationStatus?.statusMessage || 'Start verification to unlock payouts, trust badges, and full store visibility.' }}
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" (click)="startVerification()" [disabled]="isStartingVerification || !canStartVerification">
+            {{ isStartingVerification ? 'Starting...' : 'Start Verification' }}
+          </button>
+          <button class="btn btn-secondary" (click)="submitForReview()" [disabled]="isSubmittingForReview || !canSubmitForReview">
+            {{ isSubmittingForReview ? 'Submitting...' : 'Submit For Review' }}
+          </button>
+          <button class="btn btn-ghost" (click)="loadVerificationData()">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <aside class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-label">Submitted</span>
+          <strong>{{ formattedSubmittedAt }}</strong>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Last Updated</span>
+          <strong>{{ formattedUpdatedAt }}</strong>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">ETA</span>
+          <strong>{{ formattedEta }}</strong>
+        </div>
+      </aside>
+    </section>
+
+    <section class="metrics-grid">
+      <article class="metric-card">
+        <span>Completion</span>
+        <strong>{{ progressValue }}%</strong>
+      </article>
+      <article class="metric-card">
+        <span>Required Uploaded</span>
+        <strong>{{ uploadedRequiredCount }}/{{ requiredDocumentRows.length }}</strong>
+      </article>
+      <article class="metric-card">
+        <span>Approved Docs</span>
+        <strong>{{ approvedCount }}</strong>
+      </article>
+      <article class="metric-card">
+        <span>Issues / Pending</span>
+        <strong>{{ rejectedCount }} / {{ pendingCount }}</strong>
+      </article>
+    </section>
+
+    <section class="progress-card" *ngIf="verificationStatus">
+      <div class="progress-header">
+        <h3>Verification Journey</h3>
+        <strong>{{ progressValue }}%</strong>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="progressValue"></div>
+      </div>
+      <div class="steps-grid">
+        <article class="step-item" *ngFor="let step of verificationStatus.steps" [ngClass]="getStepClass(step)">
+          <span class="step-bullet">
+            <i class="fas" [class.fa-check]="step.completed" [class.fa-clock]="!step.completed"></i>
+          </span>
+          <div class="step-text">
+            <p>{{ step.stepDisplayName }}</p>
+            <small>{{ step.completed ? 'Completed' : step.current ? 'In progress' : 'Pending' }}</small>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="documents-card" [formGroup]="documentForm">
+      <div class="card-header">
+        <h3>KYC Documents</h3>
+        <p>Upload clear PDF/JPG/PNG files. Maximum file size: 5 MB.</p>
+      </div>
+      <div class="start-hint" *ngIf="!canUploadDocuments">
+        Click <strong>Start Verification</strong> first to create your verification profile before uploading documents.
+      </div>
+
+      <div class="doc-group" *ngIf="requiredDocumentRows.length">
+        <div class="group-header">
+          <h4>Required Documents</h4>
+          <span>{{ uploadedRequiredCount }}/{{ requiredDocumentRows.length }} uploaded</span>
+        </div>
+        <div class="documents-grid">
+          <article class="document-item" *ngFor="let doc of requiredDocumentRows">
+            <header>
+              <h5>{{ doc.displayName }}</h5>
+              <span class="doc-status" [ngClass]="getDocumentStatusClass(doc)">{{ doc.statusDisplayName }}</span>
+            </header>
+            <p class="doc-meta">Mandatory</p>
+            <p class="doc-error" *ngIf="doc.rejectionReason">{{ doc.rejectionReason }}</p>
+            <a class="doc-link" *ngIf="doc.documentUrl" [href]="doc.documentUrl" target="_blank" rel="noopener noreferrer">View uploaded file</a>
+
+            <div class="upload-controls">
+              <input type="text" [formControlName]="doc.type" placeholder="Document number (optional)" [disabled]="!canUploadDocuments" />
+              <label class="file-input">
+                <input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="onFileSelected($event, doc.type)" [disabled]="!canUploadDocuments" />
+                <span>{{ selectedFileNames[doc.type] || 'Choose file' }}</span>
+              </label>
+              <button class="btn btn-secondary" (click)="uploadDocument(doc.type)" [disabled]="uploadInProgress[doc.type] || !canUploadDocuments">
+                {{ uploadInProgress[doc.type] ? 'Uploading...' : (doc.uploaded ? 'Re-upload' : 'Upload') }}
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="doc-group optional" *ngIf="optionalDocumentRows.length">
+        <div class="group-header">
+          <h4>Optional / Supporting Documents</h4>
+          <span>{{ optionalDocumentRows.length }} available</span>
+        </div>
+        <div class="documents-grid">
+          <article class="document-item" *ngFor="let doc of optionalDocumentRows">
+            <header>
+              <h5>{{ doc.displayName }}</h5>
+              <span class="doc-status" [ngClass]="getDocumentStatusClass(doc)">{{ doc.statusDisplayName }}</span>
+            </header>
+            <p class="doc-meta">Optional</p>
+            <p class="doc-error" *ngIf="doc.rejectionReason">{{ doc.rejectionReason }}</p>
+            <a class="doc-link" *ngIf="doc.documentUrl" [href]="doc.documentUrl" target="_blank" rel="noopener noreferrer">View uploaded file</a>
+
+            <div class="upload-controls">
+              <input type="text" [formControlName]="doc.type" placeholder="Document number (optional)" [disabled]="!canUploadDocuments" />
+              <label class="file-input">
+                <input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="onFileSelected($event, doc.type)" [disabled]="!canUploadDocuments" />
+                <span>{{ selectedFileNames[doc.type] || 'Choose file' }}</span>
+              </label>
+              <button class="btn btn-secondary" (click)="uploadDocument(doc.type)" [disabled]="uploadInProgress[doc.type] || !canUploadDocuments">
+                {{ uploadInProgress[doc.type] ? 'Uploading...' : (doc.uploaded ? 'Re-upload' : 'Upload') }}
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="actions-card" *ngIf="verificationStatus?.actionRequired?.length">
+      <h3>Action Required</h3>
+      <ul>
+        <li *ngFor="let action of verificationStatus?.actionRequired">{{ action }}</li>
+      </ul>
+    </section>
+  </ng-container>
+</div>

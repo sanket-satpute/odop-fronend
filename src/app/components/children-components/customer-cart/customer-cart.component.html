@@ -1,0 +1,19 @@
+<p id="p" *ngIf="carts?.length == 0; else other">Cart is Empty</p>
+
+<ng-template #other>
+    <div class="cart-container">
+        <h2>Your Cart</h2>
+        <div class="product-item" *ngFor="let prod of objs">
+        <img src="{{ getImage(prod.pImgUrl) }}" alt="Product Image">
+        <div class="product-details">
+            <h3>{{ prod.pName }}</h3>
+            <p>{{ prod.pDescr }}</p>
+            <p>Price: ${{ prod.pPri }}</p>
+            <button style="background-color: blue;" (click)="showProductStatus(prod.cartId)">Show Status</button>
+            <button (click)="removeFromCart(prod.cartId)">Remove from Cart</button>
+        </div>
+        </div>
+    </div>
+</ng-template>
+
+  

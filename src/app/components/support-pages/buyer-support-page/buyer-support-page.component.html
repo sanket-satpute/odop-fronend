@@ -1,0 +1,308 @@
+<!-- Breadcrumb Navigation -->
+<nav class="breadcrumb-nav">
+  <div class="container">
+    <ol class="breadcrumb">
+      <li><a href="/">Home</a></li>
+      <li><a href="/support">Support</a></li>
+      <li class="active">Buyer Support</li>
+    </ol>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">We're here to support your shopping journey</h1>
+        <p class="hero-subtitle">From local treasures to doorstep delivery — we're committed to your satisfaction.</p>
+        <button class="cta-button" (click)="scrollToFAQ()">
+          <span>Browse FAQs</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-image">
+          <div class="floating-elements">
+            <div class="element element-1"></div>
+            <div class="element element-2"></div>
+            <div class="element element-3"></div>
+          </div>
+          <div class="hero-illustration">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Support Cards -->
+<section class="support-cards-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>How can we help you today?</h2>
+      <p>Choose from our quick support options</p>
+    </div>
+    
+    <div class="support-cards-grid">
+      <div class="support-card" *ngFor="let card of supportCards" (click)="handleCardClick(card.action)">
+        <div class="card-icon">
+          <i [class]="card.icon"></i>
+        </div>
+        <h3>{{ card.title }}</h3>
+        <p>{{ card.description }}</p>
+        <span class="card-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Order Tracking Section -->
+<section class="order-tracking-section">
+  <div class="container">
+    <div class="tracking-card">
+      <div class="tracking-header">
+        <div class="tracking-icon">
+          <i class="fas fa-search"></i>
+        </div>
+        <div class="tracking-text">
+          <h3>Track Your Order</h3>
+          <p>Enter your order ID to get real-time updates</p>
+        </div>
+      </div>
+      
+      <div class="tracking-form">
+        <div class="input-group">
+          <input 
+            type="text" 
+            [(ngModel)]="orderTrackingId" 
+            placeholder="Enter Order ID (e.g., ORD123456)"
+            class="tracking-input"
+          >
+          <button class="track-button" (click)="trackOrder()">
+            <i class="fas fa-search"></i>
+            Track Order
+          </button>
+        </div>
+        <div class="login-option">
+          <a href="/login" class="login-link">
+            <i class="fas fa-user"></i>
+            Login to view all orders
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Shipping Information -->
+<section class="shipping-info-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Shipping & Delivery</h2>
+      <p>We deliver your favorite local products worldwide</p>
+    </div>
+    
+    <div class="shipping-cards">
+      <div class="shipping-card" *ngFor="let shipping of shippingInfo">
+        <div class="shipping-icon">
+          <i [class]="shipping.icon"></i>
+        </div>
+        <h4>{{ shipping.title }}</h4>
+        <p class="shipping-timeline">{{ shipping.timeline }}</p>
+        <ul class="shipping-features">
+          <li *ngFor="let feature of shipping.features">{{ feature }}</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="shipping-policy-link">
+      <a href="/shipping-policy" class="policy-link">
+        <i class="fas fa-file-alt"></i>
+        View Complete Shipping Policy
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Returns & Refunds -->
+<section class="returns-section">
+  <div class="container">
+    <div class="returns-card">
+      <div class="returns-content">
+        <div class="returns-info">
+          <h3>Easy Returns & Refunds</h3>
+          <div class="return-features">
+            <div class="feature">
+              <i class="fas fa-calendar-alt"></i>
+              <span>7-day return window</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-credit-card"></i>
+              <span>Quick refund processing</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-shield-alt"></i>
+              <span>100% secure process</span>
+            </div>
+          </div>
+        </div>
+        <div class="returns-action">
+          <button class="return-button" (click)="requestReturn()">
+            <i class="fas fa-undo"></i>
+            Request a Return
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Payment & Security -->
+<section class="payment-security-section">
+  <div class="container">
+    <div class="payment-card">
+      <div class="payment-header">
+        <h3>Safe & Secure Payments</h3>
+        <p>Government-approved secure transactions</p>
+      </div>
+      
+      <div class="payment-methods">
+        <div class="payment-method" *ngFor="let method of paymentMethods">
+          <i [class]="method.icon"></i>
+          <span>{{ method.name }}</span>
+        </div>
+      </div>
+      
+      <div class="security-badges">
+        <div class="badge">
+          <i class="fas fa-shield-alt"></i>
+          <span>SSL Encrypted</span>
+        </div>
+        <div class="badge">
+          <i class="fas fa-certificate"></i>
+          <span>ISO Certified</span>
+        </div>
+        <div class="badge">
+          <i class="fas fa-lock"></i>
+          <span>Govt. Approved</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section" id="faq">
+  <div class="container">
+    <div class="section-header">
+      <h2>Frequently Asked Questions</h2>
+      <p>Find quick answers to common questions</p>
+    </div>
+    
+    <div class="faq-categories">
+      <button 
+        *ngFor="let category of faqCategories" 
+        class="category-btn"
+        [class.active]="selectedCategory === category"
+        (click)="selectCategory(category)"
+      >
+        {{ category }}
+      </button>
+    </div>
+    
+    <div class="faq-accordion">
+      <div class="faq-item" *ngFor="let faq of filteredFAQs">
+        <div class="faq-question" (click)="toggleFAQ(faq)">
+          <h4>{{ faq.question }}</h4>
+          <i class="fas fa-chevron-down" [class.rotated]="faq.expanded"></i>
+        </div>
+        <div class="faq-answer" [class.expanded]="faq.expanded">
+          <p>{{ faq.answer }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Support -->
+<section class="contact-support-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Still need help?</h2>
+      <p>Our support team is ready to assist you</p>
+    </div>
+    
+    <div class="contact-cards">
+      <div class="contact-card" *ngFor="let contact of contactChannels" (click)="handleContactClick(contact.action)">
+        <div class="contact-icon">
+          <i [class]="contact.icon"></i>
+        </div>
+        <h4>{{ contact.title }}</h4>
+        <p>{{ contact.description }}</p>
+        <button class="contact-button">
+          {{ contact.buttonText }}
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- G-Tag Awareness -->
+<section class="gtag-awareness-section">
+  <div class="container">
+    <div class="gtag-content">
+      <div class="gtag-info">
+        <h3>Why G-tag matters to you?</h3>
+        <div class="gtag-benefits">
+          <div class="benefit">
+            <i class="fas fa-certificate"></i>
+            <span>Government-verified products</span>
+          </div>
+          <div class="benefit">
+            <i class="fas fa-heart"></i>
+            <span>Promotes local economy</span>
+          </div>
+          <div class="benefit">
+            <i class="fas fa-star"></i>
+            <span>Authentic regional quality</span>
+          </div>
+        </div>
+      </div>
+      <div class="gtag-badge">
+        <div class="badge-container">
+          <i class="fas fa-award"></i>
+          <span>G-Tag Certified</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer Resources -->
+<section class="footer-resources">
+  <div class="container">
+    <div class="resources-grid">
+      <a href="/privacy-policy" class="resource-link">
+        <i class="fas fa-shield-alt"></i>
+        <span>Privacy Policy</span>
+      </a>
+      <a href="/terms-of-use" class="resource-link">
+        <i class="fas fa-file-contract"></i>
+        <span>Terms of Use</span>
+      </a>
+      <a href="/buyer-handbook.pdf" class="resource-link">
+        <i class="fas fa-book"></i>
+        <span>Buyer Handbook</span>
+      </a>
+      <a href="/invoicing-info" class="resource-link">
+        <i class="fas fa-receipt"></i>
+        <span>Invoicing Info</span>
+      </a>
+    </div>
+  </div>
+</section>

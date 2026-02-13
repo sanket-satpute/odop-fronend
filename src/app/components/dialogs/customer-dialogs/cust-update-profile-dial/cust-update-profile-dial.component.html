@@ -1,0 +1,242 @@
+<!-- Modal Overlay -->
+<div class="modal-overlay" (click)="closeDialog()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2 class="dialog-title">Update Profile</h2>
+      <button type="button" class="close-btn" (click)="closeDialog()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <form #profileForm="ngForm" class="update-profile-form" (ngSubmit)="submitForm(profileForm)">
+        
+        <!-- Profile Picture Section -->
+        <div class="profile-pic-section">
+          <div class="profile-pic-container">
+            <img 
+              [src]="user.profilePicUrl || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'" 
+              alt="Profile Picture"
+              class="profile-preview"
+            />
+            <div class="upload-overlay">
+              <input 
+                type="file" 
+                id="profilePic" 
+                (change)="uploadProfilePic($event)" 
+                accept="image/*"
+                style="display: none;"
+              />
+              <label for="profilePic" class="upload-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14 7h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Change Photo
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Fields Grid -->
+        <div class="form-grid">
+          
+          <!-- Full Name -->
+          <div class="form-row">
+            <label for="name">Full Name <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="name"
+              name="name"
+              [(ngModel)]="user.name" 
+              required
+              #nameField="ngModel"
+              placeholder="Enter your full name"
+              [class.error]="nameField.invalid && nameField.touched"
+            />
+            <span class="error-message" *ngIf="nameField.invalid && nameField.touched">
+              Full name is required
+            </span>
+          </div>
+
+          <!-- Email Address -->
+          <div class="form-row">
+            <label for="email">Email Address</label>
+            <input 
+              type="email" 
+              id="email"
+              name="email"
+              [(ngModel)]="user.email" 
+              readonly
+              placeholder="your.email@example.com"
+              class="readonly-field"
+            />
+            <span class="field-note">Email cannot be changed</span>
+          </div>
+
+          <!-- Mobile Number -->
+          <div class="form-row">
+            <label for="mobile">Mobile Number <span class="required">*</span></label>
+            <input 
+              type="tel" 
+              id="mobile"
+              name="mobile"
+              [(ngModel)]="user.mobile" 
+              maxlength="10"
+              pattern="[0-9]{10}"
+              required
+              #mobileField="ngModel"
+              placeholder="Enter 10-digit mobile number"
+              [class.error]="mobileField.invalid && mobileField.touched"
+              (input)="onMobileInput($event)"
+            />
+            <span class="error-message" *ngIf="mobileField.invalid && mobileField.touched">
+              Please enter a valid 10-digit mobile number
+            </span>
+          </div>
+
+          <!-- Gender -->
+          <div class="form-row">
+            <label for="gender">Gender</label>
+            <select 
+              id="gender"
+              name="gender"
+              [(ngModel)]="user.gender"
+              #genderField="ngModel"
+            >
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <!-- Date of Birth -->
+          <div class="form-row">
+            <label for="dob">Date of Birth</label>
+            <input 
+              type="date" 
+              id="dob"
+              name="dob"
+              [(ngModel)]="user.dob"
+              [max]="maxDate"
+              #dobField="ngModel"
+            />
+          </div>
+
+          <!-- Address Line 1 -->
+          <div class="form-row">
+            <label for="address1">Address Line 1 <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="address1"
+              name="address1"
+              [(ngModel)]="user.address1" 
+              required
+              #address1Field="ngModel"
+              placeholder="Enter your address"
+              [class.error]="address1Field.invalid && address1Field.touched"
+            />
+            <span class="error-message" *ngIf="address1Field.invalid && address1Field.touched">
+              Address Line 1 is required
+            </span>
+          </div>
+
+          <!-- Address Line 2 -->
+          <div class="form-row">
+            <label for="address2">Address Line 2</label>
+            <input 
+              type="text" 
+              id="address2"
+              name="address2"
+              [(ngModel)]="user.address2"
+              placeholder="Apartment, suite, etc. (optional)"
+            />
+          </div>
+
+          <!-- State -->
+          <div class="form-row">
+            <label for="state">State <span class="required">*</span></label>
+            <select 
+              id="state"
+              name="state"
+              [(ngModel)]="user.state"
+              required
+              #stateField="ngModel"
+              (change)="onStateChange()"
+              [class.error]="stateField.invalid && stateField.touched"
+            >
+              <option value="">Select State</option>
+              <option *ngFor="let state of states" [value]="state.code">{{ state.name }}</option>
+            </select>
+            <span class="error-message" *ngIf="stateField.invalid && stateField.touched">
+              Please select a state
+            </span>
+          </div>
+
+          <!-- District -->
+          <div class="form-row">
+            <label for="district">District <span class="required">*</span></label>
+            <select 
+              id="district"
+              name="district"
+              [(ngModel)]="user.district"
+              required
+              #districtField="ngModel"
+              [disabled]="!user.state"
+              [class.error]="districtField.invalid && districtField.touched"
+            >
+              <option value="">{{ user.state ? 'Select District' : 'Select State First' }}</option>
+              <option *ngFor="let district of filteredDistricts" [value]="district">{{ district }}</option>
+            </select>
+            <span class="error-message" *ngIf="districtField.invalid && districtField.touched">
+              Please select a district
+            </span>
+          </div>
+
+          <!-- Pincode -->
+          <div class="form-row">
+            <label for="pincode">Pincode <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="pincode"
+              name="pincode"
+              [(ngModel)]="user.pincode" 
+              maxlength="6"
+              pattern="[0-9]{6}"
+              required
+              #pincodeField="ngModel"
+              placeholder="Enter 6-digit pincode"
+              [class.error]="pincodeField.invalid && pincodeField.touched"
+              (input)="onPincodeInput($event)"
+            />
+            <span class="error-message" *ngIf="pincodeField.invalid && pincodeField.touched">
+              Please enter a valid 6-digit pincode
+            </span>
+          </div>
+
+        </div>
+
+        <!-- Form Footer -->
+        <div class="form-footer">
+          <button type="button" class="cancel-btn" (click)="closeDialog()">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="save-btn"
+            [disabled]="profileForm.invalid || isSubmitting"
+          >
+            <span *ngIf="isSubmitting" class="loading-spinner"></span>
+            {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

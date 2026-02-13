@@ -1,0 +1,192 @@
+<div class="messages-container">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner-ring"></div>
+      <span>Loading conversations...</span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="loadError && !isLoading">
+    <div class="error-content">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <h2>Unable to Load Messages</h2>
+      <p>{{ loadError }}</p>
+      <div class="error-actions">
+        <button class="btn btn-primary" (click)="refreshData()">
+          <i class="fas fa-sync-alt"></i> Retry
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content (only show when not loading and no error) -->
+  <ng-container *ngIf="!isLoading && !loadError">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">
+          <i class="fas fa-envelope"></i>
+          Messages
+        </h1>
+        <p class="page-subtitle">Communicate with your customers and manage inquiries</p>
+      </div>
+      <div class="header-stats">
+        <div class="mini-stat">
+          <span class="stat-num">{{ totalMessages }}</span>
+          <span class="stat-text">Total</span>
+        </div>
+        <div class="mini-stat unread">
+          <span class="stat-num">{{ unreadMessages }}</span>
+          <span class="stat-text">Unread</span>
+        </div>
+        <div class="mini-stat">
+          <span class="stat-num">{{ avgResponseTime }}</span>
+          <span class="stat-text">Avg. Response</span>
+        </div>
+        <div class="mini-stat success">
+          <span class="stat-num">{{ satisfactionRate }}%</span>
+          <span class="stat-text">Satisfaction</span>
+        </div>
+      </div>
+    </div>
+
+  <!-- Messages Layout -->
+  <div class="messages-layout">
+    <!-- Conversations Sidebar -->
+    <div class="conversations-panel">
+      <!-- Search & Filters -->
+      <div class="panel-header">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search conversations..." [(ngModel)]="searchQuery">
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab" [class.active]="activeFilter === 'all'" (click)="filterConversations('all')">All</button>
+          <button class="filter-tab" [class.active]="activeFilter === 'inquiry'" (click)="filterConversations('inquiry')">Inquiries</button>
+          <button class="filter-tab" [class.active]="activeFilter === 'order'" (click)="filterConversations('order')">Orders</button>
+          <button class="filter-tab" [class.active]="activeFilter === 'support'" (click)="filterConversations('support')">Support</button>
+        </div>
+      </div>
+
+      <!-- Conversation List -->
+      <div class="conversation-list">
+        <div 
+          class="conversation-item" 
+          *ngFor="let conv of filteredConversations"
+          [class.active]="selectedConversation?.id === conv.id"
+          [class.unread]="conv.unreadCount > 0"
+          (click)="selectConversation(conv)">
+          
+          <div class="avatar" [class.online]="conv.isOnline">
+            {{ conv.customerAvatar }}
+          </div>
+          
+          <div class="conv-content">
+            <div class="conv-header">
+              <span class="customer-name">{{ conv.customerName }}</span>
+              <span class="conv-time">{{ getTimeAgo(conv.timestamp) }}</span>
+            </div>
+            <div class="conv-preview">
+              <i class="fas" [ngClass]="getTypeIcon(conv.type)"></i>
+              <span class="message-preview">{{ conv.lastMessage }}</span>
+            </div>
+            <div class="conv-meta" *ngIf="conv.orderRef">
+              <span class="order-ref">{{ conv.orderRef }}</span>
+            </div>
+          </div>
+          
+          <span class="unread-badge" *ngIf="conv.unreadCount > 0">{{ conv.unreadCount }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div class="chat-panel" *ngIf="selectedConversation">
+      <!-- Chat Header -->
+      <div class="chat-header">
+        <div class="chat-user">
+          <div class="avatar" [class.online]="selectedConversation.isOnline">
+            {{ selectedConversation.customerAvatar }}
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ selectedConversation.customerName }}</span>
+            <span class="user-status" [class.online]="selectedConversation.isOnline">
+              {{ selectedConversation.isOnline ? 'Online' : 'Offline' }}
+            </span>
+          </div>
+        </div>
+        <div class="chat-actions">
+          <button class="icon-btn" title="View Customer Profile">
+            <i class="fas fa-user"></i>
+          </button>
+          <button class="icon-btn" title="View Order History">
+            <i class="fas fa-history"></i>
+          </button>
+          <button class="icon-btn" title="More Options">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages Area -->
+      <div class="messages-area">
+        <div class="message" *ngFor="let msg of messages" [class.own]="msg.isOwn">
+          <div class="message-bubble">
+            <p class="message-text">{{ msg.content }}</p>
+            <div class="message-meta">
+              <span class="message-time">{{ formatTime(msg.timestamp) }}</span>
+              <i class="fas" [ngClass]="getStatusIcon(msg.status)" *ngIf="msg.isOwn" 
+                 [class.read]="msg.status === 'read'"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Replies -->
+      <div class="quick-replies">
+        <span class="quick-label">Quick Replies:</span>
+        <div class="quick-chips">
+          <button class="quick-chip" *ngFor="let reply of quickReplies" (click)="useQuickReply(reply)">
+            {{ reply.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Message Input -->
+      <div class="message-input">
+        <div class="input-wrapper">
+          <button class="attach-btn">
+            <i class="fas fa-paperclip"></i>
+          </button>
+          <input 
+            type="text" 
+            placeholder="Type your message..." 
+            [(ngModel)]="newMessage"
+            (keyup.enter)="sendMessage()">
+          <button class="emoji-btn">
+            <i class="fas fa-smile"></i>
+          </button>
+        </div>
+        <button class="send-btn" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-chat" *ngIf="!selectedConversation">
+      <div class="empty-icon">
+        <i class="fas fa-comments"></i>
+      </div>
+      <h3>Select a Conversation</h3>
+      <p>Choose a conversation from the list to start messaging</p>
+    </div>
+  </div>
+  </ng-container>
+</div>

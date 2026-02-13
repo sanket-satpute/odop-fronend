@@ -1,0 +1,459 @@
+{
+  "Summary": {
+    "Passed": 46,
+    "Timestamp": "2026-02-09 19:47:50",
+    "PassRate": 88.5,
+    "TotalTests": 52,
+    "Failed": 6
+  },
+  "FailedTests": [
+    {
+      "Name": "Product Found in Cart",
+      "Category": "Add to Cart",
+      "Message": "ProductId: 6988aaeffff33d3e2811aff9"
+    },
+    {
+      "Name": "Cart Count Endpoint",
+      "Category": "Cart Real-Time Sync",
+      "Message": "Endpoint may not exist"
+    },
+    {
+      "Name": "Multiple Products in Cart",
+      "Category": "Cart Real-Time Sync",
+      "Message": "Unique products: 1"
+    },
+    {
+      "Name": "Create Payment Order",
+      "Category": "Buy Now Flow",
+      "Message": "Error: Response status code does not indicate success: 500 ()."
+    },
+    {
+      "Name": "Products Page",
+      "Category": "Frontend Components",
+      "Message": "Route may use client-side routing"
+    },
+    {
+      "Name": "Product Details",
+      "Category": "Frontend Components",
+      "Message": "Route may use client-side routing"
+    }
+  ],
+  "Tests": [
+    {
+      "Passed": true,
+      "Name": "Load All Products",
+      "Category": "Product Listing & View Details",
+      "Message": "Count: 6",
+      "Timestamp": "2026-02-09T19:47:45.5796775+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "View Details API",
+      "Category": "Product Listing & View Details",
+      "Message": "GET /product/get_product_id/{id}",
+      "Timestamp": "2026-02-09T19:47:45.6532339+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Product Name Present",
+      "Category": "Product Listing & View Details",
+      "Message": "Name: Chanderi Silk Saree - Royal Blue",
+      "Timestamp": "2026-02-09T19:47:45.6560012+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Valid Price",
+      "Category": "Product Listing & View Details",
+      "Message": "Price: ₹8500",
+      "Timestamp": "2026-02-09T19:47:45.6622897+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Description Present",
+      "Category": "Product Listing & View Details",
+      "Message": "Length: 88 chars",
+      "Timestamp": "2026-02-09T19:47:45.6669395+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Vendor ID Present",
+      "Category": "Product Listing & View Details",
+      "Message": "VendorId: 69381acfd6c2ac5d803210f2",
+      "Timestamp": "2026-02-09T19:47:45.6685377+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Category ID Present",
+      "Category": "Product Listing & View Details",
+      "Message": "CategoryId: 6988aaeffff33d3e2811afed",
+      "Timestamp": "2026-02-09T19:47:45.6714577+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Product Image URL",
+      "Category": "Product Listing & View Details",
+      "Message": "URL: https://example.com/products/chanderi-silk-saree--...",
+      "Timestamp": "2026-02-09T19:47:45.6828611+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Stock Quantity Valid",
+      "Category": "Product Listing & View Details",
+      "Message": "Quantity: 10",
+      "Timestamp": "2026-02-09T19:47:45.6861446+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Stock Status Present",
+      "Category": "Product Listing & View Details",
+      "Message": "Status: In Stock",
+      "Timestamp": "2026-02-09T19:47:45.6876407+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Origin State",
+      "Category": "Product Listing & View Details",
+      "Message": "State: Madhya Pradesh",
+      "Timestamp": "2026-02-09T19:47:45.689553+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Origin District",
+      "Category": "Product Listing & View Details",
+      "Message": "District: Ashoknagar",
+      "Timestamp": "2026-02-09T19:47:45.6909473+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "GI Tag Field",
+      "Category": "Product Listing & View Details",
+      "Message": "GI Certified: True",
+      "Timestamp": "2026-02-09T19:47:45.69321+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Craft Type",
+      "Category": "Product Listing & View Details",
+      "Message": "Type: Handloom Weaving",
+      "Timestamp": "2026-02-09T19:47:45.6950822+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Vendor Exists in DB",
+      "Category": "Product Listing & View Details",
+      "Message": "Vendor: Test Vendor User",
+      "Timestamp": "2026-02-09T19:47:45.7764247+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Category Exists in DB",
+      "Category": "Product Listing & View Details",
+      "Message": "Category: Textiles & Fabrics",
+      "Timestamp": "2026-02-09T19:47:45.8377175+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Customer Authentication",
+      "Category": "Add to Cart",
+      "Message": "Token obtained",
+      "Timestamp": "2026-02-09T19:47:46.0932589+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Customer Found",
+      "Category": "Add to Cart",
+      "Message": "ID: ec9c6a4c-c937-4011-989a-dbe2c5f494ee",
+      "Timestamp": "2026-02-09T19:47:46.1813327+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Get Initial Cart",
+      "Category": "Add to Cart",
+      "Message": "Items before: 0",
+      "Timestamp": "2026-02-09T19:47:46.2507778+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Add to Cart API",
+      "Category": "Add to Cart",
+      "Message": "CartId: 6989ec8a592ac5722480eea3",
+      "Timestamp": "2026-02-09T19:47:46.3095164+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Cart Count Increased",
+      "Category": "Add to Cart",
+      "Message": "Before: 0, After: 1",
+      "Timestamp": "2026-02-09T19:47:46.3760179+05:30",
+      "Details": null
+    },
+    {
+      "Passed": false,
+      "Name": "Product Found in Cart",
+      "Category": "Add to Cart",
+      "Message": "ProductId: 6988aaeffff33d3e2811aff9",
+      "Timestamp": "2026-02-09T19:47:46.4295402+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Duplicate Handling",
+      "Category": "Add to Cart",
+      "Message": "Same product entries: 1 (creates new entry or increments)",
+      "Timestamp": "2026-02-09T19:47:46.5866485+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Cart Endpoint 1",
+      "Category": "Cart Real-Time Sync",
+      "Message": "Items: 2",
+      "Timestamp": "2026-02-09T19:47:46.667483+05:30",
+      "Details": null
+    },
+    {
+      "Passed": false,
+      "Name": "Cart Count Endpoint",
+      "Category": "Cart Real-Time Sync",
+      "Message": "Endpoint may not exist",
+      "Timestamp": "2026-02-09T19:47:46.8034587+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Add Second Product",
+      "Category": "Cart Real-Time Sync",
+      "Message": "Product: Banarasi Katan Silk Saree - Maroon Gold",
+      "Timestamp": "2026-02-09T19:47:46.8365746+05:30",
+      "Details": null
+    },
+    {
+      "Passed": false,
+      "Name": "Multiple Products in Cart",
+      "Category": "Cart Real-Time Sync",
+      "Message": "Unique products: 1",
+      "Timestamp": "2026-02-09T19:47:47.4078681+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Update Quantity",
+      "Category": "Cart Real-Time Sync",
+      "Message": "New quantity: 3",
+      "Timestamp": "2026-02-09T19:47:47.4335663+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Remove Cart Item",
+      "Category": "Cart Real-Time Sync",
+      "Message": "Removed CartId: 6989ec8a592ac5722480eea5",
+      "Timestamp": "2026-02-09T19:47:47.4706293+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Verify Item Removed",
+      "Category": "Cart Real-Time Sync",
+      "Message": "Item no longer in cart",
+      "Timestamp": "2026-02-09T19:47:48.1063179+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Cart Clear Capability",
+      "Category": "Cart Real-Time Sync",
+      "Message": "Can iterate and delete items",
+      "Timestamp": "2026-02-09T19:47:48.1792416+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Product In Stock",
+      "Category": "Buy Now Flow",
+      "Message": "Status: In Stock, Qty: 10",
+      "Timestamp": "2026-02-09T19:47:48.1846125+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Has Valid Price",
+      "Category": "Buy Now Flow",
+      "Message": "Price: ₹8500",
+      "Timestamp": "2026-02-09T19:47:48.1857564+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Customer Has Address",
+      "Category": "Buy Now Flow",
+      "Message": "Address: 123 Test Street",
+      "Timestamp": "2026-02-09T19:47:48.2522205+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Customer Has City",
+      "Category": "Buy Now Flow",
+      "Message": "City: Jaipur",
+      "Timestamp": "2026-02-09T19:47:48.2545491+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Customer Has State",
+      "Category": "Buy Now Flow",
+      "Message": "State: Rajasthan",
+      "Timestamp": "2026-02-09T19:47:48.2557974+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Customer Has Pin Code",
+      "Category": "Buy Now Flow",
+      "Message": "Pin: 302001",
+      "Timestamp": "2026-02-09T19:47:48.2580117+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Customer Has Phone",
+      "Category": "Buy Now Flow",
+      "Message": "Phone: 9547133552",
+      "Timestamp": "2026-02-09T19:47:48.2621872+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Create Order",
+      "Category": "Buy Now Flow",
+      "Message": "Success",
+      "Timestamp": "2026-02-09T19:47:48.3789454+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Payment Service Health",
+      "Category": "Buy Now Flow",
+      "Message": "Payment API available",
+      "Timestamp": "2026-02-09T19:47:48.3932834+05:30",
+      "Details": null
+    },
+    {
+      "Passed": false,
+      "Name": "Create Payment Order",
+      "Category": "Buy Now Flow",
+      "Message": "Error: Response status code does not indicate success: 500 ().",
+      "Timestamp": "2026-02-09T19:47:49.2345954+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Products Available",
+      "Category": "Product Navigation",
+      "Message": "Total: 6 products",
+      "Timestamp": "2026-02-09T19:47:49.2429417+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "View First Product",
+      "Category": "Product Navigation",
+      "Message": "Index: 0 - Chanderi Silk Saree - Royal Blue",
+      "Timestamp": "2026-02-09T19:47:49.2462549+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Next Button → Product",
+      "Category": "Product Navigation",
+      "Message": "Index: 1 - Banarasi Katan Silk Saree - Maroon Gold",
+      "Timestamp": "2026-02-09T19:47:49.2972197+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Prev Button → Product",
+      "Category": "Product Navigation",
+      "Message": "Index: 0 - Chanderi Silk Saree - Royal Blue",
+      "Timestamp": "2026-02-09T19:47:49.340363+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Last Product Access",
+      "Category": "Product Navigation",
+      "Message": "Index: 5 - Blue Pottery Dinner Plate Set (6 pieces)",
+      "Timestamp": "2026-02-09T19:47:49.3945361+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Wrap Around (Last → First)",
+      "Category": "Product Navigation",
+      "Message": "Wraps to index: 0",
+      "Timestamp": "2026-02-09T19:47:49.440239+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "All Products Accessible",
+      "Category": "Product Navigation",
+      "Message": "Accessible: 6 / 6",
+      "Timestamp": "2026-02-09T19:47:49.6999795+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Frontend Server",
+      "Category": "Frontend Components",
+      "Message": "URL: http://localhost:4200",
+      "Timestamp": "2026-02-09T19:47:49.709381+05:30",
+      "Details": null
+    },
+    {
+      "Passed": true,
+      "Name": "Angular App Root",
+      "Category": "Frontend Components",
+      "Message": "app-root element present",
+      "Timestamp": "2026-02-09T19:47:49.7106671+05:30",
+      "Details": null
+    },
+    {
+      "Passed": false,
+      "Name": "Products Page",
+      "Category": "Frontend Components",
+      "Message": "Route may use client-side routing",
+      "Timestamp": "2026-02-09T19:47:49.7205946+05:30",
+      "Details": null
+    },
+    {
+      "Passed": false,
+      "Name": "Product Details",
+      "Category": "Frontend Components",
+      "Message": "Route may use client-side routing",
+      "Timestamp": "2026-02-09T19:47:49.7266632+05:30",
+      "Details": null
+    }
+  ]
+}

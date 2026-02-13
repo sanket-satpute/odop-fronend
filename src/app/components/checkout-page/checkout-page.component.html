@@ -1,0 +1,340 @@
+<div class="checkout-container">
+  <!-- Header -->
+  <div class="checkout-header">
+    <button mat-icon-button (click)="goBackToCart()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Checkout</h1>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoadingCart" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading your cart...</p>
+  </div>
+
+  <!-- Empty Cart -->
+  <div *ngIf="!isLoadingCart && cartItems.length === 0" class="empty-cart">
+    <mat-icon class="empty-icon">shopping_cart</mat-icon>
+    <h2>Your cart is empty</h2>
+    <p>Add some products to proceed with checkout</p>
+    <button mat-raised-button color="primary" routerLink="/products">
+      Continue Shopping
+    </button>
+  </div>
+
+  <!-- Main Checkout Content -->
+  <div *ngIf="!isLoadingCart && cartItems.length > 0" class="checkout-content">
+    
+    <!-- Stepper -->
+    <div class="stepper">
+      <div *ngFor="let step of steps; let i = index" 
+           class="step" 
+           [class.active]="i === currentStep"
+           [class.completed]="i < currentStep"
+           (click)="goToStep(i)">
+        <div class="step-number">
+          <mat-icon *ngIf="i < currentStep">check</mat-icon>
+          <span *ngIf="i >= currentStep">{{ i + 1 }}</span>
+        </div>
+        <span class="step-label">{{ step }}</span>
+      </div>
+    </div>
+
+    <div class="checkout-main">
+      <!-- Left Column - Forms -->
+      <div class="checkout-forms">
+        
+        <!-- Step 1: Shipping -->
+        <div *ngIf="currentStep === 0" class="step-content" [@fadeIn]>
+          <h2><mat-icon>local_shipping</mat-icon> Shipping Information</h2>
+          
+          <form [formGroup]="shippingForm" class="shipping-form">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Full Name</mat-label>
+                <input matInput formControlName="fullName" placeholder="Enter your full name">
+                <mat-icon matPrefix>person</mat-icon>
+                <mat-error *ngIf="shippingForm.get('fullName')?.touched">
+                  {{ getFieldError(shippingForm, 'fullName') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row two-columns">
+              <mat-form-field appearance="outline">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email" type="email" placeholder="email@example.com">
+                <mat-icon matPrefix>email</mat-icon>
+                <mat-error *ngIf="shippingForm.get('email')?.touched">
+                  {{ getFieldError(shippingForm, 'email') }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Phone Number</mat-label>
+                <input matInput formControlName="phone" placeholder="10-digit number">
+                <mat-icon matPrefix>phone</mat-icon>
+                <mat-error *ngIf="shippingForm.get('phone')?.touched">
+                  {{ getFieldError(shippingForm, 'phone') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Address</mat-label>
+                <textarea matInput formControlName="address" rows="3" 
+                          placeholder="House/Flat No., Building Name, Street, Area"></textarea>
+                <mat-icon matPrefix>home</mat-icon>
+                <mat-error *ngIf="shippingForm.get('address')?.touched">
+                  {{ getFieldError(shippingForm, 'address') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row three-columns">
+              <mat-form-field appearance="outline">
+                <mat-label>City</mat-label>
+                <input matInput formControlName="city" placeholder="City">
+                <mat-error *ngIf="shippingForm.get('city')?.touched">
+                  {{ getFieldError(shippingForm, 'city') }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>State</mat-label>
+                <input matInput formControlName="state" placeholder="State">
+                <mat-error *ngIf="shippingForm.get('state')?.touched">
+                  {{ getFieldError(shippingForm, 'state') }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>PIN Code</mat-label>
+                <input matInput formControlName="pinCode" placeholder="6-digit PIN">
+                <mat-error *ngIf="shippingForm.get('pinCode')?.touched">
+                  {{ getFieldError(shippingForm, 'pinCode') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-checkbox formControlName="saveAddress" color="primary">
+                Save this address for future orders
+              </mat-checkbox>
+            </div>
+          </form>
+        </div>
+
+        <!-- Step 2: Payment -->
+        <div *ngIf="currentStep === 1" class="step-content" [@fadeIn]>
+          <h2><mat-icon>payment</mat-icon> Payment Method</h2>
+          
+          <form [formGroup]="paymentForm" class="payment-form">
+            <mat-radio-group formControlName="paymentMethod" class="payment-methods">
+              <mat-radio-button *ngFor="let method of paymentMethods" [value]="method.value" color="primary">
+                <div class="payment-option">
+                  <mat-icon>{{ method.icon }}</mat-icon>
+                  <span>{{ method.label }}</span>
+                </div>
+              </mat-radio-button>
+            </mat-radio-group>
+
+            <!-- Card Details -->
+            <div *ngIf="paymentForm.get('paymentMethod')?.value === 'card'" class="card-details" [@fadeIn]>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Card Number</mat-label>
+                <input matInput formControlName="cardNumber" placeholder="1234 5678 9012 3456">
+                <mat-icon matPrefix>credit_card</mat-icon>
+              </mat-form-field>
+
+              <div class="form-row two-columns">
+                <mat-form-field appearance="outline">
+                  <mat-label>Expiry Date</mat-label>
+                  <input matInput formControlName="cardExpiry" placeholder="MM/YY">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>CVV</mat-label>
+                  <input matInput formControlName="cardCvv" type="password" maxlength="4" placeholder="***">
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- UPI Details -->
+            <div *ngIf="paymentForm.get('paymentMethod')?.value === 'upi'" class="upi-details" [@fadeIn]>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>UPI ID</mat-label>
+                <input matInput formControlName="upiId" placeholder="yourname@upi">
+                <mat-icon matPrefix>account_balance</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-checkbox formControlName="savePayment" color="primary">
+                Save payment method for faster checkout
+              </mat-checkbox>
+            </div>
+          </form>
+        </div>
+
+        <!-- Step 3: Review -->
+        <div *ngIf="currentStep === 2" class="step-content" [@fadeIn]>
+          <h2><mat-icon>receipt_long</mat-icon> Order Review</h2>
+          
+          <div class="review-section">
+            <h3>Shipping Address</h3>
+            <div class="review-card">
+              <p><strong>{{ shippingForm.get('fullName')?.value }}</strong></p>
+              <p>{{ shippingForm.get('address')?.value }}</p>
+              <p>{{ shippingForm.get('city')?.value }}, {{ shippingForm.get('state')?.value }} - {{ shippingForm.get('pinCode')?.value }}</p>
+              <p>Phone: {{ shippingForm.get('phone')?.value }}</p>
+              <button mat-button color="primary" (click)="goToStep(0)">
+                <mat-icon>edit</mat-icon> Edit
+              </button>
+            </div>
+          </div>
+
+          <div class="review-section">
+            <h3>Payment Method</h3>
+            <div class="review-card">
+              <p>
+                <mat-icon>{{ getPaymentMethodIcon(paymentForm.get('paymentMethod')?.value) }}</mat-icon>
+                {{ paymentForm.get('paymentMethod')?.value | titlecase }}
+              </p>
+              <button mat-button color="primary" (click)="goToStep(1)">
+                <mat-icon>edit</mat-icon> Edit
+              </button>
+            </div>
+          </div>
+
+          <div class="review-section">
+            <h3>Order Items ({{ cartItems.length }})</h3>
+            <div class="order-items-list">
+              <div *ngFor="let item of cartItems" class="order-item">
+                <img [src]="item.productImage || 'assets/placeholder.png'" [alt]="item.productName">
+                <div class="item-details">
+                  <p class="item-name">{{ item.productName }}</p>
+                  <p class="item-vendor">Sold by: {{ item.vendorName }}</p>
+                  <p class="item-qty">Qty: {{ item.quantity }}</p>
+                </div>
+                <p class="item-price">₹{{ item.productPrice * item.quantity }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="step-navigation">
+          <button mat-stroked-button *ngIf="currentStep > 0" (click)="previousStep()">
+            <mat-icon>arrow_back</mat-icon> Back
+          </button>
+          <button mat-stroked-button *ngIf="currentStep === 0" (click)="goBackToCart()">
+            <mat-icon>arrow_back</mat-icon> Back to Cart
+          </button>
+          
+          <button mat-raised-button color="primary" *ngIf="currentStep < 2" (click)="nextStep()">
+            Continue <mat-icon>arrow_forward</mat-icon>
+          </button>
+          <button mat-raised-button color="primary" *ngIf="currentStep === 2" 
+                  (click)="confirmOrder()" [disabled]="isProcessing">
+            <mat-spinner *ngIf="isProcessing" diameter="20"></mat-spinner>
+            <span *ngIf="!isProcessing">Place Order</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column - Order Summary -->
+      <div class="order-summary">
+        <h3>Order Summary</h3>
+        
+        <div class="summary-items">
+          <div *ngFor="let item of cartItems.slice(0, 3)" class="summary-item">
+            <img [src]="item.productImage || 'assets/placeholder.png'" [alt]="item.productName">
+            <div class="summary-item-info">
+              <p class="item-name">{{ item.productName }}</p>
+              <p class="item-qty">Qty: {{ item.quantity }}</p>
+            </div>
+            <p class="item-price">₹{{ item.productPrice * item.quantity }}</p>
+          </div>
+          <p *ngIf="cartItems.length > 3" class="more-items">
+            +{{ cartItems.length - 3 }} more item(s)
+          </p>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Coupon Section -->
+        <div class="coupon-section">
+          <div *ngIf="!couponApplied" class="coupon-input">
+            <mat-form-field appearance="outline" class="coupon-field">
+              <mat-label>Coupon Code</mat-label>
+              <input matInput [(ngModel)]="couponCode" placeholder="Enter code">
+            </mat-form-field>
+            <button mat-stroked-button color="primary" (click)="applyCoupon()" [disabled]="!couponCode">
+              Apply
+            </button>
+          </div>
+          <div *ngIf="couponApplied" class="coupon-applied">
+            <span class="coupon-tag">
+              <mat-icon>local_offer</mat-icon>
+              {{ couponCode }}
+              <button mat-icon-button (click)="removeCoupon()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </span>
+          </div>
+          <mat-error *ngIf="couponError">{{ couponError }}</mat-error>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Price Breakdown -->
+        <div class="price-breakdown">
+          <div class="price-row">
+            <span>Subtotal</span>
+            <span>₹{{ subtotal }}</span>
+          </div>
+          <div class="price-row">
+            <span>Shipping</span>
+            <span [class.free]="shippingCost === 0">
+              {{ shippingCost === 0 ? 'FREE' : '₹' + shippingCost }}
+            </span>
+          </div>
+          <div class="price-row">
+            <span>Tax (GST 18%)</span>
+            <span>₹{{ taxAmount }}</span>
+          </div>
+          <div *ngIf="discount > 0" class="price-row discount">
+            <span>Discount</span>
+            <span>-₹{{ discount }}</span>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="total-row">
+          <span>Total</span>
+          <span class="total-amount">₹{{ totalAmount }}</span>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="trust-badges">
+          <div class="badge">
+            <mat-icon>verified_user</mat-icon>
+            <span>Secure Payment</span>
+          </div>
+          <div class="badge">
+            <mat-icon>replay</mat-icon>
+            <span>Easy Returns</span>
+          </div>
+          <div class="badge">
+            <mat-icon>local_shipping</mat-icon>
+            <span>Fast Delivery</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

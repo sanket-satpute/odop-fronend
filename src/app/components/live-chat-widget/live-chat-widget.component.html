@@ -1,0 +1,89 @@
+<div class="chat-widget" [class.open]="isOpen" [class.minimized]="isMinimized">
+  <!-- Chat Button -->
+  <button class="chat-toggle-btn" (click)="toggleChat()" *ngIf="!isOpen || isMinimized">
+    <i class="fas" [ngClass]="isOpen ? 'fa-comments' : 'fa-comments'"></i>
+    <span class="unread-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+  </button>
+
+  <!-- Chat Window -->
+  <div class="chat-window" *ngIf="isOpen && !isMinimized">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="header-info">
+        <div class="agent-avatar">
+          <img [src]="agentAvatar" alt="Agent">
+          <span class="status-dot"></span>
+        </div>
+        <div class="agent-details">
+          <span class="agent-name">{{ agentName }}</span>
+          <span class="status-text">Online</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" (click)="minimizeChat()" title="Minimize">
+          <i class="fas fa-minus"></i>
+        </button>
+        <button class="header-btn close" (click)="closeChat()" title="Close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" #messagesContainer>
+      <div 
+        class="message" 
+        *ngFor="let msg of messages"
+        [ngClass]="msg.sender">
+        
+        <div class="message-content">
+          <div class="message-bubble">{{ msg.text }}</div>
+          <span class="message-time">{{ formatTime(msg.timestamp) }}</span>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="message agent typing-indicator" *ngIf="isAgentTyping">
+        <div class="message-content">
+          <div class="message-bubble">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Replies -->
+    <div class="quick-replies" *ngIf="messages.length <= 1">
+      <button 
+        class="quick-reply-btn" 
+        *ngFor="let reply of quickReplies"
+        (click)="handleQuickReply(reply)">
+        {{ reply.text }}
+      </button>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input">
+      <div class="input-wrapper">
+        <input 
+          type="text" 
+          [(ngModel)]="newMessage"
+          (keypress)="onKeyPress($event)"
+          placeholder="Type your message...">
+        <button class="emoji-btn" title="Add emoji">
+          <i class="far fa-smile"></i>
+        </button>
+      </div>
+      <button class="send-btn" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+
+    <!-- Powered By -->
+    <div class="powered-by">
+      <span>Powered by <strong>ODOP Support</strong></span>
+    </div>
+  </div>
+</div>

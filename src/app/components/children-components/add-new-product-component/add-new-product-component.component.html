@@ -1,0 +1,175 @@
+<div class="product-create-page">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Vendor Product Studio</p>
+      <h2>Create New Product</h2>
+      <p class="subtitle">Design a complete, trust-ready listing for faster admin approval and better conversions.</p>
+    </div>
+    <aside class="readiness">
+      <p class="readiness-label">Required Completion</p>
+      <div class="readiness-value">{{ requiredCompletionCount }}/{{ requiredTotalCount }}</div>
+      <div class="readiness-progress">
+        <span [style.width.%]="completionPercentage"></span>
+      </div>
+      <small>{{ completionPercentage }}% ready</small>
+    </aside>
+  </section>
+
+  <form class="form-shell" [formGroup]="productForm" (ngSubmit)="saveProduct()">
+    <section class="form-card">
+      <header>
+        <h3>1. Core Listing <span class="pill required">Required</span></h3>
+      </header>
+      <div class="grid two">
+        <label>
+          <span>Product Name *</span>
+          <input type="text" formControlName="productName" placeholder="e.g. Banarasi Silk Saree" />
+        </label>
+
+        <label>
+          <span>Category *</span>
+          <select formControlName="categoryId">
+            <option value="">Select category</option>
+            <option *ngFor="let c of categories" [value]="c.prodCategoryID">{{ c.categoryName }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Sub-Category ID <em>(Optional)</em></span>
+          <input type="text" formControlName="subCategoryId" placeholder="Sub-category reference id" />
+        </label>
+
+        <label class="full">
+          <span>Description *</span>
+          <textarea rows="5" formControlName="productDescription" placeholder="Explain quality, use-case, uniqueness, and craftsmanship."></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <header>
+        <h3>2. Pricing & Inventory <span class="pill required">Required</span></h3>
+      </header>
+      <div class="grid three">
+        <label>
+          <span>Price (INR) *</span>
+          <input type="number" formControlName="price" min="1" />
+        </label>
+        <label>
+          <span>Stock Quantity *</span>
+          <input type="number" formControlName="productQuantity" min="1" />
+        </label>
+        <label>
+          <span>Discount % <em>(Optional)</em></span>
+          <input type="number" formControlName="discount" min="0" max="90" />
+        </label>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" formControlName="promotionEnabled" />
+        <span>Enable Promotion Badge</span>
+      </label>
+    </section>
+
+    <section class="form-card">
+      <header>
+        <h3>3. Product Media <span class="pill required">Required</span></h3>
+      </header>
+      <label class="file-box">
+        <input type="file" accept=".jpg,.jpeg,.png,.webp" (change)="onFileSelected($event)" />
+        <span class="file-title">{{ selectedFileName || 'Choose Product Cover Image' }}</span>
+        <small>JPG, PNG, WEBP up to 5MB</small>
+      </label>
+    </section>
+
+    <section class="form-card">
+      <header>
+        <h3>4. ODOP Identity <span class="pill required">Required</span></h3>
+      </header>
+      <div class="grid two">
+        <label>
+          <span>Origin District *</span>
+          <input type="text" formControlName="originDistrict" placeholder="e.g. Varanasi" />
+        </label>
+        <label>
+          <span>Origin State *</span>
+          <input type="text" formControlName="originState" placeholder="e.g. Uttar Pradesh" />
+        </label>
+        <label>
+          <span>Craft Type *</span>
+          <select formControlName="craftType">
+            <option value="">Select craft type</option>
+            <option *ngFor="let type of craftTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
+        </label>
+        <label>
+          <span>PIN Code <em>(Optional)</em></span>
+          <input type="text" formControlName="originPinCode" placeholder="6-digit PIN code" />
+        </label>
+        <label>
+          <span>Local Name <em>(Optional)</em></span>
+          <input type="text" formControlName="localName" placeholder="Product name in local language" />
+        </label>
+        <label>
+          <span>Made By <em>(Optional)</em></span>
+          <input type="text" formControlName="madeBy" placeholder="Artisan or cluster name" />
+        </label>
+        <label class="full">
+          <span>Origin Story <em>(Optional)</em></span>
+          <textarea rows="4" formControlName="originStory" placeholder="Heritage, process, and cultural significance."></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <header>
+        <h3>5. Product Details <span class="pill optional">Optional</span></h3>
+      </header>
+      <div class="grid two">
+        <label class="full">
+          <span>Specifications</span>
+          <textarea rows="4" formControlName="specification" placeholder="Dimensions, weight, finish, included items, etc."></textarea>
+        </label>
+        <label>
+          <span>Materials Used</span>
+          <input type="text" formControlName="materialsUsed" placeholder="Cotton, brass, bamboo..." />
+        </label>
+        <label>
+          <span>Warranty</span>
+          <input type="text" formControlName="warranty" placeholder="e.g. 6 months craftsmanship warranty" />
+        </label>
+        <label class="full">
+          <span>Search Tags</span>
+          <input type="text" formControlName="tagsInput" placeholder="comma,separated,tags" />
+        </label>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <header>
+        <h3>6. GI Compliance <span class="pill optional">Optional</span></h3>
+      </header>
+      <label class="toggle">
+        <input type="checkbox" formControlName="giTagCertified" />
+        <span>This product is GI tag certified</span>
+      </label>
+      <div class="grid two">
+        <label>
+          <span>GI Tag Number</span>
+          <input type="text" formControlName="giTagNumber" placeholder="Enter official GI registration number" />
+        </label>
+      </div>
+    </section>
+
+    <footer class="actions">
+      <div class="status-block">
+        <span class="status" [class.ready]="isReadyToPublish" [class.pending]="!isReadyToPublish">
+          {{ isReadyToPublish ? 'Ready to submit' : 'Complete required fields to submit' }}
+        </span>
+        <small>Products are submitted with <strong>PENDING</strong> approval status.</small>
+      </div>
+      <button type="submit" [disabled]="isSubmitting || !isReadyToPublish">
+        {{ isSubmitting ? 'Submitting...' : 'Submit Product' }}
+      </button>
+    </footer>
+  </form>
+</div>

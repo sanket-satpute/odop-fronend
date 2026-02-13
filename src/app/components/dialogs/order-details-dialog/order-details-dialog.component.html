@@ -1,0 +1,290 @@
+<!-- Order Details Dialog -->
+<div class="order-details-dialog">
+  
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="order-badge">
+        <i [class]="getStatusConfig(order.orderStatus).icon"></i>
+      </div>
+      <div class="header-text">
+        <h2 class="dialog-title">Order {{ order.orderId }}</h2>
+        <p class="dialog-subtitle">Placed on {{ formatDate(order.orderDateTime) }}</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div 
+        class="status-badge"
+        [style.background]="getStatusConfig(order.orderStatus).bgColor"
+        [style.color]="getStatusConfig(order.orderStatus).color">
+        {{ getStatusConfig(order.orderStatus).label }}
+      </div>
+      <button class="close-btn" (click)="closeDialog()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'details'"
+      (click)="setActiveTab('details')">
+      <i class="fas fa-box"></i>
+      Order Details
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'tracking'"
+      (click)="setActiveTab('tracking')">
+      <i class="fas fa-truck"></i>
+      Track Order
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'invoice'"
+      (click)="setActiveTab('invoice')">
+      <i class="fas fa-file-invoice"></i>
+      Invoice
+    </button>
+  </div>
+
+  <!-- Dialog Body -->
+  <div class="dialog-body">
+    
+    <!-- Details Tab -->
+    <div class="tab-content" *ngIf="activeTab === 'details'">
+      
+      <!-- Products Section -->
+      <div class="section">
+        <h3 class="section-title">
+          <i class="fas fa-shopping-bag"></i>
+          Items ({{ order.productList.length }})
+        </h3>
+        <div class="products-list">
+          <div 
+            class="product-item" 
+            *ngFor="let product of order.productList"
+            (click)="viewProduct(product)">
+            <div class="product-image">
+              <img 
+                [src]="product.image || 'https://via.placeholder.com/80x80/f8f9fa/FFA500?text=' + product.productName.charAt(0)" 
+                [alt]="product.productName">
+            </div>
+            <div class="product-info">
+              <h4 class="product-name">{{ product.productName }}</h4>
+              <p class="product-variant" *ngIf="product.category">{{ product.category }}</p>
+              <div class="product-pricing">
+                <span class="product-price">{{ formatCurrency(product.pricePerUnit) }}</span>
+                <span class="product-qty">× {{ product.quantity }}</span>
+              </div>
+            </div>
+            <div class="product-total">
+              {{ formatCurrency(product.pricePerUnit * product.quantity) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="section">
+        <h3 class="section-title">
+          <i class="fas fa-receipt"></i>
+          Order Summary
+        </h3>
+        <div class="summary-card">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>{{ formatCurrency(getSubtotal()) }}</span>
+          </div>
+          <div class="summary-row" *ngIf="getDiscount() > 0">
+            <span>Discount</span>
+            <span class="discount">-{{ formatCurrency(getDiscount()) }}</span>
+          </div>
+          <div class="summary-row" *ngIf="order.couponCode">
+            <span>Coupon ({{ order.couponCode }})</span>
+            <span class="discount">Applied</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span class="free-shipping">FREE</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total Amount</span>
+            <span>{{ formatCurrency(order.totalAmount) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping & Payment Info -->
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-icon">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <div class="info-content">
+            <h4>Shipping Address</h4>
+            <p>{{ order.shippingAddress || 'Not available' }}</p>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">
+            <i class="fas fa-credit-card"></i>
+          </div>
+          <div class="info-content">
+            <h4>Payment Method</h4>
+            <p>{{ order.paymentMethod || 'Not specified' }}</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tracking Tab -->
+    <div class="tab-content" *ngIf="activeTab === 'tracking'">
+      
+      <!-- Tracking Number -->
+      <div class="tracking-header" *ngIf="order.trackingNumber">
+        <div class="tracking-info">
+          <span class="tracking-label">Tracking Number</span>
+          <div class="tracking-number">
+            <span>{{ order.trackingNumber }}</span>
+            <button class="copy-btn" (click)="copyTrackingNumber()">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        </div>
+        <div class="delivery-estimate" *ngIf="order.estimatedDelivery">
+          <span class="estimate-label">Expected Delivery</span>
+          <span class="estimate-date">{{ formatDate(order.estimatedDelivery) }}</span>
+        </div>
+      </div>
+
+      <!-- Tracking Timeline -->
+      <div class="tracking-timeline">
+        <div 
+          class="timeline-step" 
+          *ngFor="let step of trackingSteps; let last = last"
+          [class.completed]="step.completed"
+          [class.current]="step.current">
+          <div class="step-indicator">
+            <div class="step-dot">
+              <i class="fas fa-check" *ngIf="step.completed && !step.current"></i>
+              <i class="fas fa-circle" *ngIf="step.current"></i>
+            </div>
+            <div class="step-line" *ngIf="!last"></div>
+          </div>
+          <div class="step-content">
+            <h4 class="step-title">{{ step.label }}</h4>
+            <p class="step-description">{{ step.description }}</p>
+            <span class="step-date" *ngIf="step.date">{{ formatDateShort(step.date) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Tracking Available -->
+      <div class="no-tracking" *ngIf="!order.trackingNumber && order.orderStatus !== 'cancelled'">
+        <i class="fas fa-truck"></i>
+        <h4>Tracking Not Available Yet</h4>
+        <p>Tracking information will be available once your order is shipped.</p>
+      </div>
+
+    </div>
+
+    <!-- Invoice Tab -->
+    <div class="tab-content" *ngIf="activeTab === 'invoice'">
+      
+      <div class="invoice-preview">
+        <div class="invoice-header">
+          <div class="invoice-logo">
+            <span class="logo-text">ODOP</span>
+            <span class="logo-subtitle">One District One Product</span>
+          </div>
+          <div class="invoice-meta">
+            <h3>TAX INVOICE</h3>
+            <p>Invoice #: INV-{{ order.orderId }}</p>
+            <p>Date: {{ formatDate(order.orderDateTime) }}</p>
+          </div>
+        </div>
+
+        <div class="invoice-details">
+          <div class="invoice-section">
+            <h4>Bill To:</h4>
+            <p>{{ order.shippingAddress || 'Customer Address' }}</p>
+          </div>
+          <div class="invoice-section">
+            <h4>Order Details:</h4>
+            <p>Order ID: {{ order.orderId }}</p>
+            <p>Payment: {{ order.paymentMethod || 'N/A' }}</p>
+          </div>
+        </div>
+
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of order.productList">
+              <td>{{ product.productName }}</td>
+              <td>{{ product.quantity }}</td>
+              <td>{{ formatCurrency(product.pricePerUnit) }}</td>
+              <td>{{ formatCurrency(product.pricePerUnit * product.quantity) }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3">Subtotal</td>
+              <td>{{ formatCurrency(getSubtotal()) }}</td>
+            </tr>
+            <tr *ngIf="getDiscount() > 0">
+              <td colspan="3">Discount</td>
+              <td>-{{ formatCurrency(getDiscount()) }}</td>
+            </tr>
+            <tr>
+              <td colspan="3">Shipping</td>
+              <td>FREE</td>
+            </tr>
+            <tr class="grand-total">
+              <td colspan="3">Grand Total</td>
+              <td>{{ formatCurrency(order.totalAmount) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <button class="download-invoice-btn" (click)="downloadInvoice()">
+        <i class="fas fa-download"></i>
+        Download Invoice
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- Dialog Footer -->
+  <div class="dialog-footer">
+    <button class="footer-btn secondary" (click)="contactSupport()">
+      <i class="fas fa-headset"></i>
+      Need Help?
+    </button>
+    <div class="footer-actions">
+      <button 
+        class="footer-btn secondary" 
+        *ngIf="order.orderStatus === 'delivered'"
+        (click)="requestReturn()">
+        <i class="fas fa-undo"></i>
+        Request Return
+      </button>
+      <button class="footer-btn primary" (click)="closeDialog()">
+        Close
+      </button>
+    </div>
+  </div>
+
+</div>

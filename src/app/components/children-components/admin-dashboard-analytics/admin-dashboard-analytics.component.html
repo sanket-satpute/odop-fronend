@@ -1,0 +1,220 @@
+<!-- Analytics Section -->
+<div class="analytics-container">
+  <!-- Header Section -->
+  <div class="analytics-header">
+    <div class="header-content">
+      <h1 class="section-title">Platform Analytics</h1>
+      <p class="section-subtitle">Track key performance metrics in real time</p>
+    </div>
+    <div class="date-selector">
+      <select class="date-select" [(ngModel)]="selectedPeriod" (change)="onPeriodChange()">
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 3 months</option>
+        <option value="custom">Custom Range</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- KPI Cards Section -->
+  <div class="kpi-section">
+    <div class="kpi-grid">
+      <div class="kpi-card" *ngFor="let kpi of kpiData">
+        <div class="kpi-icon">
+          <i [class]="kpi.icon"></i>
+        </div>
+        <div class="kpi-content">
+          <h3 class="kpi-value">{{ kpi.value }}</h3>
+          <p class="kpi-label">{{ kpi.label }}</p>
+          <div class="kpi-change" [class.positive]="kpi.change > 0" [class.negative]="kpi.change < 0">
+            <i class="fas fa-arrow-up" *ngIf="kpi.change > 0"></i>
+            <i class="fas fa-arrow-down" *ngIf="kpi.change < 0"></i>
+            <span>{{ Math.abs(kpi.change) }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-section">
+    <div class="charts-grid">
+      <!-- Sales Over Time Chart -->
+      <div class="chart-card large-card">
+        <div class="chart-header">
+          <h3>Sales Over Time</h3>
+          <div class="chart-controls">
+            <button 
+              class="control-btn" 
+              [class.active]="chartPeriod === 'daily'"
+              (click)="setChartPeriod('daily')">
+              Daily
+            </button>
+            <button 
+              class="control-btn" 
+              [class.active]="chartPeriod === 'weekly'"
+              (click)="setChartPeriod('weekly')">
+              Weekly
+            </button>
+            <button 
+              class="control-btn" 
+              [class.active]="chartPeriod === 'monthly'"
+              (click)="setChartPeriod('monthly')">
+              Monthly
+            </button>
+          </div>
+        </div>
+        <div class="chart-content">
+          <canvas #salesChart></canvas>
+        </div>
+      </div>
+
+      <!-- Revenue Breakdown Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Revenue Breakdown</h3>
+        </div>
+        <div class="chart-content">
+          <canvas #revenueChart></canvas>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item" *ngFor="let item of revenueBreakdown">
+            <div class="legend-color" [style.background-color]="item.color"></div>
+            <span class="legend-label">{{ item.label }}</span>
+            <span class="legend-value">₹{{ item.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User & Vendor Activity Section -->
+  <div class="activity-section">
+    <div class="activity-grid">
+      <!-- New User Signups -->
+      <div class="activity-card">
+        <div class="card-header">
+          <h3>New User Signups</h3>
+          <span class="trend-indicator positive">+12.5%</span>
+        </div>
+        <div class="signup-chart">
+          <canvas #signupChart></canvas>
+        </div>
+      </div>
+
+      <!-- Top Vendors Performance -->
+      <div class="activity-card">
+        <div class="card-header">
+          <h3>Top Vendors Performance</h3>
+          <button class="view-all-btn">View All</button>
+        </div>
+        <div class="vendors-table">
+          <div class="table-header">
+            <span>Vendor</span>
+            <span>Sales</span>
+            <span>Rating</span>
+            <span>Orders</span>
+            <span>Status</span>
+          </div>
+          <div class="table-row" *ngFor="let vendor of topVendors">
+            <div class="vendor-info">
+              <div class="vendor-avatar">{{ vendor.name.charAt(0) }}</div>
+              <span class="vendor-name">{{ vendor.name }}</span>
+            </div>
+            <span class="vendor-sales">₹{{ vendor.sales }}</span>
+            <div class="vendor-rating">
+              <i class="fas fa-star"></i>
+              <span>{{ vendor.rating }}</span>
+            </div>
+            <span class="vendor-orders">{{ vendor.orders }}</span>
+            <div class="vendor-status" [class]="vendor.status.toLowerCase()">
+              {{ vendor.status }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Insights Section -->
+  <div class="insights-section">
+    <div class="insights-grid">
+      <!-- Top Selling Products -->
+      <div class="insight-card">
+        <div class="card-header">
+          <h3>Top Selling Products</h3>
+          <select class="category-filter">
+            <option>All Categories</option>
+            <option>Electronics</option>
+            <option>Fashion</option>
+            <option>Home & Garden</option>
+          </select>
+        </div>
+        <div class="products-chart">
+          <div class="product-bar" *ngFor="let product of topProducts">
+            <div class="product-info">
+              <span class="product-name">{{ product.name }}</span>
+              <span class="product-units">{{ product.units }} units</span>
+            </div>
+            <div class="product-progress">
+              <div class="progress-bar" [style.width.%]="product.percentage"></div>
+            </div>
+            <span class="product-revenue">₹{{ product.revenue }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Sentiment -->
+      <div class="insight-card">
+        <div class="card-header">
+          <h3>Customer Sentiment</h3>
+          <span class="sentiment-score">4.3 ★</span>
+        </div>
+        <div class="sentiment-chart">
+          <canvas #sentimentChart></canvas>
+        </div>
+        <div class="sentiment-breakdown">
+          <div class="sentiment-item" *ngFor="let item of sentimentData">
+            <div class="sentiment-indicator" [style.background-color]="item.color"></div>
+            <span class="sentiment-label">{{ item.label }}</span>
+            <span class="sentiment-percentage">{{ item.percentage }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Geographical Insights -->
+  <div class="geo-section">
+    <div class="geo-card">
+      <div class="card-header">
+        <h3>Top Performing Regions</h3>
+        <div class="geo-controls">
+          <button class="geo-btn active">Sales</button>
+          <button class="geo-btn">Users</button>
+          <button class="geo-btn">Orders</button>
+        </div>
+      </div>
+      <div class="geo-content">
+        <div class="geo-stats">
+          <div class="region-item" *ngFor="let region of topRegions">
+            <div class="region-info">
+              <span class="region-name">{{ region.name }}</span>
+              <span class="region-growth">+{{ region.growth }}%</span>
+            </div>
+            <div class="region-progress">
+              <div class="progress-bar" [style.width.%]="region.percentage"></div>
+            </div>
+            <span class="region-value">₹{{ region.value }}</span>
+          </div>
+        </div>
+        <div class="geo-map">
+          <div class="map-placeholder">
+            <i class="fas fa-map-marked-alt"></i>
+            <p>Interactive map visualization</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

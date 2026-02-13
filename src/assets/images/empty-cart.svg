@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="cartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fff7ed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fed7aa;stop-opacity:0.5" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#cartGrad)"/>
+  
+  <!-- Shopping cart -->
+  <g transform="translate(130, 60)">
+    <!-- Cart body -->
+    <path d="M20 50 L30 110 L110 110 L120 50 Z" fill="#FFA500" opacity="0.3" stroke="#FFA500" stroke-width="2"/>
+    <!-- Cart handle -->
+    <path d="M10 50 L20 50" stroke="#FFA500" stroke-width="4" stroke-linecap="round"/>
+    <path d="M0 35 L10 50" stroke="#FFA500" stroke-width="4" stroke-linecap="round"/>
+    <!-- Wheels -->
+    <circle cx="45" cy="120" r="10" fill="#FFA500" opacity="0.5"/>
+    <circle cx="95" cy="120" r="10" fill="#FFA500" opacity="0.5"/>
+    <!-- Empty indicator -->
+    <text x="70" y="90" font-family="Inter, sans-serif" font-size="30" fill="#FFA500" opacity="0.6" text-anchor="middle">∅</text>
+  </g>
+  
+  <text x="200" y="210" font-family="Poppins, sans-serif" font-size="18" font-weight="600" fill="#ea580c" text-anchor="middle">Your Cart is Empty</text>
+  <text x="200" y="235" font-family="Inter, sans-serif" font-size="13" fill="#9a3412" opacity="0.7" text-anchor="middle">Start shopping to add items</text>
+</svg>

@@ -1,0 +1,18 @@
+.skeleton {
+  background: #eee;
+  border-radius: 4px;
+  margin: 8px 0;
+  min-height: 24px;
+  animation: skeleton-loading 1.2s infinite ease-in-out;
+}
+
+.skeleton.product-card {
+  width: 100%;
+  height: 180px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-color: #eee; }
+  50% { background-color: #ddd; }
+  100% { background-color: #eee; }
+}

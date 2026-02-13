@@ -1,0 +1,257 @@
+<!-- Festivals Landing Page -->
+<div class="festivals-page">
+  
+  <!-- Hero Section with Featured/Live Festival -->
+  <section class="hero-section" *ngIf="featuredFestival">
+    <div class="hero-background" 
+         [style.backgroundImage]="'url(' + (featuredFestival.bannerImageUrl || featuredFestival.heroImageUrl || 'assets/images/festival-default.jpg') + ')'">
+      <div class="hero-overlay" [class]="featuredFestival.themeColor || 'warm'"></div>
+    </div>
+    
+    <div class="hero-content">
+      <div class="container">
+        <div class="live-badge" *ngIf="featuredFestival.isLive">
+          <span class="pulse"></span>
+          LIVE NOW
+        </div>
+        
+        <h1 class="festival-title">{{ featuredFestival.name }}</h1>
+        <p class="festival-tagline">{{ featuredFestival.tagline }}</p>
+        
+        <!-- Countdown Timer -->
+        <div class="countdown-timer" *ngIf="featuredFestival.isLive">
+          <div class="countdown-label">Sale ends in</div>
+          <div class="countdown-boxes">
+            <div class="countdown-box">
+              <span class="count-value">{{ getCountdown(featuredFestival.id).days }}</span>
+              <span class="count-label">Days</span>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-box">
+              <span class="count-value">{{ getCountdown(featuredFestival.id).hours }}</span>
+              <span class="count-label">Hours</span>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-box">
+              <span class="count-value">{{ getCountdown(featuredFestival.id).minutes }}</span>
+              <span class="count-label">Minutes</span>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-box">
+              <span class="count-value">{{ getCountdown(featuredFestival.id).seconds }}</span>
+              <span class="count-label">Seconds</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Discount Badge -->
+        <div class="discount-highlight" *ngIf="featuredFestival.discountInfo?.percentage">
+          <span class="discount-text">Up to</span>
+          <span class="discount-value">{{ featuredFestival.discountInfo?.percentage }}%</span>
+          <span class="discount-text">OFF</span>
+        </div>
+        
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" (click)="viewFestival(featuredFestival!)">
+            <i class="fas fa-gift"></i> Shop Now
+          </button>
+          <button class="btn btn-outline-light btn-lg" (click)="viewFestival(featuredFestival!)">
+            <i class="fas fa-book-open"></i> View Gift Guide
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Live Festivals Section -->
+  <section class="live-festivals-section" *ngIf="liveFestivals.length > 1">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="live-indicator"></span>
+          Live Festival Sales
+        </h2>
+        <p class="section-subtitle">Don't miss these ongoing celebrations!</p>
+      </div>
+      
+      <div class="live-festivals-grid">
+        <div class="live-festival-card" 
+             *ngFor="let festival of liveFestivals.slice(1, 5); trackBy: trackByFestival"
+             (click)="viewFestival(festival)"
+             [class]="festival.themeColor || 'warm'">
+          
+          <div class="card-image">
+            <img [src]="festival.thumbnailUrl || 'assets/images/festival-thumb.jpg'" 
+                 [alt]="festival.name">
+            <div class="card-overlay"></div>
+            <span class="discount-tag" *ngIf="festival.discountInfo?.percentage">
+              {{ festival.discountInfo?.percentage }}% OFF
+            </span>
+          </div>
+          
+          <div class="card-content">
+            <h3>{{ festival.name }}</h3>
+            <p class="tagline">{{ festival.tagline }}</p>
+            
+            <div class="mini-countdown">
+              <i class="fas fa-clock"></i>
+              <span>{{ getCountdown(festival.id).days }}d {{ getCountdown(festival.id).hours }}h left</span>
+            </div>
+            
+            <button class="btn btn-shop">Shop Collection</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Upcoming Festivals Section -->
+  <section class="upcoming-section" *ngIf="upcomingFestivals.length > 0">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-calendar-alt"></i>
+          Upcoming Festivals
+        </h2>
+        <p class="section-subtitle">Get ready for these celebrations</p>
+      </div>
+      
+      <div class="upcoming-carousel">
+        <div class="upcoming-card" 
+             *ngFor="let festival of upcomingFestivals; trackBy: trackByFestival"
+             (click)="viewFestival(festival)">
+          
+          <div class="upcoming-image">
+            <img [src]="festival.thumbnailUrl || 'assets/images/festival-thumb.jpg'" 
+                 [alt]="festival.name">
+            <div class="date-badge">
+              <span class="month">{{ festival.startDate }}</span>
+              <span class="day">{{ festival.daysUntilFestival }}</span>
+            </div>
+          </div>
+          
+          <div class="upcoming-info">
+            <h3>{{ festival.name }}</h3>
+            <p class="festival-type">{{ festival.type }}</p>
+            <div class="days-until">
+              <i class="fas fa-hourglass-half"></i>
+              Starts in {{ festival.daysUntilFestival }} days
+            </div>
+            <button class="btn btn-notify">
+              <i class="fas fa-bell"></i> Notify Me
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- All Festivals Section -->
+  <section class="all-festivals-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-sparkles"></i>
+          Festival Collections
+        </h2>
+        <p class="section-subtitle">Explore all festival-themed products</p>
+      </div>
+      
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button 
+          *ngFor="let type of festivalTypes"
+          class="filter-tab"
+          [class.active]="activeFilter === type.value"
+          (click)="filterByType(type.value)">
+          {{ type.label }}
+        </button>
+      </div>
+      
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Loading festivals...</p>
+      </div>
+      
+      <!-- Festival Grid -->
+      <div class="festivals-grid" *ngIf="!isLoading">
+        <div class="festival-card" 
+             *ngFor="let festival of getFilteredFestivals(); trackBy: trackByFestival"
+             (click)="viewFestival(festival)"
+             [class.live]="festival.isLive">
+          
+          <div class="festival-image">
+            <img [src]="festival.thumbnailUrl || 'assets/images/festival-thumb.jpg'" 
+                 [alt]="festival.name">
+            <div class="image-overlay"></div>
+            
+            <!-- Status Badge -->
+            <div class="status-badge live" *ngIf="festival.isLive">
+              <span class="pulse"></span> Live
+            </div>
+            <div class="status-badge upcoming" *ngIf="!festival.isLive && festival.daysUntilFestival > 0">
+              In {{ festival.daysUntilFestival }} days
+            </div>
+            
+            <!-- Discount Badge -->
+            <div class="discount-badge" *ngIf="festival.discountInfo?.percentage">
+              {{ festival.discountInfo?.percentage }}% OFF
+            </div>
+          </div>
+          
+          <div class="festival-content">
+            <div class="festival-type-tag">{{ festival.type }}</div>
+            <h3 class="festival-name">{{ festival.name }}</h3>
+            <p class="festival-tagline">{{ festival.tagline }}</p>
+            
+            <div class="festival-meta">
+              <span class="date-range">
+                <i class="fas fa-calendar"></i>
+                {{ festival.startDate }} - {{ festival.endDate }}
+              </span>
+              <span class="product-count" *ngIf="festival.productCount">
+                <i class="fas fa-box"></i>
+                {{ festival.productCount }} products
+              </span>
+            </div>
+            
+            <div class="festival-actions">
+              <button class="btn btn-view">
+                Explore Collection
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- No Results -->
+      <div class="no-results" *ngIf="!isLoading && getFilteredFestivals().length === 0">
+        <i class="fas fa-calendar-times"></i>
+        <h3>No festivals found</h3>
+        <p>Check back later for upcoming celebrations!</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Newsletter/Notification Section -->
+  <section class="notification-section">
+    <div class="container">
+      <div class="notification-card">
+        <div class="notification-content">
+          <i class="fas fa-bell-on"></i>
+          <h2>Never Miss a Festival Sale!</h2>
+          <p>Subscribe to get notified about upcoming festivals and exclusive early-bird offers</p>
+        </div>
+        <form class="notification-form">
+          <input type="email" placeholder="Enter your email address" required>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Subscribe
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+  
+</div>

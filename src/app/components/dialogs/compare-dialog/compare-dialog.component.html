@@ -1,0 +1,138 @@
+<div class="compare-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="header-title">
+        <i class="fas fa-balance-scale"></i>
+        <h2>Compare Products</h2>
+        <span class="product-count">{{ compareProducts.length }} Products</span>
+      </div>
+      <div class="header-actions">
+        <button class="add-more-btn" (click)="addMoreProducts()" *ngIf="compareProducts.length < 4">
+          <i class="fas fa-plus"></i>
+          Add More
+        </button>
+        <button class="close-btn" (click)="close()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+    <div class="highlight-toggle">
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="highlightBestValue">
+        <span class="toggle-text">Highlight Best Values</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Compare Content -->
+  <div class="compare-content" *ngIf="compareProducts.length >= 2">
+    <!-- Product Cards Row -->
+    <div class="products-row">
+      <div class="attribute-header-cell"></div>
+      <div class="product-card" *ngFor="let product of compareProducts">
+        <button class="remove-product-btn" (click)="removeProduct(product.id)" title="Remove from comparison">
+          <i class="fas fa-times-circle"></i>
+        </button>
+        
+        <div class="product-image">
+          <img [src]="product.image" [alt]="product.name">
+          <span class="gi-badge" *ngIf="product.giTagged">
+            <i class="fas fa-certificate"></i> GI Tagged
+          </span>
+        </div>
+        
+        <div class="product-info">
+          <h3 class="product-name" [title]="product.name">{{ product.name }}</h3>
+          <div class="product-price">
+            <span class="current-price">₹{{ product.price | number }}</span>
+            <span class="original-price" *ngIf="product.discount">
+              ₹{{ getOriginalPrice(product.price, product.discount) | number }}
+            </span>
+            <span class="discount-badge" *ngIf="product.discount">-{{ product.discount }}%</span>
+          </div>
+          <div class="product-rating">
+            <span class="stars">{{ generateStars(product.rating) }}</span>
+            <span class="rating-text">{{ product.rating }} ({{ product.reviews }})</span>
+          </div>
+        </div>
+        
+        <div class="product-actions">
+          <button class="action-btn primary" (click)="addToCart(product)">
+            <i class="fas fa-shopping-cart"></i>
+            Add to Cart
+          </button>
+          <button class="action-btn secondary" (click)="viewProduct(product.id)">
+            <i class="fas fa-eye"></i>
+            View Details
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="comparison-table">
+      <div class="table-row" *ngFor="let attr of attributes">
+        <div class="attribute-cell">
+          <i [class]="attr.icon"></i>
+          <span>{{ attr.label }}</span>
+        </div>
+        <div 
+          class="value-cell" 
+          *ngFor="let product of compareProducts"
+          [class.best-value]="isBestValue(attr.key, getAttributeValue(product, attr.key), attr.type)"
+        >
+          <ng-container [ngSwitch]="attr.type">
+            <!-- Price -->
+            <ng-container *ngSwitchCase="'price'">
+              <span class="value-price">₹{{ getAttributeValue(product, attr.key) | number }}</span>
+            </ng-container>
+            
+            <!-- Rating -->
+            <ng-container *ngSwitchCase="'rating'">
+              <div class="value-rating">
+                <span class="stars">{{ generateStars(getAttributeValue(product, attr.key)) }}</span>
+                <span>{{ getAttributeValue(product, attr.key) }}</span>
+              </div>
+            </ng-container>
+            
+            <!-- Boolean -->
+            <ng-container *ngSwitchCase="'boolean'">
+              <span class="value-boolean" [class.yes]="getAttributeValue(product, attr.key)">
+                <i [class]="getAttributeValue(product, attr.key) ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+                {{ getAttributeValue(product, attr.key) ? 'Yes' : 'No' }}
+              </span>
+            </ng-container>
+            
+            <!-- Default Text -->
+            <ng-container *ngSwitchDefault>
+              <span class="value-text">{{ formatValue(getAttributeValue(product, attr.key), attr.type) }}</span>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="compareProducts.length < 2">
+    <div class="empty-icon">
+      <i class="fas fa-balance-scale"></i>
+    </div>
+    <h3>Add More Products to Compare</h3>
+    <p>You need at least 2 products to see a comparison.</p>
+    <button class="add-products-btn" (click)="addMoreProducts()">
+      <i class="fas fa-plus"></i>
+      Select Products
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="footer-btn secondary" (click)="close()">Close</button>
+    <button class="footer-btn primary" (click)="addMoreProducts()" *ngIf="compareProducts.length < 4">
+      <i class="fas fa-plus"></i>
+      Add More Products
+    </button>
+  </div>
+</div>

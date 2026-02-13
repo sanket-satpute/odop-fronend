@@ -1,0 +1,158 @@
+<!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="contact-heading">Get in Touch With Us</h1>
+                    <p class="contact-subheading">
+                        For support, queries, or feedback, reach out to us anytime. We're here to help you with all your government portal needs and ensure your experience is seamless.
+                    </p>
+                </div>
+                <div class="hero-illustration">
+                    <div class="illustration-card">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="main-content">
+        <div class="container">
+            <div class="content-grid">
+                <!-- Contact Information -->
+                <div class="contact-info">
+                    <h3>Contact Information</h3>
+                    
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Address</h4>
+                            <p>Government Complex, Sector 1<br>
+                               Pune, Maharashtra 411001<br>
+                               India</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Phone</h4>
+                            <p>+91 20 1234 5678<br>
+                               Toll Free: 1800-123-4567</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Email</h4>
+                            <p>support&#64;govportal.in<br>
+                               info&#64;govportal.in</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Working Hours</h4>
+                            <p>Monday - Friday: 9:00 AM - 6:00 PM<br>
+                               Saturday: 10:00 AM - 4:00 PM<br>
+                               Sunday: Closed</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="contact-form">
+                    <h3>Send us a Message</h3>
+                    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+                        <div class="form-group">
+                            <label for="name" class="form-label">Full Name *</label>
+                            <input type="text" id="name" formControlName="fullName" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" id="email" formControlName="emailAddress" class="form-input" required>
+                            <div style="color: red; background-color: rgb(243, 193, 215);
+                                margin-top: 5px;
+                                padding: 0.3rem 1rem;
+                                border-radius: 0.5rem;
+                                font-size: smaller;
+                                font-family: cursive;" 
+                                *ngIf="contactForm.get('emailAddress')?.invalid && contactForm.get('emailAddress')?.touched" class="error-msg">
+                                Please enter a valid email address.
+                            </div>
+                        </div>
+                        
+
+
+                        <div class="form-group">
+                            <label for="subject" class="form-label">Subject *</label>
+                            <input type="text" id="subject" formControlName="subject" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message" class="form-label">Message *</label>
+                            <textarea id="message" formControlName="message" class="form-textarea" rows="5" required></textarea>
+                        </div>
+
+                        <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+                            <i class="fas fa-paper-plane" style="margin-right: 0.5rem;"></i>
+                            {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+                        </button>
+                        </form>
+
+                    <div class="form-message" [ngClass]="{ 'error': formStatusMessage.includes('❌'), 'success': formStatusMessage.includes('✅') }">
+                        {{ formStatusMessage }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            <div class="map-section">
+                <div class="map-container">
+                    <h3>Find Us on Map</h3>
+                    <iframe 
+                        class="map-embed"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3783.2712608569073!2d73.8567437!3d18.5204303!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c147b8b3a3bf%3A0x6256d8f32426b654!2sPune%2C%20Maharashtra%2C%20India!5e0!3m2!1sen!2sin!4v1625742432000!5m2!1sen!2sin"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Media Section -->
+    <section class="social-section">
+        <div class="container">
+            <h3>Connect with Us</h3>
+            <div class="social-links">
+                <a href="#" class="social-link linkedin" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a href="#" class="social-link twitter" aria-label="Twitter">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="social-link youtube" aria-label="YouTube">
+                    <i class="fab fa-youtube"></i>
+                </a>
+            </div>
+            <!-- <p class="copyright">
+                © 2025 Government Portal. All rights reserved. | Privacy Policy | Terms of Service
+            </p> -->
+        </div>
+    </section>
+

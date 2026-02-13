@@ -1,0 +1,372 @@
+<div class="support-container">
+
+  <!-- Landing View -->
+  <ng-container *ngIf="currentView === 'landing'">
+    <!-- Header Section -->
+    <div class="support-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="main-title">Need Help? We're Here for You!</h1>
+          <p class="subtitle">Explore answers, contact us, or raise a ticket below. Our dedicated support team is ready to assist you.</p>
+          <div class="support-stats">
+            <div class="stat-item">
+              <span class="stat-number">24/7</span>
+              <span class="stat-label">Support</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">99.9%</span>
+              <span class="stat-label">Uptime</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">< 2hrs</span>
+              <span class="stat-label">Response Time</span>
+            </div>
+          </div>
+        </div>
+        <div class="header-illustration">
+          <div class="illustration-wrapper">
+            <svg viewBox="0 0 400 300" class="support-illustration">
+              <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#FFA500;stop-opacity:0.2" />
+                  <stop offset="100%" style="stop-color:#FFA500;stop-opacity:0.1" />
+                </linearGradient>
+              </defs>
+              <circle cx="200" cy="120" r="40" fill="url(#grad1)" />
+              <circle cx="200" cy="115" r="25" fill="#FFA500" opacity="0.3" />
+              <path d="M180 105 Q200 95 220 105" stroke="#FFA500" stroke-width="3" fill="none" />
+              <circle cx="175" cy="108" r="8" fill="#FFA500" opacity="0.6" />
+              <circle cx="225" cy="108" r="8" fill="#FFA500" opacity="0.6" />
+              <path d="M200 125 Q205 140 210 135" stroke="#FFA500" stroke-width="2" fill="none" />
+              <ellipse cx="150" cy="80" rx="25" ry="15" fill="#FFA500" opacity="0.2" />
+              <ellipse cx="280" cy="90" rx="30" ry="18" fill="#FFA500" opacity="0.15" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Support Option Cards -->
+    <div class="support-cards">
+      <div class="card-container">
+        <!-- My Tickets Card -->
+        <div class="support-card" (click)="onCardClick('mytickets')">
+          <div class="card-icon">
+            <i class="fas fa-list-alt"></i>
+          </div>
+          <h3 class="card-title">My Support Tickets</h3>
+          <p class="card-description">View and manage all your support tickets. Track status and continue conversations.</p>
+          <button class="card-button">
+            <span>View Tickets</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <div class="card-decoration"></div>
+          <div class="ticket-count-badge" *ngIf="ticketStats && (ticketStats.open + ticketStats.inProgress) > 0">
+            {{ ticketStats.open + ticketStats.inProgress }} Active
+          </div>
+        </div>
+
+        <!-- New Ticket Card -->
+        <div class="support-card featured" (click)="onCardClick('ticket')">
+          <div class="card-icon">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+          <h3 class="card-title">Raise a Support Ticket</h3>
+          <p class="card-description">Submit a detailed support request for any issue you're experiencing with our services.</p>
+          <button class="card-button">
+            <span>Submit Request</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <div class="card-decoration"></div>
+          <div class="featured-badge">Most Popular</div>
+        </div>
+
+        <!-- Live Chat Card -->
+        <div class="support-card" (click)="onCardClick('chat')">
+          <div class="card-icon">
+            <i class="fas fa-headset"></i>
+          </div>
+          <h3 class="card-title">Live Chat & Call Support</h3>
+          <p class="card-description">Connect with our support executives in real-time for immediate assistance and guidance.</p>
+          <button class="card-button">
+            <span>Contact Now</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <div class="card-decoration"></div>
+          <div class="status-indicator-2">
+            <div class="status-dot"></div>
+            <span>Online</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick FAQ Section -->
+    <div class="quick-faq" *ngIf="showQuickFAQ">
+      <div class="faq-header">
+        <h2>Quick Answers</h2>
+        <p>Get instant help with these common questions</p>
+      </div>
+      
+      <div class="faq-list">
+        <div class="faq-item" *ngFor="let faq of quickFAQs; let i = index" 
+            [class.active]="faq.isOpen" 
+            (click)="toggleFAQ(i)">
+          <div class="faq-question">
+            <h4>{{ faq.question }}</h4>
+            <i class="fas fa-chevron-down" [class.rotated]="faq.isOpen"></i>
+          </div>
+          <div class="faq-answer" [class.open]="faq.isOpen">
+            <p>{{ faq.answer }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <button class="view-all-btn" (click)="viewAllFAQs()">
+        <span>View All FAQs</span>
+        <i class="fas fa-external-link-alt"></i>
+      </button>
+    </div>
+
+    <!-- Ticket Status Alert -->
+    <div class="ticket-alert" *ngIf="hasActiveTicket">
+      <div class="alert-content">
+        <div class="alert-icon">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="alert-text">
+          <h4>Active Support Tickets</h4>
+          <p>You have {{ ticketStats?.open || 0 }} open and {{ ticketStats?.inProgress || 0 }} in-progress tickets.</p>
+        </div>
+        <button class="alert-button" (click)="viewTicketStatus()">
+          <span>View Status</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Tickets List View -->
+  <ng-container *ngIf="currentView === 'tickets'">
+    <div class="tickets-view">
+      <div class="view-header">
+        <button class="back-btn" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <h2>My Support Tickets</h2>
+        <button class="new-ticket-btn" (click)="goToView('newTicket')">
+          <i class="fas fa-plus"></i> New Ticket
+        </button>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button [class.active]="statusFilter === ''" (click)="filterByStatus('')">All</button>
+        <button [class.active]="statusFilter === 'open'" (click)="filterByStatus('open')">Open</button>
+        <button [class.active]="statusFilter === 'in-progress'" (click)="filterByStatus('in-progress')">In Progress</button>
+        <button [class.active]="statusFilter === 'resolved'" (click)="filterByStatus('resolved')">Resolved</button>
+        <button [class.active]="statusFilter === 'closed'" (click)="filterByStatus('closed')">Closed</button>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-state" *ngIf="isLoading">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>
+        <p>Loading tickets...</p>
+      </div>
+
+      <!-- Error -->
+      <div class="error-state" *ngIf="loadError && !isLoading">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>{{ loadError }}</p>
+        <button (click)="loadTickets()"><i class="fas fa-redo"></i> Retry</button>
+      </div>
+
+      <!-- Tickets List -->
+      <div class="tickets-list" *ngIf="!isLoading && !loadError">
+        <div class="ticket-item" *ngFor="let ticket of tickets" (click)="viewTicketDetails(ticket)">
+          <div class="ticket-header">
+            <span class="ticket-id">#{{ ticket.ticketId }}</span>
+            <span class="ticket-status" [style.background-color]="getStatusInfo(ticket.status || 'open').color">
+              {{ getStatusInfo(ticket.status || 'open').label }}
+            </span>
+          </div>
+          <h3 class="ticket-subject">{{ ticket.subject }}</h3>
+          <p class="ticket-desc">{{ ticket.description | slice:0:100 }}{{ ticket.description && ticket.description.length > 100 ? '...' : '' }}</p>
+          <div class="ticket-meta">
+            <span class="category">
+              <i class="fas" [ngClass]="getCategoryIcon(ticket.category)"></i>
+              {{ getCategoryLabel(ticket.category) }}
+            </span>
+            <span class="date">{{ formatDate(ticket.createdAt) }}</span>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="tickets.length === 0">
+          <i class="fas fa-ticket-alt fa-3x"></i>
+          <h3>No Tickets Found</h3>
+          <p>You haven't created any support tickets yet.</p>
+          <button class="create-btn" (click)="goToView('newTicket')">
+            <i class="fas fa-plus"></i> Create Your First Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- New Ticket Form View -->
+  <ng-container *ngIf="currentView === 'newTicket'">
+    <div class="new-ticket-view">
+      <div class="view-header">
+        <button class="back-btn" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <h2>Create New Ticket</h2>
+      </div>
+
+      <div class="ticket-form">
+        <div class="form-group">
+          <label>Category <span class="required">*</span></label>
+          <div class="category-grid">
+            <div class="category-option" 
+                *ngFor="let cat of categories" 
+                [class.selected]="newTicketForm.category === cat.value"
+                (click)="newTicketForm.category = cat.value">
+              <i class="fas" [ngClass]="cat.icon"></i>
+              <span>{{ cat.label }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Subject <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="newTicketForm.subject" placeholder="Brief description of your issue">
+        </div>
+
+        <div class="form-group">
+          <label>Description <span class="required">*</span></label>
+          <textarea [(ngModel)]="newTicketForm.description" rows="5" 
+                    placeholder="Please provide detailed information about your issue..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Priority</label>
+            <select [(ngModel)]="newTicketForm.priority">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Related Order ID (Optional)</label>
+            <input type="text" [(ngModel)]="newTicketForm.orderId" placeholder="e.g., ORD-12345">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="cancel-btn" (click)="goBack()" [disabled]="isSubmitting">Cancel</button>
+          <button class="submit-btn" (click)="submitTicket()" [disabled]="!validateTicketForm() || isSubmitting">
+            <i class="fas" [ngClass]="isSubmitting ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+            {{ isSubmitting ? 'Submitting...' : 'Submit Ticket' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Ticket Detail View -->
+  <ng-container *ngIf="currentView === 'ticketDetail' && selectedTicket">
+    <div class="ticket-detail-view">
+      <div class="view-header">
+        <button class="back-btn" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i> Back to Tickets
+        </button>
+        <h2>Ticket #{{ selectedTicket.ticketId }}</h2>
+        <button class="close-ticket-btn" 
+                *ngIf="selectedTicket.status !== 'closed'" 
+                (click)="closeTicket()">
+          <i class="fas fa-times-circle"></i> Close Ticket
+        </button>
+      </div>
+
+      <div class="ticket-detail-content">
+        <!-- Ticket Info -->
+        <div class="ticket-info-card">
+          <div class="info-header">
+            <h3>{{ selectedTicket.subject }}</h3>
+            <span class="status-badge" [style.background-color]="getStatusInfo(selectedTicket.status || 'open').color">
+              <i class="fas" [ngClass]="getStatusInfo(selectedTicket.status || 'open').icon"></i>
+              {{ getStatusInfo(selectedTicket.status || 'open').label }}
+            </span>
+          </div>
+          <p class="description">{{ selectedTicket.description }}</p>
+          <div class="info-meta">
+            <div class="meta-item">
+              <i class="fas" [ngClass]="getCategoryIcon(selectedTicket.category)"></i>
+              <span>{{ getCategoryLabel(selectedTicket.category) }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-flag"></i>
+              <span [style.color]="getPriorityInfo(selectedTicket.priority || 'medium').color">
+                {{ getPriorityInfo(selectedTicket.priority || 'medium').label }} Priority
+              </span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-calendar"></i>
+              <span>Created: {{ formatDate(selectedTicket.createdAt) }}</span>
+            </div>
+            <div class="meta-item" *ngIf="selectedTicket.orderId">
+              <i class="fas fa-shopping-cart"></i>
+              <span>Order: {{ selectedTicket.orderId }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages Section -->
+        <div class="messages-section">
+          <h4><i class="fas fa-comments"></i> Conversation</h4>
+          
+          <div class="messages-list" *ngIf="selectedTicket.messages && selectedTicket.messages.length > 0">
+            <div class="message-item" 
+                *ngFor="let msg of selectedTicket.messages"
+                [class.customer]="msg.senderRole === 'customer'"
+                [class.support]="msg.senderRole !== 'customer'">
+              <div class="message-header">
+                <span class="sender-name">{{ msg.senderName }}</span>
+                <span class="sender-role" *ngIf="msg.senderRole !== 'customer'">(Support)</span>
+                <span class="message-time">{{ formatDate(msg.timestamp) }}</span>
+              </div>
+              <div class="message-content">{{ msg.message }}</div>
+            </div>
+          </div>
+
+          <div class="no-messages" *ngIf="!selectedTicket.messages || selectedTicket.messages.length === 0">
+            <i class="fas fa-comment-slash"></i>
+            <p>No messages yet. Start the conversation below.</p>
+          </div>
+
+          <!-- Reply Form -->
+          <div class="reply-form" *ngIf="selectedTicket.status !== 'closed'">
+            <textarea [(ngModel)]="newMessage" rows="3" placeholder="Type your message..."></textarea>
+            <button class="send-btn" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+              <i class="fas fa-paper-plane"></i> Send
+            </button>
+          </div>
+
+          <div class="ticket-closed-notice" *ngIf="selectedTicket.status === 'closed'">
+            <i class="fas fa-lock"></i>
+            <p>This ticket is closed. Create a new ticket if you need further assistance.</p>
+          </div>
+        </div>
+
+        <!-- Resolution -->
+        <div class="resolution-section" *ngIf="selectedTicket.resolution">
+          <h4><i class="fas fa-check-circle"></i> Resolution</h4>
+          <p>{{ selectedTicket.resolution }}</p>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

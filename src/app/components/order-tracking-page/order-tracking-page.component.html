@@ -1,0 +1,137 @@
+<div class="order-tracking-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="container">
+      <h1><i class="fas fa-truck"></i> Track Your Order</h1>
+      <p>Enter your order ID to track your package</p>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <div class="container">
+      <div class="search-box">
+        <input type="text" 
+               [(ngModel)]="searchOrderId" 
+               placeholder="Enter Order ID (e.g., ORD-123456)"
+               (keyup.enter)="trackOrder()">
+        <button class="btn-track" (click)="trackOrder()" [disabled]="isLoading">
+          <i class="fas" [ngClass]="isLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i>
+          {{ isLoading ? 'Tracking...' : 'Track Order' }}
+        </button>
+      </div>
+      <p class="error-message" *ngIf="error">
+        <i class="fas fa-exclamation-circle"></i> {{ error }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Order Details (if found) -->
+  <div class="order-details" *ngIf="order && !isLoading">
+    <div class="container">
+      <!-- Order Info Card -->
+      <div class="info-card">
+        <div class="info-header">
+          <div class="order-id">
+            <span class="label">Order ID</span>
+            <span class="value">{{ order.orderId }}</span>
+            <button class="copy-btn" (click)="copyOrderId()" title="Copy Order ID">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+          <div class="order-status" [ngClass]="getStatusClass(order.orderStatus || '')">
+            {{ order.orderStatus }}
+          </div>
+        </div>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <i class="fas fa-calendar"></i>
+            <div>
+              <span class="label">Order Date</span>
+              <span class="value">{{ order.orderDateTime | date:'mediumDate' }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-clock"></i>
+            <div>
+              <span class="label">Estimated Delivery</span>
+              <span class="value">{{ getEstimatedDelivery() | date:'mediumDate' }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-rupee-sign"></i>
+            <div>
+              <span class="label">Total Amount</span>
+              <span class="value price">₹{{ order.totalAmount | number }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+              <span class="label">Shipping To</span>
+              <span class="value">{{ order.shippingAddress || 'Address on file' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tracking Timeline -->
+      <div class="timeline-card">
+        <h2><i class="fas fa-route"></i> Tracking Timeline</h2>
+        
+        <div class="timeline">
+          <div class="timeline-item" 
+               *ngFor="let step of trackingSteps; let i = index; let last = last"
+               [class.completed]="step.completed"
+               [class.current]="step.current"
+               [class.cancelled]="step.status === 'cancelled' || step.status === 'returned'">
+            
+            <div class="timeline-marker">
+              <div class="marker-icon">
+                <i [class]="step.icon"></i>
+              </div>
+              <div class="marker-line" *ngIf="!last"></div>
+            </div>
+            
+            <div class="timeline-content">
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.description }}</p>
+              <span class="date" *ngIf="step.date">
+                <i class="fas fa-clock"></i> {{ step.date | date:'medium' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn-secondary" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i> Back to Orders
+        </button>
+        <button class="btn-primary" (click)="contactSupport()">
+          <i class="fas fa-headset"></i> Need Help?
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!order && !isLoading && !error && !orderId">
+    <div class="container">
+      <i class="fas fa-box-open fa-4x"></i>
+      <h2>Track Your Package</h2>
+      <p>Enter your order ID above to see real-time updates on your order status</p>
+      <div class="tips">
+        <h4>Where to find your Order ID?</h4>
+        <ul>
+          <li>Check your order confirmation email</li>
+          <li>Visit your <a routerLink="/customer-dashboard/orders">orders page</a></li>
+          <li>Look at your payment receipt</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+

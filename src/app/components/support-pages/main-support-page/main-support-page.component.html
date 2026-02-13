@@ -1,0 +1,251 @@
+<!-- Support Page Component Template -->
+<div class="support-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">Help & Support</h1>
+        <p class="hero-subtitle">We're here to assist you at every step of your local-to-global journey.</p>
+        <button class="cta-button primary" (click)="openLiveChat()">
+          <i class="fas fa-comments"></i>
+          Need Immediate Help?
+        </button>
+      </div>
+      <div class="hero-image">
+        <img src="assets/images/vendor-hero.jpg" alt="Happy vendor with G-tag products" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Access Cards -->
+  <section class="quick-access-section">
+    <div class="container">
+      <h2 class="section-title">How Can We Help You?</h2>
+      <div class="cards-grid">
+        <div class="support-card" (click)="navigateToSection('buyer')">
+          <div class="card-icon">
+            <i class="fas fa-user-tie"></i>
+          </div>
+          <h3>Buyer Support</h3>
+          <p>Track orders, manage refunds, and get shipping assistance</p>
+          <span class="card-arrow">→</span>
+        </div>
+        
+        <div class="support-card" (click)="navigateToSection('vendor')">
+          <div class="card-icon">
+            <i class="fas fa-store"></i>
+          </div>
+          <h3>Vendor Support</h3>
+          <p>Product listing, G-tag registration, and earnings management</p>
+          <span class="card-arrow">→</span>
+        </div>
+        
+        <div class="support-card" (click)="navigateToSection('shipping')">
+          <div class="card-icon">
+            <i class="fas fa-shipping-fast"></i>
+          </div>
+          <h3>Shipping Info</h3>
+          <p>Delivery zones, timelines, and logistics partners</p>
+          <span class="card-arrow">→</span>
+        </div>
+        
+        <div class="support-card" (click)="navigateToSection('returns')">
+          <div class="card-icon">
+            <i class="fas fa-undo-alt"></i>
+          </div>
+          <h3>Returns & Refunds</h3>
+          <p>Easy returns policy and refund processing</p>
+          <span class="card-arrow">→</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- G-Tag Section -->
+  <section class="gtag-section">
+    <div class="container">
+      <div class="gtag-content">
+        <div class="gtag-info">
+          <h2 class="section-title">G-Tag Product Certification</h2>
+          <p class="gtag-description">
+            G-tag (Geographical-tagged) products are specially certified local specialties that represent 
+            the authentic heritage and quality of specific regions across India.
+          </p>
+          
+          <div class="gtag-steps">
+            <div class="step-item">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <h4>Verify Authenticity</h4>
+                <p>Ensure your product meets regional quality standards</p>
+              </div>
+            </div>
+            
+            <div class="step-item">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <h4>Submit Documentation</h4>
+                <p>Provide necessary certificates and origin proofs</p>
+              </div>
+            </div>
+            
+            <div class="step-item">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <h4>Get Verified</h4>
+                <p>Our team reviews and approves your G-tag application</p>
+              </div>
+            </div>
+          </div>
+          
+          <button class="cta-button secondary" (click)="openGtagApplication()">
+            <i class="fas fa-certificate"></i>
+            Apply for G-Tag
+          </button>
+        </div>
+        
+        <div class="gtag-visual">
+          <div class="gtag-badge">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>G-TAG</span>
+            <small>CERTIFIED</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section">
+    <div class="container">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search for help..." [(ngModel)]="searchQuery" (input)="filterFAQs()">
+      </div>
+      
+      <div class="faq-categories">
+        <div class="category-tabs">
+          <button class="tab-button" 
+                  [class.active]="activeCategory === category" 
+                  *ngFor="let category of faqCategories" 
+                  (click)="setActiveCategory(category)">
+            {{category}}
+          </button>
+        </div>
+        
+        <div class="faq-list">
+          <div class="faq-item" *ngFor="let faq of filteredFAQs; let i = index">
+            <div class="faq-question" (click)="toggleFAQ(i)">
+              <span>{{faq.question}}</span>
+              <i class="fas fa-chevron-down" [class.rotated]="faq.expanded"></i>
+            </div>
+            <div class="faq-answer" [class.expanded]="faq.expanded">
+              <p>{{faq.answer}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Support Section -->
+  <section class="contact-section">
+    <div class="container">
+      <h2 class="section-title">Get In Touch</h2>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="contact-icon">
+            <i class="fas fa-phone-alt"></i>
+          </div>
+          <h3>Phone Support</h3>
+          <p class="contact-info">1800-xxx-xxxx</p>
+          <p class="contact-hours">Mon–Sat, 10 AM – 6 PM</p>
+          <button class="contact-btn" (click)="callSupport()">Call Now</button>
+        </div>
+        
+        <div class="contact-card">
+          <div class="contact-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h3>Email Support</h3>
+          <p class="contact-info">support@yourplatform.gov.in</p>
+          <p class="contact-hours">24/7 Response</p>
+          <button class="contact-btn" (click)="sendEmail()">Send Email</button>
+        </div>
+        
+        <div class="contact-card">
+          <div class="contact-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <h3>Live Chat</h3>
+          <p class="contact-info">Instant Support</p>
+          <p class="contact-hours">Available Now</p>
+          <button class="contact-btn" (click)="openLiveChat()">Start Chat</button>
+        </div>
+        
+        <div class="contact-card">
+          <div class="contact-icon">
+            <i class="fas fa-edit"></i>
+          </div>
+          <h3>Feedback Form</h3>
+          <p class="contact-info">Share Your Experience</p>
+          <p class="contact-hours">Help Us Improve</p>
+          <button class="contact-btn" (click)="openFeedbackForm()">Give Feedback</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vendor Success Stories -->
+  <section class="success-stories-section">
+    <div class="container">
+      <h2 class="section-title">Vendor Success Stories</h2>
+      <div class="stories-grid">
+        <div class="story-card" *ngFor="let story of vendorStories">
+          <div class="story-image">
+            <img [src]="story.image" [alt]="story.name">
+          </div>
+          <div class="story-content">
+            <h4>{{story.name}}</h4>
+            <p class="story-location">{{story.location}}</p>
+            <p class="story-quote">"{{story.quote}}"</p>
+            <div class="story-stats">
+              <span class="stat">
+                <i class="fas fa-chart-line"></i>
+                {{story.salesIncrease}}% increase
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Legal Links -->
+  <section class="legal-section">
+    <div class="container">
+      <div class="legal-links">
+        <a href="/privacy-policy" class="legal-link">Privacy Policy</a>
+        <a href="/terms-of-service" class="legal-link">Terms of Service</a>
+        <a href="/refund-policy" class="legal-link">Refund Policy</a>
+        <a href="/gtag-guidelines" class="legal-link">G-tag Guidelines</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer CTA -->
+  <section class="footer-cta">
+    <div class="container">
+      <div class="cta-content">
+        <h3>Still need help?</h3>
+        <p>Our support team is ready to assist you with any questions or concerns.</p>
+        <button class="cta-button primary" (click)="openContactForm()">
+          <i class="fas fa-headset"></i>
+          Contact Support
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

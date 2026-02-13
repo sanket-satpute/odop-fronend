@@ -1,0 +1,234 @@
+<!-- Main Container -->
+<div class="manage-products-container">
+  
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner-ring"></div>
+      <span>Loading products...</span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="loadError && !isLoading">
+    <div class="error-content">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <h2>Unable to Load Products</h2>
+      <p>{{ loadError }}</p>
+      <div class="error-actions">
+        <button class="btn btn-primary" (click)="refreshData()">
+          <i class="fas fa-sync-alt"></i> Retry
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content (only show when not loading and no error) -->
+  <ng-container *ngIf="!isLoading && !loadError">
+    <!-- Header Section -->
+    <div class="section-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h1 class="main-title">Manage Products</h1>
+          <p class="subtitle">Add, edit, or manage your product catalog</p>
+        </div>
+        <div class="header-actions">
+          <button class="refresh-btn" (click)="refreshData()" title="Refresh">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+          <button class="add-product-btn" (click)="addProduct()">
+            <i class="fas fa-plus"></i>
+            <span>Add Product</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  <!-- Search and Filter Section -->
+  <div class="filter-section">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+          type="text" 
+          placeholder="Search products by name or SKU..." 
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()"
+        />
+      </div>
+    </div>
+    
+    <div class="filter-controls">
+      <div class="filter-group">
+        <label class="filter-label">Category</label>
+        <select 
+          class="filter-select" 
+          [(ngModel)]="selectedCategory"
+          (change)="onCategoryChange()"
+        >
+          <option *ngFor="let category of categories" [value]="category.value">
+            {{category.label}}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <select 
+          class="filter-select" 
+          [(ngModel)]="selectedStatus"
+          (change)="onStatusChange()"
+        >
+          <option *ngFor="let status of statusOptions" [value]="status.value">
+            {{status.label}}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Table Section -->
+  <div class="table-container">
+    <div class="table-wrapper">
+      <table class="products-table">
+        <thead class="table-header">
+          <tr>
+            <th class="th-image">Image</th>
+            <th class="th-product">Product Details</th>
+            <th class="th-price">Price</th>
+            <th class="th-stock">Stock</th>
+            <th class="th-status">Status</th>
+            <th class="th-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="table-body">
+          <tr 
+            *ngFor="let product of filteredProducts" 
+            class="table-row"
+            [class.low-stock-row]="product.isLowStock"
+          >
+            <!-- Product Image -->
+            <td class="td-image">
+              <div class="image-container">
+                <img [src]="product.image" [alt]="product.name" class="product-image">
+              </div>
+            </td>
+
+            <!-- Product Details -->
+            <td class="td-product">
+              <div class="product-info">
+                <div class="product-name-wrapper">
+                  <h3 class="product-name">{{product.name}}</h3>
+                  <div class="product-badges">
+                    <span *ngIf="product.isBestseller" class="badge badge-bestseller">
+                      <i class="fas fa-star"></i> Bestseller
+                    </span>
+                    <span *ngIf="product.isNew" class="badge badge-new">
+                      <i class="fas fa-sparkles"></i> New
+                    </span>
+                  </div>
+                </div>
+                <p class="product-sku">SKU: {{product.sku}}</p>
+                <p class="product-category">{{product.category}}</p>
+              </div>
+            </td>
+
+            <!-- Price -->
+            <td class="td-price">
+              <span class="price-value">{{formatPrice(product.price)}}</span>
+            </td>
+
+            <!-- Stock -->
+            <td class="td-stock">
+              <div class="stock-info">
+                <span 
+                  class="stock-value" 
+                  [class.low-stock]="product.isLowStock"
+                >
+                  {{product.stock}}
+                </span>
+                <span *ngIf="product.isLowStock" class="stock-warning">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </span>
+              </div>
+            </td>
+
+            <!-- Status -->
+            <td class="td-status">
+              <div class="status-toggle">
+                <label class="toggle-switch">
+                  <input 
+                    type="checkbox" 
+                    [checked]="product.active"
+                    (change)="toggleProductStatus(product)"
+                  >
+                  <span class="slider"></span>
+                </label>
+                <span 
+                  class="status-label" 
+                  [class.status-active]="product.active"
+                  [class.status-inactive]="!product.active"
+                >
+                  {{product.active ? 'Active' : 'Inactive'}}
+                </span>
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td class="td-actions">
+              <div class="action-buttons">
+                <button 
+                  class="action-btn edit-btn" 
+                  (click)="editProduct(product)"
+                  title="Edit Product"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button 
+                  class="action-btn delete-btn" 
+                  (click)="deleteProduct(product)"
+                  title="Delete Product"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="filteredProducts.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-box-open"></i>
+    </div>
+    <h3 class="empty-title">No products found</h3>
+    <p class="empty-description">Try adjusting your search or filter criteria</p>
+  </div>
+
+  <!-- Pagination Section -->
+  <div class="pagination-section" *ngIf="filteredProducts.length > 0">
+    <div class="pagination-info">
+      <span class="results-count">Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, totalProducts) }} of {{ totalProducts }} products</span>
+    </div>
+    <div class="pagination-controls">
+      <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">
+        <i class="fas fa-chevron-left"></i>
+        Previous
+      </button>
+      <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button class="pagination-btn" [disabled]="currentPage >= totalPages" (click)="nextPage()">
+        Next
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+  </ng-container>
+</div>

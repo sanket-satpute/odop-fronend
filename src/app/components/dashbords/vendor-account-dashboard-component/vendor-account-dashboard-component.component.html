@@ -1,0 +1,139 @@
+<!-- Main Dashboard Container -->
+<div class="dashboard-container" (click)="closeDropdowns()">
+  
+  <!-- Mobile Overlay -->
+  <div class="sidebar-overlay" [class.active]="isSidebarOpen" (click)="closeSidebar()"></div>
+  
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="isSidebarCollapsed" [class.active]="isSidebarOpen">
+    <!-- Logo Section -->
+    <div class="logo-section">
+      <div class="logo-container">
+        <i class="fas fa-store logo-icon"></i>
+        <span class="logo-text" *ngIf="!isSidebarCollapsed">Vendor Portal</span>
+      </div>
+      <button class="collapse-btn" (click)="toggleSidebar()">
+        <i class="fas" [class.fa-chevron-left]="!isSidebarCollapsed" [class.fa-chevron-right]="isSidebarCollapsed"></i>
+      </button>
+    </div>
+    
+    <!-- Navigation Menu -->
+    <nav class="nav-menu">
+      <ul class="nav-list">
+        <li class="nav-item" *ngFor="let item of sidebarItems" [class.active]="item.active">
+          <a class="nav-link" (click)="setActiveMenuItem(item)">
+            <i class="fas {{item.icon}} nav-icon"></i>
+            <span class="nav-text" *ngIf="!isSidebarCollapsed">{{item.label}}</span>
+            <span class="nav-badge" *ngIf="item.badge && !isSidebarCollapsed" [ngClass]="item.badgeType || 'default'">
+              {{item.badge}}
+            </span>
+            <span class="nav-badge-dot" *ngIf="item.badge && isSidebarCollapsed"></span>
+          </a>
+        </li>
+      </ul>
+      
+      <!-- Bottom Menu Items -->
+      <div class="bottom-menu">
+        <ul class="nav-list">
+          <li class="nav-item" *ngFor="let item of bottomSidebarItems" [class.active]="item.active">
+            <a class="nav-link" (click)="setActiveMenuItem(item)">
+              <i class="fas {{item.icon}} nav-icon"></i>
+              <span class="nav-text" *ngIf="!isSidebarCollapsed">{{item.label}}</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+  
+  <!-- Main Content Area -->
+  <main class="main-content">
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <!-- Mobile Menu Toggle (only visible on mobile) -->
+        <button class="mobile-menu-toggle" (click)="toggleMobileSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="welcome-section">
+          <h1 class="welcome-title">Welcome back, {{userState.vendor?.shopkeeperName || vendorName}}!</h1>
+          <p class="welcome-subtitle">Manage your store and grow your business</p>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <!-- Notifications -->
+        <div class="notification-container">
+          <button class="notification-btn" (click)="toggleNotifications()" [class.active]="isNotificationOpen">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge">{{unreadNotificationsCount}}</span>
+          </button>
+          
+          <div class="notification-dropdown" *ngIf="isNotificationOpen">
+            <div class="dropdown-header">
+              <h3>Notifications</h3>
+              <span class="notification-count">{{unreadNotificationsCount}} new</span>
+            </div>
+            <div class="notification-list">
+              <div class="notification-item" *ngFor="let notification of notifications" [class.unread]="notification.unread">
+                <div class="notification-icon">
+                  <i class="fas {{notification.icon}}"></i>
+                </div>
+                <div class="notification-content">
+                  <h4>{{notification.title}}</h4>
+                  <p>{{notification.description}}</p>
+                  <span class="notification-time">{{notification.time}}</span>
+                </div>
+              </div>
+            </div>
+            <div class="dropdown-footer">
+              <a href="#">View all notifications</a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Profile -->
+        <div class="profile-container">
+          <button class="profile-btn" (click)="toggleProfile()" [class.active]="isProfileOpen">
+            <img [src]="userState.vendor?.profilePictureUrl || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'" alt="Profile" class="profile-avatar">
+            <i class="fas fa-chevron-down profile-chevron"></i>
+          </button>
+          
+          <div class="profile-dropdown" *ngIf="isProfileOpen">
+            <div class="dropdown-header">
+              <img [src]="userState.vendor?.profilePictureUrl || 'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'" alt="Profile" class="profile-large">
+              <div class="profile-info">
+                <h4>{{userState.vendor?.shopkeeperName || vendorName}}</h4>
+                <p>Verified Vendor</p>
+              </div>
+            </div>
+            <div class="dropdown-menu">
+              <a href="#" class="dropdown-item">
+                <i class="fas fa-user"></i>
+                <span>My Profile</span>
+              </a>
+              <a href="#" class="dropdown-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+              </a>
+              <a href="#" class="dropdown-item">
+                <i class="fas fa-question-circle"></i>
+                <span>Help & Support</span>
+              </a>
+              <hr class="dropdown-divider">
+              <a href="#" class="dropdown-item logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-content"> 
+      <router-outlet></router-outlet>
+    </div>    
+  </main>
+</div>

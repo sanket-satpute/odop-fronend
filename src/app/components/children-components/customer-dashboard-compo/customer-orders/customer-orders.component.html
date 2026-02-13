@@ -1,0 +1,202 @@
+<div class="orders-container">
+  <!-- Header Section -->
+  <div class="orders-header">
+    <div class="header-content">
+      <h1 class="main-title">My Orders</h1>
+      <p class="subtitle">Track your recent and past orders</p>
+    </div>
+    <div class="header-actions">
+      <button class="export-btn" (click)="exportOrders()" [disabled]="!hasOrders">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7,10 12,15 17,10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Order Section Tabs -->
+  <div class="order-sections" *ngIf="hasOrders">
+    <button 
+      *ngFor="let section of orderSections"
+      class="section-tab"
+      [class.active]="activeSection === section.key"
+      (click)="onSectionChange(section.key)">
+      <i [class]="section.icon" [style.color]="activeSection === section.key ? section.color : ''"></i>
+      <span class="section-label">{{ section.label }}</span>
+      <span class="section-count" [style.background-color]="activeSection === section.key ? section.color : ''">
+        {{ sectionCounts[section.key] }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filters-section" *ngIf="hasOrders">
+    <div class="search-container">
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input 
+        type="text" 
+        placeholder="Search by Order ID, Product name..." 
+        class="search-input"
+        [(ngModel)]="searchQuery"
+        (input)="onSearchChange()">
+    </div>
+    
+    <div class="filter-controls">
+      <div class="filter-group">
+        <select class="filter-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+          <option value="">All Status</option>
+          <option value="placed">Processing</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="shipped">Shipped</option>
+          <option value="out_for_delivery">Out for Delivery</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="returned">Returned</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <select class="filter-select" [(ngModel)]="selectedSort" (change)="onSortChange()">
+          <option value="latest">Latest First</option>
+          <option value="oldest">Oldest First</option>
+        </select>
+      </div>
+
+      <button class="clear-filters-btn" *ngIf="searchQuery || selectedStatus" (click)="clearFilters()">
+        <i class="fas fa-times"></i> Clear
+      </button>
+    </div>
+  </div>
+
+  <!-- Results Summary -->
+  <div class="results-summary" *ngIf="hasOrders && (searchQuery || selectedStatus)">
+    <span>Showing {{ filteredOrders.length }} of {{ orders.length }} orders</span>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+    <p class="loading-text">Loading your orders...</p>
+  </div>
+
+  <!-- Orders Grid -->
+  <div class="orders-grid" *ngIf="!isLoading && hasFilteredOrders">
+    <!-- Order Card - Dynamic -->
+    <div 
+      class="order-card" 
+      *ngFor="let order of displayedOrders; trackBy: trackByOrderId"
+      (click)="viewOrderDetails(order)">
+      
+      <div class="order-header">
+        <div class="order-meta">
+          <span class="order-id">#{{ order.orderId }}</span>
+          <span class="order-date">{{ formatDate(order.orderDateTime) }}</span>
+        </div>
+        <div 
+          class="order-status" 
+          [ngClass]="'status-' + order.orderStatus"
+          [style.background-color]="getStatusConfig(order.orderStatus).bgColor"
+          [style.color]="getStatusConfig(order.orderStatus).color">
+          <span class="status-dot" [style.background-color]="getStatusConfig(order.orderStatus).color"></span>
+          {{ getStatusConfig(order.orderStatus).label }}
+        </div>
+      </div>
+      
+      <div class="order-products">
+        <div 
+          class="product-item" 
+          *ngFor="let product of order.productList.slice(0, 3)"
+          (click)="viewProduct(product.productId, $event)">
+          <div class="product-image">
+            <img 
+              [src]="product.image || 'assets/placeholder-product.png'" 
+              [alt]="product.productName"
+              (error)="$any($event.target).src='assets/placeholder-product.png'">
+          </div>
+          <div class="product-info">
+            <h4 class="product-name">{{ product.productName }}</h4>
+            <p class="product-variant" *ngIf="product.variant">{{ product.variant }}</p>
+            <p class="product-price">{{ formatCurrency(product.pricePerUnit) }}</p>
+          </div>
+          <div class="product-quantity">×{{ product.quantity }}</div>
+        </div>
+        
+        <!-- More products indicator -->
+        <div class="more-products" *ngIf="order.productList.length > 3">
+          <span>+{{ order.productList.length - 3 }} more item(s)</span>
+        </div>
+      </div>
+      
+      <div class="order-footer">
+        <div class="order-total">
+          <span class="total-label">Total Amount</span>
+          <span class="total-amount">{{ formatCurrency(order.totalAmount) }}</span>
+        </div>
+        <div class="order-actions">
+          <button 
+            *ngFor="let action of getOrderActions(order)"
+            class="action-btn"
+            [ngClass]="{'primary': action.primary, 'secondary': !action.primary}"
+            (click)="handleAction(action.action, order, $event)">
+            <i [class]="action.icon"></i>
+            {{ action.label }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State - No Orders -->
+  <div class="empty-state" *ngIf="!isLoading && !hasOrders">
+    <div class="empty-icon">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+        <rect x="9" y="3" width="6" height="4" rx="1"/>
+        <path d="M9 12h6"/>
+        <path d="M9 16h3"/>
+      </svg>
+    </div>
+    <h3 class="empty-title">No orders yet</h3>
+    <p class="empty-description">Start shopping to see your orders here!</p>
+    <button class="browse-btn" (click)="browseProducts()">
+      <i class="fas fa-shopping-bag"></i>
+      Browse Products
+    </button>
+  </div>
+
+  <!-- Empty State - No Results -->
+  <div class="empty-state no-results" *ngIf="!isLoading && hasOrders && !hasFilteredOrders">
+    <div class="empty-icon">
+      <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+        <path d="M8 8l6 6"/>
+        <path d="M14 8l-6 6"/>
+      </svg>
+    </div>
+    <h3 class="empty-title">No matching orders</h3>
+    <p class="empty-description">Try adjusting your search or filters</p>
+    <button class="clear-btn" (click)="clearFilters()">
+      <i class="fas fa-undo"></i>
+      Clear Filters
+    </button>
+  </div>
+
+  <!-- Load More Section -->
+  <div class="load-more-section" *ngIf="!isLoading && canLoadMore">
+    <button class="load-more-btn" (click)="loadMoreOrders()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14m7-7H5"/>
+      </svg>
+      Load More Orders ({{ filteredOrders.length - displayedOrders.length }} remaining)
+    </button>
+  </div>
+</div>

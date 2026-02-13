@@ -1,0 +1,78 @@
+<div class="faq-page">
+  <!-- Hero Section -->
+  <section class="faq-hero">
+    <div class="hero-content">
+      <h1>Frequently Asked Questions</h1>
+      <p>Find answers to common questions about ODOP products, orders, and more</p>
+      
+      <!-- Search Box -->
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="Search your question..."
+        />
+      </div>
+    </div>
+    <div class="hero-decoration">
+      <div class="circle circle-1"></div>
+      <div class="circle circle-2"></div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="faq-content">
+    <div class="container">
+      <!-- Category Sidebar -->
+      <aside class="category-sidebar">
+        <h3>Categories</h3>
+        <ul class="category-list">
+          <li 
+            *ngFor="let category of categories"
+            [class.active]="selectedCategory === category.id"
+            (click)="selectCategory(category.id)"
+          >
+            <i class="fas" [ngClass]="category.icon"></i>
+            {{ category.name }}
+          </li>
+        </ul>
+      </aside>
+
+      <!-- FAQ List -->
+      <div class="faq-list">
+        <div *ngIf="filteredFaqs.length === 0" class="no-results">
+          <i class="fas fa-search"></i>
+          <h3>No results found</h3>
+          <p>Try different keywords or browse by category</p>
+        </div>
+
+        <div 
+          class="faq-item" 
+          *ngFor="let faq of filteredFaqs"
+          [class.open]="faq.isOpen"
+        >
+          <div class="faq-question" (click)="toggleFaq(faq)">
+            <span>{{ faq.question }}</span>
+            <i class="fas" [ngClass]="faq.isOpen ? 'fa-minus' : 'fa-plus'"></i>
+          </div>
+          <div class="faq-answer" *ngIf="faq.isOpen">
+            <p>{{ faq.answer }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact CTA -->
+  <section class="contact-cta">
+    <div class="cta-content">
+      <i class="fas fa-headset"></i>
+      <h2>Still have questions?</h2>
+      <p>Our support team is here to help you 24/7</p>
+      <a routerLink="/contact_us" class="cta-button">
+        <i class="fas fa-envelope"></i> Contact Us
+      </a>
+    </div>
+  </section>
+</div>

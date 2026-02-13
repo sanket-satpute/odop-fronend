@@ -1,0 +1,242 @@
+<div class="promotions-container">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner-ring"></div>
+      <span>Loading promotions...</span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="loadError && !isLoading">
+    <div class="error-content">
+      <div class="error-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3>Unable to Load Promotions</h3>
+      <p>{{ loadError }}</p>
+      <button class="retry-btn" (click)="refreshPromotions()">
+        <i class="fas fa-redo"></i>
+        Try Again
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <ng-container *ngIf="!isLoading && !loadError">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-tags"></i>
+        Promotions & Discounts
+      </h1>
+      <p class="page-subtitle">Create and manage promotional campaigns to boost your sales</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="refreshPromotions()" [disabled]="isLoading" [class.rotating]="isLoading">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+      <button class="btn btn-primary" (click)="createPromotion()">
+        <i class="fas fa-plus"></i>
+        Create Promotion
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-cards">
+    <div class="stat-card">
+      <div class="stat-icon active">
+        <i class="fas fa-fire"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ activePromotions }}</span>
+        <span class="stat-label">Active Campaigns</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon revenue">
+        <i class="fas fa-rupee-sign"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">₹{{ totalRevenue | number }}</span>
+        <span class="stat-label">Promotional Revenue</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon redemptions">
+        <i class="fas fa-shopping-cart"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ totalRedemptions }}</span>
+        <span class="stat-label">Total Redemptions</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon conversion">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ conversionRate }}%</span>
+        <span class="stat-label">Conversion Rate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Promotions List -->
+    <div class="promotions-section">
+      <!-- Filters -->
+      <div class="section-header">
+        <h2 class="section-title">All Promotions</h2>
+        <div class="filter-tabs">
+          <button class="filter-tab" [class.active]="filterStatus === 'all'" (click)="filterStatus = 'all'">All</button>
+          <button class="filter-tab" [class.active]="filterStatus === 'active'" (click)="filterStatus = 'active'">Active</button>
+          <button class="filter-tab" [class.active]="filterStatus === 'scheduled'" (click)="filterStatus = 'scheduled'">Scheduled</button>
+          <button class="filter-tab" [class.active]="filterStatus === 'expired'" (click)="filterStatus = 'expired'">Expired</button>
+        </div>
+      </div>
+
+      <!-- Promotion Cards -->
+      <div class="promotions-list">
+        <div class="promo-card" *ngFor="let promo of filteredPromotions">
+          <div class="promo-header">
+            <div class="promo-type" [attr.data-type]="promo.type">
+              <i class="fas" [ngClass]="getTypeIcon(promo.type)"></i>
+              <span>{{ getTypeLabel(promo.type) }}</span>
+            </div>
+            <span class="promo-status" [ngClass]="getStatusClass(promo.status)">
+              {{ promo.status | titlecase }}
+            </span>
+          </div>
+          
+          <h3 class="promo-name">{{ promo.name }}</h3>
+          
+          <div class="promo-discount">
+            {{ formatDiscount(promo) }}
+          </div>
+          
+          <div class="promo-details">
+            <div class="detail-item">
+              <i class="fas fa-calendar-alt"></i>
+              <span>{{ formatDate(promo.startDate) }} - {{ formatDate(promo.endDate) }}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-box"></i>
+              <span>{{ promo.applicableProducts }} Products</span>
+            </div>
+          </div>
+
+          <div class="promo-progress">
+            <div class="progress-header">
+              <span>Usage</span>
+              <span>{{ promo.usageCount }} / {{ promo.usageLimit }}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getProgressPercentage(promo.usageCount, promo.usageLimit)"></div>
+            </div>
+          </div>
+
+          <div class="promo-footer">
+            <div class="promo-revenue">
+              <span class="revenue-label">Revenue</span>
+              <span class="revenue-value">₹{{ promo.revenue | number }}</span>
+            </div>
+            <div class="promo-actions">
+              <button class="action-btn" title="Edit" (click)="editPromotion(promo)">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn" title="Duplicate" (click)="duplicatePromotion(promo)">
+                <i class="fas fa-copy"></i>
+              </button>
+              <button class="action-btn delete" title="Delete" (click)="deletePromotion(promo)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-section">
+      <!-- Active Coupons -->
+      <div class="coupons-card">
+        <div class="card-header">
+          <h3>
+            <i class="fas fa-ticket-alt"></i>
+            Active Coupon Codes
+          </h3>
+          <button class="btn-link">View All</button>
+        </div>
+        
+        <div class="coupons-list">
+          <div class="coupon-item" *ngFor="let coupon of coupons">
+            <div class="coupon-code">
+              <span class="code">{{ coupon.code }}</span>
+              <button class="copy-btn" (click)="copyCode(coupon.code)" title="Copy Code">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+            <div class="coupon-info">
+              <span class="discount">{{ coupon.discount }}</span>
+              <span class="usage">{{ coupon.usedCount }}/{{ coupon.totalCount }} used</span>
+            </div>
+            <div class="coupon-expiry">
+              <i class="fas fa-clock"></i>
+              Expires in {{ coupon.expiresIn }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Create -->
+      <div class="quick-create-card">
+        <h3>Quick Create</h3>
+        <div class="quick-options">
+          <button class="quick-option">
+            <div class="option-icon discount">
+              <i class="fas fa-percent"></i>
+            </div>
+            <span>Percentage Discount</span>
+          </button>
+          <button class="quick-option">
+            <div class="option-icon flash">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <span>Flash Sale</span>
+          </button>
+          <button class="quick-option">
+            <div class="option-icon coupon">
+              <i class="fas fa-ticket-alt"></i>
+            </div>
+            <span>Coupon Code</span>
+          </button>
+          <button class="quick-option">
+            <div class="option-icon bundle">
+              <i class="fas fa-box-open"></i>
+            </div>
+            <span>Bundle Deal</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tips Card -->
+      <div class="tips-card">
+        <div class="tips-icon">
+          <i class="fas fa-lightbulb"></i>
+        </div>
+        <h4>Promotion Tips</h4>
+        <ul class="tips-list">
+          <li>Run flash sales during peak hours for maximum impact</li>
+          <li>Use percentage discounts for high-value items</li>
+          <li>Create bundle deals to increase average order value</li>
+          <li>Set usage limits to create urgency</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  </ng-container>
+</div>

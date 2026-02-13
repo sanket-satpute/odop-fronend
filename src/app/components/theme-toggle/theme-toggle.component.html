@@ -1,0 +1,49 @@
+<div class="theme-toggle-container">
+  <!-- Simple Toggle Button (Click to toggle, Long press for menu) -->
+  <button 
+    class="theme-toggle-btn" 
+    (click)="toggleTheme()"
+    (contextmenu)="toggleMenu(); $event.preventDefault()"
+    [attr.aria-label]="'Current theme: ' + getThemeLabel() + '. Click to toggle, right-click for options'"
+    [class.dark]="isDark">
+    
+    <div class="toggle-track">
+      <i class="fas fa-sun sun-icon"></i>
+      <i class="fas fa-moon moon-icon"></i>
+      <div class="toggle-thumb" [class.dark]="isDark">
+        <i class="fas" [ngClass]="getThemeIcon()"></i>
+      </div>
+    </div>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <div class="theme-menu" *ngIf="showMenu">
+    <div class="menu-header">
+      <span>Appearance</span>
+    </div>
+    <button 
+      class="menu-option" 
+      (click)="setTheme('light')"
+      [class.active]="currentTheme === 'light'">
+      <i class="fas fa-sun"></i>
+      <span>Light</span>
+      <i class="fas fa-check check-icon" *ngIf="currentTheme === 'light'"></i>
+    </button>
+    <button 
+      class="menu-option" 
+      (click)="setTheme('dark')"
+      [class.active]="currentTheme === 'dark'">
+      <i class="fas fa-moon"></i>
+      <span>Dark</span>
+      <i class="fas fa-check check-icon" *ngIf="currentTheme === 'dark'"></i>
+    </button>
+    <button 
+      class="menu-option" 
+      (click)="setTheme('system')"
+      [class.active]="currentTheme === 'system'">
+      <i class="fas fa-desktop"></i>
+      <span>System</span>
+      <i class="fas fa-check check-icon" *ngIf="currentTheme === 'system'"></i>
+    </button>
+  </div>
+</div>

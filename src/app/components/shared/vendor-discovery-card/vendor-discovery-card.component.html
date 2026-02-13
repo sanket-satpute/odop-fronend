@@ -1,0 +1,151 @@
+<section class="vendor-discovery-section">
+  <div class="container">
+    <!-- Section Header -->
+    <div class="section-header">
+      <div class="header-content">
+        <span class="section-badge">
+          <i class="fas fa-store"></i>
+          Artisan Network
+        </span>
+        <h2 class="section-title">Discover Local Artisans</h2>
+        <p class="section-subtitle">
+          Connect with skilled craftspeople from across India. Each vendor brings generations of expertise in traditional crafts.
+        </p>
+      </div>
+      <button class="explore-all-btn" (click)="exploreAllVendors()">
+        <span>View All Vendors</span>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ totalVendors }}+</span>
+          <span class="stat-label">Verified Artisans</span>
+        </div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-icon">
+          <i class="fas fa-map-marked-alt"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ totalStates }}+</span>
+          <span class="stat-label">States Covered</span>
+        </div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-icon">
+          <i class="fas fa-certificate"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">GI</span>
+          <span class="stat-label">Tagged Products</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick State Filters -->
+    <div class="quick-filters">
+      <span class="filter-label">Quick Search:</span>
+      <div class="filter-chips">
+        <button 
+          *ngFor="let state of popularStates" 
+          class="filter-chip"
+          [class.active]="selectedState === state"
+          (click)="onQuickFilter(state)">
+          <i class="fas fa-map-marker-alt"></i>
+          {{ state }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Featured Vendors Grid -->
+    <div class="vendors-showcase">
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="vendor-card-skeleton" *ngFor="let i of [1,2,3,4]">
+          <div class="skeleton-image"></div>
+          <div class="skeleton-content">
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line medium"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vendor Cards -->
+      <div class="vendors-grid" *ngIf="!isLoading">
+        <div 
+          class="vendor-card" 
+          *ngFor="let vendor of featuredVendors"
+          (click)="viewVendorShop(vendor.id)">
+          <div class="vendor-image">
+            <img 
+              [src]="vendor.image" 
+              [alt]="vendor.name"
+              (error)="$any($event.target).src = 'assets/images/placeholder-vendor.jpg'">
+            <div class="vendor-badge" *ngIf="vendor.verified">
+              <i class="fas fa-check-circle"></i>
+              Verified
+            </div>
+          </div>
+          <div class="vendor-info">
+            <h3 class="vendor-name">{{ vendor.name }}</h3>
+            <p class="vendor-shop">{{ vendor.shopName }}</p>
+            <div class="vendor-meta">
+              <span class="vendor-location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ vendor.location }}, {{ vendor.state }}
+              </span>
+              <span class="vendor-rating">
+                <i class="fas fa-star"></i>
+                {{ vendor.rating }}
+              </span>
+            </div>
+            <span class="vendor-specialty">{{ vendor.specialty }}</span>
+          </div>
+          <div class="vendor-hover-overlay">
+            <span class="view-shop-btn">
+              <i class="fas fa-external-link-alt"></i>
+              Visit Shop
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!isLoading && featuredVendors.length === 0">
+        <i class="fas fa-store-slash"></i>
+        <p>No vendors available at the moment.</p>
+        <button class="retry-btn" (click)="loadFeaturedVendors()">
+          <i class="fas fa-redo"></i>
+          Retry
+        </button>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="cta-banner">
+      <div class="cta-content">
+        <div class="cta-icon">
+          <i class="fas fa-handshake"></i>
+        </div>
+        <div class="cta-text">
+          <h3>Are you an artisan?</h3>
+          <p>Join our network and showcase your traditional crafts to customers across India.</p>
+        </div>
+      </div>
+      <button class="cta-button" (click)="router.navigate(['/register'], { queryParams: { role: 'vendor' } })">
+        <i class="fas fa-user-plus"></i>
+        Become a Vendor
+      </button>
+    </div>
+  </div>
+</section>

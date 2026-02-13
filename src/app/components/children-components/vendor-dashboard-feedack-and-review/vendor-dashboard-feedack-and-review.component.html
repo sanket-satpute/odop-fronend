@@ -1,0 +1,354 @@
+<!-- Feedback & Reviews Component -->
+<div class="feedback-reviews-container">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">Customer Feedback & Reviews</h1>
+        <p class="page-subtitle">Track what customers are saying about your products and service</p>
+      </div>
+      <div class="header-actions">
+        <button class="export-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7,10 12,15 17,10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon positive">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-number">{{ stats.totalReviews }}</h3>
+        <p class="stat-label">Total Reviews</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon rating">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-number">{{ stats.averageRating }}<span class="stat-decimal">/5</span></h3>
+        <p class="stat-label">Average Rating</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon neutral">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M8 12h8"/>
+          <circle cx="12" cy="12" r="10"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-number">{{ stats.pendingReplies }}</h3>
+        <p class="stat-label">Pending Replies</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon positive">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 9V5a3 3 0 0 0-6 0v4"/>
+          <rect x="2" y="9" width="20" height="12" rx="2" ry="2"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-number">{{ stats.satisfactionRate }}%</h3>
+        <p class="stat-label">Satisfaction Rate</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-grid">
+      <!-- Search Bar -->
+      <div class="search-container">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Search by product or customer name..."
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+        />
+      </div>
+
+      <!-- Rating Filter -->
+      <div class="filter-dropdown">
+        <select class="filter-select" [(ngModel)]="selectedRating" (change)="onRatingFilter()">
+          <option value="">All Ratings</option>
+          <option value="5">⭐⭐⭐⭐⭐ (5 Stars)</option>
+          <option value="4">⭐⭐⭐⭐ (4 Stars)</option>
+          <option value="3">⭐⭐⭐ (3 Stars)</option>
+          <option value="2">⭐⭐ (2 Stars)</option>
+          <option value="1">⭐ (1 Star)</option>
+        </select>
+      </div>
+
+      <!-- Date Filter -->
+      <div class="filter-dropdown">
+        <select class="filter-select" [(ngModel)]="selectedDateRange" (change)="onDateRangeFilter()">
+          <option value="">All Time</option>
+          <option value="7">Last 7 Days</option>
+          <option value="30">Last 30 Days</option>
+          <option value="90">Last 3 Months</option>
+          <option value="365">Last Year</option>
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-dropdown">
+        <select class="filter-select" [(ngModel)]="selectedStatus" (change)="onStatusFilter()">
+          <option value="">All Status</option>
+          <option value="replied">Replied</option>
+          <option value="pending">Pending Reply</option>
+          <option value="addressed">Addressed</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sentiment Analysis Panel -->
+  <div class="sentiment-panel">
+    <h3 class="panel-title">Sentiment Analysis</h3>
+    <div class="sentiment-grid">
+      <div class="sentiment-item positive">
+        <div class="sentiment-bar">
+          <div class="sentiment-fill" [style.width.%]="sentimentData.positive"></div>
+        </div>
+        <div class="sentiment-info">
+          <span class="sentiment-emoji">😊</span>
+          <span class="sentiment-label">Positive</span>
+          <span class="sentiment-percentage">{{ sentimentData.positive }}%</span>
+        </div>
+      </div>
+      
+      <div class="sentiment-item neutral">
+        <div class="sentiment-bar">
+          <div class="sentiment-fill" [style.width.%]="sentimentData.neutral"></div>
+        </div>
+        <div class="sentiment-info">
+          <span class="sentiment-emoji">😐</span>
+          <span class="sentiment-label">Neutral</span>
+          <span class="sentiment-percentage">{{ sentimentData.neutral }}%</span>
+        </div>
+      </div>
+      
+      <div class="sentiment-item negative">
+        <div class="sentiment-bar">
+          <div class="sentiment-fill" [style.width.%]="sentimentData.negative"></div>
+        </div>
+        <div class="sentiment-info">
+          <span class="sentiment-emoji">😠</span>
+          <span class="sentiment-label">Negative</span>
+          <span class="sentiment-percentage">{{ sentimentData.negative }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews Grid -->
+  <div class="reviews-grid">
+    <div class="review-card" *ngFor="let review of filteredReviews; trackBy: trackByReviewId">
+      <!-- Customer Info Header -->
+      <div class="review-header">
+        <div class="customer-info">
+          <div class="customer-avatar">
+            <img [src]="review.customer.avatar" [alt]="review.customer.name" />
+          </div>
+          <div class="customer-details">
+            <h4 class="customer-name">{{ review.customer.name }}</h4>
+            <p class="customer-status">
+              <span class="verified-badge" *ngIf="review.customer.isVerified">✓ Verified</span>
+              <span class="purchase-date">{{ review.purchaseDate | date:'MMM d, yyyy' }}</span>
+            </p>
+          </div>
+        </div>
+        
+        <div class="review-rating">
+          <div class="star-rating">
+            <span class="star" *ngFor="let star of getStarArray(review.rating)" 
+                  [class.filled]="star <= review.rating">★</span>
+          </div>
+          <span class="rating-value">{{ review.rating }}/5</span>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="product-info">
+        <img [src]="review.product.image" [alt]="review.product.name" class="product-image" />
+        <div class="product-details">
+          <h5 class="product-name">{{ review.product.name }}</h5>
+          <p class="product-category">{{ review.product.category }}</p>
+        </div>
+      </div>
+
+      <!-- Review Content -->
+      <div class="review-content">
+        <p class="review-text" [class.expanded]="review.expanded">
+          {{ review.text }}
+        </p>
+        <button class="read-more-btn" *ngIf="review.text.length > 150" (click)="toggleReviewExpansion(review)">
+          {{ review.expanded ? 'Read Less' : 'Read More' }}
+        </button>
+      </div>
+
+      <!-- Sentiment Tags -->
+      <div class="sentiment-tags">
+        <span class="sentiment-tag" *ngFor="let tag of review.sentimentTags" 
+              [class]="'tag-' + tag.type">
+          <span class="tag-icon">{{ tag.icon }}</span>
+          {{ tag.label }}
+        </span>
+      </div>
+
+      <!-- Review Actions -->
+      <div class="review-actions">
+        <div class="review-meta">
+          <span class="review-date">{{ review.createdAt | date:'MMM d, yyyy • h:mm a' }}</span>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="action-btn reply-btn" *ngIf="!review.reply" (click)="openReplyDialog(review)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 20L21 12 3 4v6l15 2-15 2z"/>
+            </svg>
+            Reply
+          </button>
+          
+          <button class="action-btn view-btn" (click)="viewFullReview(review)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            View
+          </button>
+          
+          <button class="action-btn mark-btn" *ngIf="!review.isAddressed" (click)="markAsAddressed(review)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            Mark as Addressed
+          </button>
+        </div>
+      </div>
+
+      <!-- Reply Section -->
+      <div class="reply-section" *ngIf="review.reply">
+        <div class="reply-header">
+          <div class="reply-avatar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+          </div>
+          <div class="reply-info">
+            <h5 class="reply-author">You replied</h5>
+            <p class="reply-date">{{ review.reply.createdAt | date:'MMM d, yyyy • h:mm a' }}</p>
+          </div>
+        </div>
+        <p class="reply-text">{{ review.reply.text }}</p>
+      </div>
+
+      <!-- Status Badge -->
+      <div class="status-badge" [class]="'status-' + review.status">
+        {{ review.status | titlecase }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-section">
+    <div class="pagination-info">
+      <span>Showing {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, totalReviews) }} of {{ totalReviews }} reviews</span>
+    </div>
+    
+    <div class="pagination-controls">
+      <button class="page-btn" [disabled]="currentPage === 1" (click)="previousPage()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+        Previous
+      </button>
+      
+      <div class="page-numbers">
+        <button class="page-number" *ngFor="let page of getPageNumbers()" 
+                [class.active]="page === currentPage" 
+                (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </div>
+      
+      <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Reply Dialog Modal -->
+<div class="modal-overlay" *ngIf="showReplyDialog" (click)="closeReplyDialog()">
+  <div class="reply-dialog" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h3>Reply to Review</h3>
+      <button class="close-btn" (click)="closeReplyDialog()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="dialog-content">
+      <div class="original-review">
+        <h4>Original Review:</h4>
+        <p>"{{ selectedReview?.text }}"</p>
+        <div class="review-rating">
+          <span class="star" *ngFor="let star of getStarArray(selectedReview?.rating ?? 0)" 
+                [class.filled]="star <= (selectedReview?.rating ?? 0)">★</span>
+        </div>
+      </div>
+      
+      <div class="reply-form">
+        <label for="replyText">Your Reply:</label>
+        <textarea 
+          id="replyText"
+          [(ngModel)]="replyText" 
+          placeholder="Write a professional and helpful response..."
+          rows="4"
+          maxlength="500"
+          class="reply-textarea"
+        ></textarea>
+        <div class="character-count">{{ replyText.length || 0 }}/500</div>
+      </div>
+    </div>
+    
+    <div class="dialog-actions">
+      <button class="cancel-btn" (click)="closeReplyDialog()">Cancel</button>
+      <button class="submit-btn" (click)="submitReply()" [disabled]="!replyText.trim()">
+        Send Reply
+      </button>
+    </div>
+  </div>
+</div>

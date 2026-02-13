@@ -1,0 +1,114 @@
+<div class="add-money-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-icon">
+      <i class="fas fa-wallet"></i>
+    </div>
+    <div class="header-content">
+      <h2 class="dialog-title">Add Money to Wallet</h2>
+      <p class="dialog-subtitle">Current Balance: {{ formatCurrency(data.currentBalance) }}</p>
+    </div>
+    <button class="close-btn" (click)="onCancel()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="dialog-body">
+    <form [formGroup]="addMoneyForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Amount Input -->
+      <div class="form-section">
+        <label class="section-label">Enter Amount</label>
+        <div class="amount-input-wrapper">
+          <span class="currency-symbol">₹</span>
+          <input 
+            type="number" 
+            formControlName="amount"
+            placeholder="Enter amount"
+            class="amount-input"
+            [class.invalid]="amountControl?.touched && amountControl?.invalid">
+        </div>
+        <div class="input-hint" *ngIf="amountControl?.touched && amountControl?.invalid">
+          <i class="fas fa-exclamation-circle"></i>
+          <span *ngIf="amountControl?.errors?.['required']">Amount is required</span>
+          <span *ngIf="amountControl?.errors?.['min']">Minimum amount is ₹100</span>
+          <span *ngIf="amountControl?.errors?.['max']">Maximum amount is ₹10,000</span>
+        </div>
+        <p class="amount-range">Min: ₹100 • Max: ₹10,000</p>
+      </div>
+
+      <!-- Quick Amount Buttons -->
+      <div class="form-section">
+        <label class="section-label">Quick Select</label>
+        <div class="quick-amounts">
+          <button 
+            type="button"
+            *ngFor="let amount of quickAmounts"
+            class="quick-amount-btn"
+            [class.selected]="amountControl?.value === amount"
+            (click)="selectQuickAmount(amount)">
+            ₹{{ amount.toLocaleString('en-IN') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Payment Methods -->
+      <div class="form-section">
+        <label class="section-label">Payment Method</label>
+        <div class="payment-methods">
+          <div 
+            *ngFor="let method of paymentMethods"
+            class="payment-method-card"
+            [class.selected]="selectedPaymentMethod === method.id"
+            (click)="selectPaymentMethod(method.id)">
+            <div class="method-icon">
+              <i [class]="method.icon"></i>
+            </div>
+            <div class="method-info">
+              <span class="method-name">{{ method.name }}</span>
+              <span class="method-desc">{{ method.description }}</span>
+            </div>
+            <div class="method-check" *ngIf="selectedPaymentMethod === method.id">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-section" *ngIf="isAmountValid">
+        <div class="summary-row">
+          <span>Amount to Add</span>
+          <span class="summary-value">₹{{ amountControl?.value?.toLocaleString('en-IN') }}</span>
+        </div>
+        <div class="summary-row total">
+          <span>New Balance</span>
+          <span class="summary-value highlight">₹{{ (data.currentBalance + (amountControl?.value || 0)).toLocaleString('en-IN') }}</span>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button type="button" class="cancel-btn" (click)="onCancel()" [disabled]="isProcessing">
+      Cancel
+    </button>
+    <button 
+      type="submit" 
+      class="submit-btn" 
+      (click)="onSubmit()"
+      [disabled]="addMoneyForm.invalid || isProcessing">
+      <span *ngIf="!isProcessing">
+        <i class="fas fa-plus"></i>
+        Add ₹{{ amountControl?.value?.toLocaleString('en-IN') || '0' }}
+      </span>
+      <span *ngIf="isProcessing" class="processing">
+        <i class="fas fa-spinner fa-spin"></i>
+        Processing...
+      </span>
+    </button>
+  </div>
+</div>

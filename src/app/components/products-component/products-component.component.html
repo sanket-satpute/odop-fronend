@@ -1,0 +1,511 @@
+<!-- Header -->
+<!-- <header class="header">
+    <div class="container">
+        <div class="header-content">
+            <a href="#" class="logo">ODOP Marketplace</a>
+            
+            <div class="search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search for handcrafted products..." 
+   [(ngModel)]="filters.searchTerm" (input)="onSearchChange($event)">
+            </div>
+            
+            <div class="user-controls">
+                <a href="#"><i class="fas fa-heart"></i> Wishlist</a>
+                <a href="#"><i class="fas fa-shopping-cart"></i> Cart ({{cartItems}})</a>
+                <a href="#"><i class="fas fa-user"></i> Account</a>
+            </div>
+        </div>
+    </div>
+    
+     Navigation -->
+    <!-- <nav class="nav">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a routerLink="/home">Home</a></li>
+                <li><a href="#" class="active">Products</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="#">Impact</a></li>
+            </ul>
+        </div>
+    </nav>
+</header> -->
+
+<!-- Banner Section -->
+<section class="banner">
+    <div class="container">
+        <h1>Explore Local Products</h1>
+        <p>Handcrafted items from your district</p>
+        <div class="breadcrumbs">
+            <a routerLink="/">Home</a> / Products
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="categories-section">
+    <div class="container">
+        <div class="section-header-row">
+            <div class="section-title-wrapper">
+                <h2 class="section-title">Shop by Category</h2>
+                <span class="categories-count-badge">{{categories.length + 1}} categories</span>
+            </div>
+            <button class="btn-expand-categories" (click)="toggleCategoriesExpand()">
+                <i [class]="isCategoriesExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+                <span>{{isCategoriesExpanded ? 'Collapse' : 'Expand All'}}</span>
+            </button>
+        </div>
+        
+        <div class="categories-wrapper" [class.expanded]="isCategoriesExpanded">
+            <div class="categories-grid">
+                <!-- All Categories Card - Always First -->
+                <div class="category-card all-categories-card" 
+                     [class.selected]="isCategorySelected('all')"
+                     (click)="filterByCategory('')">
+                    <div class="category-check" *ngIf="isCategorySelected('all')">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="category-icon all-icon">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <h3>All Categories</h3>
+                    <p class="category-count">{{getTotalProductsCount()}} items</p>
+                </div>
+                
+                <!-- Dynamic Categories -->
+                <div class="category-card" 
+                     *ngFor="let category of categories" 
+                     [class.selected]="isCategorySelected(category.value)"
+                     (click)="filterByCategory(category.value)">
+                    <div class="category-check" *ngIf="isCategorySelected(category.value)">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="category-icon"><i [class]="category.icon"></i></div>
+                    <h3>{{category.name}}</h3>
+                    <p class="category-count">{{category.count}} items</p>
+                </div>
+            </div>
+            
+            <!-- Gradient Overlay when collapsed -->
+            <div class="categories-fade-overlay" *ngIf="!isCategoriesExpanded && categories.length > 4"></div>
+        </div>
+        
+        <!-- Show More Button when collapsed -->
+        <button class="btn-show-more" *ngIf="!isCategoriesExpanded && categories.length > 4" (click)="toggleCategoriesExpand()">
+            <span>Show {{categories.length - 4}} more categories</span>
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+</section>
+
+<!-- Premium Filter Bar -->
+<section class="filter-section" [class.is-sticky]="isFilterSticky" #filterSection>
+    <div class="container">
+        <div class="filter-bar-premium">
+            <!-- Search Bar -->
+            <div class="search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input-premium" 
+                       placeholder="Search products, artisans, districts..." 
+                       [(ngModel)]="filters.searchTerm" 
+                       (input)="onSearchChange($event)">
+                <button class="search-clear" *ngIf="filters.searchTerm" (click)="filters.searchTerm = ''; applyFilters()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="filter-actions">
+                <!-- Filter Toggle Button -->
+                <button class="btn-filter-toggle" [class.active]="isFilterPanelOpen" (click)="toggleFilterPanel()">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Filters</span>
+                    <span class="filter-count" *ngIf="activeFilters.length > 0">{{activeFilters.length}}</span>
+                </button>
+
+                <!-- Quick Sort Dropdown -->
+                <div class="sort-dropdown">
+                    <label><i class="fas fa-sort-amount-down"></i></label>
+                    <select class="sort-select" [(ngModel)]="filters.sortBy" (change)="onSortChange($event)">
+                        <option *ngFor="let option of sortOptions" [value]="option.value">{{option.name}}</option>
+                    </select>
+                </div>
+
+                <!-- Results Count -->
+                <div class="results-badge">
+                    <i class="fas fa-box-open"></i>
+                    <span>{{getResultsCount()}} Products</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Filters Bar -->
+        <div class="active-filters-bar" *ngIf="hasActiveFilters()">
+            <div class="active-filters-label">
+                <i class="fas fa-filter"></i>
+                Active Filters:
+            </div>
+            <div class="active-filter-chips">
+                <div class="filter-chip" *ngFor="let filter of activeFilters">
+                    <span class="chip-label">{{filter.label}}:</span>
+                    <span class="chip-value">{{filter.displayValue}}</span>
+                    <button class="chip-remove" (click)="removeFilter(filter)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <button class="btn-clear-all" (click)="clearFilters()">
+                <i class="fas fa-trash-alt"></i>
+                Clear All
+            </button>
+        </div>
+
+        <!-- Expandable Filter Panel -->
+        <div class="filter-panel" [class.open]="isFilterPanelOpen">
+            <div class="filter-panel-header">
+                <h3><i class="fas fa-filter"></i> Advanced Filters</h3>
+                <button class="btn-close-panel" (click)="closeFilterPanel()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="filter-panel-content">
+                <!-- Category Filter -->
+                <div class="filter-group-panel">
+                    <label class="filter-label">
+                        <i class="fas fa-th-large"></i> Category
+                    </label>
+                    <select class="filter-select-premium" [(ngModel)]="filters.category" (change)="onCategoryFilterChange($event)">
+                        <option value="">All Categories</option>
+                        <option *ngFor="let category of categories" [value]="category.value">{{category.name}}</option>
+                    </select>
+                </div>
+
+                <!-- District Filter -->
+                <div class="filter-group-panel">
+                    <label class="filter-label">
+                        <i class="fas fa-map-marker-alt"></i> District / State
+                    </label>
+                    <select class="filter-select-premium" [(ngModel)]="filters.district" (change)="onDistrictFilterChange($event)">
+                        <option *ngFor="let district of districts" [value]="district.value">{{district.name}}</option>
+                    </select>
+                </div>
+
+                <!-- Price Range Filter -->
+                <div class="filter-group-panel">
+                    <label class="filter-label">
+                        <i class="fas fa-rupee-sign"></i> Price Range
+                    </label>
+                    <div class="price-range-wrapper">
+                        <input type="range" class="price-range-slider" min="0" max="100000" step="1000"
+                               [(ngModel)]="filters.priceRange" (input)="onPriceRangeChange($event)">
+                        <div class="price-range-labels">
+                            <span>₹0</span>
+                            <span class="current-price">₹{{formatPrice(filters.priceRange)}}</span>
+                            <span>₹1,00,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rating Filter -->
+                <div class="filter-group-panel">
+                    <label class="filter-label">
+                        <i class="fas fa-star"></i> Minimum Rating
+                    </label>
+                    <select class="filter-select-premium" [(ngModel)]="filters.minRating" (change)="onRatingFilterChange($event)">
+                        <option *ngFor="let rating of ratingOptions" [value]="rating.value">{{rating.name}}</option>
+                    </select>
+                </div>
+
+                <!-- GI Tag Toggle -->
+                <div class="filter-group-panel">
+                    <label class="filter-label">
+                        <i class="fas fa-certificate"></i> Certification
+                    </label>
+                    <label class="gi-toggle">
+                        <input type="checkbox" [(ngModel)]="filters.giTagOnly" (change)="toggleGiTagFilter()">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-text">GI Tagged Products Only</span>
+                    </label>
+                </div>
+
+                <!-- Sort By -->
+                <div class="filter-group-panel">
+                    <label class="filter-label">
+                        <i class="fas fa-sort-amount-down"></i> Sort By
+                    </label>
+                    <select class="filter-select-premium" [(ngModel)]="filters.sortBy" (change)="onSortChange($event)">
+                        <option *ngFor="let option of sortOptions" [value]="option.value">{{option.name}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-panel-footer">
+                <button class="btn-reset" (click)="clearFilters()">
+                    <i class="fas fa-undo"></i> Reset All
+                </button>
+                <button class="btn-apply" (click)="closeFilterPanel()">
+                    <i class="fas fa-check"></i> Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filter Panel Overlay -->
+<div class="filter-overlay" *ngIf="isFilterPanelOpen" (click)="closeFilterPanel()"></div>
+
+<!-- Products Grid -->
+<section class="products-section" #productsSection>
+    <div class="container">
+        <!-- Results Header -->
+        <div class="results-header" *ngIf="paginatedProducts.length > 0">
+            <p class="results-text">Showing <strong>{{(currentPage - 1) * productsPerPage + 1}}-{{Math.min(currentPage * productsPerPage, filteredProducts.length)}}</strong> of <strong>{{filteredProducts.length}}</strong> products</p>
+        </div>
+
+        <!-- Empty state when no products match filters -->
+        <div class="empty-state" *ngIf="!isLoading && paginatedProducts.length === 0">
+            <div class="empty-state-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3>No products found</h3>
+            <p>Try adjusting your filters or search terms to find what you're looking for.</p>
+            <button class="btn btn-primary" (click)="clearFilters()">Clear All Filters</button>
+        </div>
+        
+        <div class="products-grid" *ngIf="paginatedProducts.length > 0">
+            <!-- Premium Product Card -->
+            <div class="product-card-premium fade-in" 
+                 *ngFor="let product of paginatedProducts"
+                 [class.in-wishlist]="isInWishlist(product.id)"
+                 [class.in-compare]="isInCompare(product.id)"
+                 [class.in-cart]="isInCart(product.id)">
+                
+                <!-- Persistent Wishlist Heart Badge -->
+                <div class="wishlist-indicator" *ngIf="isInWishlist(product.id)" 
+                     (click)="toggleWishlist(product.id); $event.stopPropagation()"
+                     title="In your wishlist - Click to remove">
+                    <i class="fas fa-heart"></i>
+                </div>
+                
+                <!-- Persistent Cart Badge -->
+                <div class="cart-indicator" *ngIf="isInCart(product.id)" 
+                     (click)="toggleCart(product.id); $event.stopPropagation()"
+                     title="In your cart - Click to remove">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+
+                <!-- Image Section -->
+                <div class="card-image-container">
+                    <!-- Badges Container -->
+                    <div class="card-badges">
+                        <span *ngIf="product.giTagged" class="badge badge-gi" title="GI Tagged Product">
+                            <i class="fas fa-award"></i> GI Certified
+                        </span>
+                        <span *ngIf="product.discount && product.discount > 0" class="badge badge-discount">
+                            -{{product.discount}}% OFF
+                        </span>
+                    </div>
+                    
+                    <!-- Quick Actions (visible on hover) -->
+                    <div class="card-quick-actions">
+                        <button class="quick-action-btn wishlist-btn" 
+                                [class.active]="isInWishlist(product.id)"
+                                (click)="toggleWishlist(product.id); $event.stopPropagation()"
+                                [title]="isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'">
+                            <i [class]="isInWishlist(product.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
+                        </button>
+                        <button class="quick-action-btn quickview-btn" (click)="openQuickView(product); $event.stopPropagation()" title="Quick View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="quick-action-btn compare-btn" 
+                                [class.active]="isInCompare(product.id)"
+                                (click)="toggleCompare(product.id); $event.stopPropagation()" 
+                                [title]="isInCompare(product.id) ? 'Remove from Compare' : 'Add to Compare'">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                    </div>
+
+                    <!-- Product Image -->
+                    <div class="card-image" (click)="viewDetails(product.id)">
+                        <img *ngIf="product.image && !product.image.startsWith('http') && product.image.length > 3" 
+                             [src]="product.image" 
+                             [alt]="product.name"
+                             loading="lazy">
+                        <div *ngIf="!product.image || product.image.length <= 3" class="product-placeholder">
+                            <span class="placeholder-emoji">{{product.image || '📦'}}</span>
+                        </div>
+                    </div>
+
+                    <!-- Hover Overlay -->
+                    <div class="card-overlay" (click)="viewDetails(product.id)">
+                        <span class="view-details-text">View Details</span>
+                    </div>
+                </div>
+
+                <!-- Card Content -->
+                <div class="card-content">
+                    <!-- Category Tag -->
+                    <div class="card-category">
+                        <span class="category-tag">{{product.category || 'Handicraft'}}</span>
+                    </div>
+
+                    <!-- Product Name -->
+                    <h3 class="card-title" (click)="viewDetails(product.id)">{{product.name}}</h3>
+
+                    <!-- Origin Info -->
+                    <div class="card-origin">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span class="vendor-name">{{product.vendor}}</span>
+                        <span class="origin-separator">•</span>
+                        <span class="district-name">{{product.district}}</span>
+                    </div>
+
+                    <!-- Rating Section -->
+                    <div class="card-rating">
+                        <div class="rating-stars">
+                            <span class="stars-filled" [style.width.%]="(product.rating / 5) * 100"></span>
+                        </div>
+                        <span class="rating-value">{{product.rating.toFixed(1)}}</span>
+                        <span class="rating-count">({{product.reviews}} reviews)</span>
+                    </div>
+
+                    <!-- Price Section -->
+                    <div class="card-price-section">
+                        <div class="price-wrapper">
+                            <span class="current-price">₹{{formatPrice(product.price)}}{{product.unit ? '/' + product.unit : ''}}</span>
+                            <span *ngIf="product.discount && product.discount > 0" class="original-price">
+                                ₹{{formatPrice(getOriginalPrice(product.price, product.discount))}}
+                            </span>
+                        </div>
+                        <span *ngIf="product.discount && product.discount > 0" class="savings-text">
+                            Save ₹{{formatPrice(getOriginalPrice(product.price, product.discount) - product.price)}}
+                        </span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card-actions">
+                        <button class="btn-add-cart" 
+                                [class.loading]="isCartLoading(product.id)"
+                                [class.added]="isAddedToCart(product.id)"
+                                [class.in-cart]="isInCart(product.id)"
+                                [disabled]="isCartLoading(product.id)"
+                                (click)="toggleCart(product.id)">
+                            <!-- Loading State -->
+                            <ng-container *ngIf="isCartLoading(product.id)">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Processing...</span>
+                            </ng-container>
+                            <!-- Just Added State -->
+                            <ng-container *ngIf="isAddedToCart(product.id) && !isCartLoading(product.id)">
+                                <i class="fas fa-check"></i>
+                                <span>Added!</span>
+                            </ng-container>
+                            <!-- In Cart State -->
+                            <ng-container *ngIf="isInCart(product.id) && !isAddedToCart(product.id) && !isCartLoading(product.id)">
+                                <span class="cart-state-normal">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>In Cart</span>
+                                </span>
+                                <span class="cart-state-hover">
+                                    <i class="fas fa-trash-alt"></i>
+                                    <span>Remove</span>
+                                </span>
+                            </ng-container>
+                            <!-- Default State -->
+                            <ng-container *ngIf="!isInCart(product.id) && !isAddedToCart(product.id) && !isCartLoading(product.id)">
+                                <i class="fas fa-cart-plus"></i>
+                                <span>Add to Cart</span>
+                            </ng-container>
+                        </button>
+                        <button class="btn-buy-now" (click)="buyNow(product.id)">
+                            <i class="fas fa-bolt"></i>
+                            <span>Buy Now</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="loading" *ngIf="isLoading">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="paginatedProducts.length > 0">
+            <button (click)="changePage('prev')" [disabled]="!hasPreviousPage()">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <button *ngFor="let page of getPaginationArray()" 
+                    [class.active]="isPageActive(page)"
+                    (click)="changePage(page)"
+                    [disabled]="page === '...'">
+                {{page}}
+            </button>
+            <button (click)="changePage('next')" [disabled]="!hasNextPage()">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Floating Compare Bar -->
+<div class="compare-floating-bar" *ngIf="compareItems.size > 0" [@slideUp]>
+    <div class="compare-bar-content">
+        <div class="compare-items-preview">
+            <span class="compare-label">
+                <i class="fas fa-exchange-alt"></i>
+                Compare Products
+            </span>
+            <div class="compare-thumbnails">
+                <div class="compare-thumb" *ngFor="let productId of getCompareItemsArray()">
+                    <img [src]="getProductImage(productId)" [alt]="getProductName(productId)">
+                    <button class="remove-compare" (click)="removeFromCompare(productId)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="compare-thumb add-more" *ngIf="compareItems.size < 4" (click)="openCompareSelectDialog()">
+                    <i class="fas fa-plus"></i>
+                </div>
+            </div>
+            <span class="compare-count">{{compareItems.size}}/4 items</span>
+        </div>
+        <div class="compare-actions">
+            <button class="btn-compare-now" (click)="openCompareDialog()" [disabled]="compareItems.size < 2">
+                <i class="fas fa-columns"></i>
+                Compare Now
+            </button>
+            <button class="btn-clear-compare" (click)="clearCompare()">
+                <i class="fas fa-trash-alt"></i>
+                Clear All
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar (Optional) -->
+<aside class="container">
+    <div class="sidebar">
+        <div class="sidebar-section">
+            <h3 class="sidebar-title"><i class="fas fa-star"></i> Featured Products</h3>
+            <div class="featured-product" *ngFor="let product of featuredProducts">
+                <h4>{{product.name}}</h4>
+                <p>₹{{formatPrice(product.price)}}{{product.unit ? '/' + product.unit : ''}} | ⭐ {{product.rating}} ({{product.reviews}} reviews)</p>
+            </div>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-title"><i class="fas fa-gift"></i> Festival Offers</h3>
+            <div class="featured-product">
+                <h4>Diwali Special - 25% Off</h4>
+                <p>On traditional handicrafts</p>
+            </div>
+            <div class="featured-product">
+                <h4>Free Shipping</h4>
+                <p>Orders above ₹999</p>
+            </div>
+        </div>
+    </div>
+</aside>

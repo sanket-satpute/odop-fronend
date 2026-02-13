@@ -1,0 +1,159 @@
+<div class="shopping-cart-container">
+  <!-- Header -->
+  <div class="cart-header">
+    <h1>Shopping Cart</h1>
+    <span class="item-count" *ngIf="cartItems.length > 0">{{ getTotalItems() }} item(s)</span>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading your cart...</p>
+  </div>
+
+  <!-- Empty Cart -->
+  <div *ngIf="!isLoading && isEmpty" class="empty-cart">
+    <mat-icon class="empty-icon">shopping_cart</mat-icon>
+    <h2>Your cart is empty</h2>
+    <p>Looks like you haven't added any products yet.</p>
+    <button mat-raised-button color="primary" (click)="continueShopping()">
+      <mat-icon>storefront</mat-icon>
+      Start Shopping
+    </button>
+  </div>
+
+  <!-- Cart Content -->
+  <div *ngIf="!isLoading && !isEmpty" class="cart-content">
+    <!-- Left Section - Cart Items -->
+    <div class="cart-items-section">
+      <!-- Actions Bar -->
+      <div class="actions-bar">
+        <button mat-button color="warn" (click)="clearCart()">
+          <mat-icon>delete_sweep</mat-icon>
+          Clear Cart
+        </button>
+        <button mat-button (click)="continueShopping()">
+          <mat-icon>arrow_back</mat-icon>
+          Continue Shopping
+        </button>
+      </div>
+
+      <!-- Cart Items List -->
+      <div class="cart-items-list">
+        <div *ngFor="let item of cartItems" class="cart-item" [class.updating]="item.isUpdating">
+          <!-- Product Image -->
+          <div class="item-image" (click)="viewProduct(item.productId)">
+            <img [src]="item.productImage" [alt]="item.productName" 
+                 onerror="this.src='assets/placeholder.png'">
+          </div>
+
+          <!-- Product Details -->
+          <div class="item-details">
+            <h3 class="product-name" (click)="viewProduct(item.productId)">
+              {{ item.productName }}
+            </h3>
+            <p class="vendor-name">Sold by: {{ item.vendorName }}</p>
+            <div class="item-price">
+              <span class="current-price">₹{{ item.productPrice }}</span>
+            </div>
+          </div>
+
+          <!-- Quantity Controls -->
+          <div class="quantity-controls">
+            <button mat-icon-button 
+                    (click)="updateQuantity(item, -1)" 
+                    [disabled]="item.isUpdating || item.quantity <= 1">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <span class="quantity">{{ item.quantity }}</span>
+            <button mat-icon-button 
+                    (click)="updateQuantity(item, 1)" 
+                    [disabled]="item.isUpdating || item.quantity >= 10">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <!-- Item Total -->
+          <div class="item-total">
+            <span class="total-label">Total</span>
+            <span class="total-amount">₹{{ item.productPrice * item.quantity }}</span>
+          </div>
+
+          <!-- Remove Button -->
+          <button mat-icon-button class="remove-btn" 
+                  (click)="removeItem(item)" 
+                  [disabled]="item.isUpdating"
+                  matTooltip="Remove item">
+            <mat-icon>close</mat-icon>
+          </button>
+
+          <!-- Loading Overlay -->
+          <div *ngIf="item.isUpdating" class="item-loading">
+            <mat-spinner diameter="24"></mat-spinner>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Section - Order Summary -->
+    <div class="order-summary-section">
+      <div class="summary-card">
+        <h3>Order Summary</h3>
+
+        <div class="summary-details">
+          <div class="summary-row">
+            <span>Subtotal ({{ getTotalItems() }} items)</span>
+            <span>₹{{ subtotal }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span [class.free]="shippingCost === 0">
+              {{ shippingCost === 0 ? 'FREE' : '₹' + shippingCost }}
+            </span>
+          </div>
+          <div class="summary-row">
+            <span>Tax (GST 18%)</span>
+            <span>₹{{ taxAmount }}</span>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="total-row">
+          <span>Total</span>
+          <span class="total-amount">₹{{ totalAmount }}</span>
+        </div>
+
+        <!-- Free Shipping Progress -->
+        <div *ngIf="subtotal < 500" class="free-shipping-banner">
+          <mat-icon>local_shipping</mat-icon>
+          <span>Add ₹{{ 500 - subtotal }} more for FREE shipping!</span>
+          <mat-progress-bar mode="determinate" [value]="(subtotal / 500) * 100"></mat-progress-bar>
+        </div>
+
+        <button mat-raised-button color="primary" class="checkout-btn" (click)="proceedToCheckout()">
+          <mat-icon>shopping_cart_checkout</mat-icon>
+          Proceed to Checkout
+        </button>
+
+        <!-- Trust Indicators -->
+        <div class="trust-indicators">
+          <div class="indicator">
+            <mat-icon>verified_user</mat-icon>
+            <span>Secure Checkout</span>
+          </div>
+          <div class="indicator">
+            <mat-icon>replay</mat-icon>
+            <span>Easy Returns</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coupon Section -->
+      <div class="coupon-card">
+        <h4>Have a Coupon?</h4>
+        <p>Apply coupon code at checkout</p>
+      </div>
+    </div>
+  </div>
+</div>

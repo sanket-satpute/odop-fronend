@@ -1,0 +1,202 @@
+<div class="dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <h2 class="dialog-title">Welcome Back</h2>
+      <p class="dialog-subtitle">Sign in to your account to continue</p>
+    </div>
+    <button class="close-btn" (click)="closeDialog()" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Role Selection -->
+  <div class="role-selection">
+    <div class="role-tabs">
+      <button 
+        type="button"
+        class="role-tab"
+        [class.active]="selectedRole === 'customer'"
+        (click)="selectedRole = 'customer'; onRoleChange()">
+        <mat-icon>person</mat-icon>
+        <span>Customer</span>
+      </button>
+      <button 
+        type="button"
+        class="role-tab"
+        [class.active]="selectedRole === 'vendor'"
+        (click)="selectedRole = 'vendor'; onRoleChange()">
+        <mat-icon>store</mat-icon>
+        <span>Vendor</span>
+      </button>
+      <button 
+        type="button"
+        class="role-tab"
+        [class.active]="selectedRole === 'admin'"
+        (click)="selectedRole = 'admin'; onRoleChange()">
+        <mat-icon>admin_panel_settings</mat-icon>
+        <span>Admin</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="loginError" class="error-message">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ loginError }}</span>
+  </div>
+
+  <!-- Login Form -->
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    
+    <!-- Social Login Section (Only for Customer) -->
+    <div *ngIf="selectedRole === 'customer'" class="social-login-section">
+      <p class="social-login-label">Quick login with</p>
+      
+      <div class="social-buttons-row">
+        <!-- Google Sign-In Button Container -->
+        <div id="google-signin-dialog-btn" class="google-btn-container"></div>
+        
+        <!-- Facebook Login Button -->
+        <button 
+          type="button" 
+          class="social-btn facebook-btn"
+          (click)="loginWithFacebook()"
+          [disabled]="socialLoginLoading || isLoading">
+          <svg class="social-icon" viewBox="0 0 24 24" width="18" height="18">
+            <path fill="currentColor" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
+          </svg>
+          <span>Facebook</span>
+        </button>
+      </div>
+
+      <div class="divider-with-text">
+        <span>or continue with email</span>
+      </div>
+    </div>
+
+    <!-- Email Field -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email Address</mat-label>
+        <input 
+          matInput 
+          type="email" 
+          formControlName="email" 
+          [placeholder]="selectedRole === 'vendor' ? 'Enter your business email' : 'Enter your email address'">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error>{{ getErrorMessage('email') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Password Field -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input 
+          matInput 
+          [type]="hidePassword ? 'password' : 'text'" 
+          formControlName="password" 
+          placeholder="Enter your password">
+        <button 
+          type="button" 
+          mat-icon-button 
+          matSuffix 
+          (click)="hidePassword = !hidePassword"
+          [title]="hidePassword ? 'Show password' : 'Hide password'">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error>{{ getErrorMessage('password') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Admin Code Field (Only for Admin) -->
+    <div *ngIf="selectedRole === 'admin'" class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Admin Authorization Code</mat-label>
+        <input 
+          matInput 
+          formControlName="adminCode" 
+          placeholder="Enter admin authorization code">
+        <mat-icon matSuffix>security</mat-icon>
+        <mat-error>{{ getErrorMessage('adminCode') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Remember Me & Forgot Password -->
+    <div class="form-options">
+      <div class="remember-me">
+        <mat-checkbox formControlName="rememberMe" color="primary">
+          Remember me
+        </mat-checkbox>
+      </div>
+      <button 
+        type="button" 
+        class="forgot-password-btn" 
+        (click)="onForgotPassword()"
+        *ngIf="!showForgotPassword">
+        Forgot Password?
+      </button>
+    </div>
+
+    <!-- Forgot Password Section -->
+    <div *ngIf="showForgotPassword" class="forgot-password-section">
+      <div class="forgot-password-content">
+        <mat-icon>info</mat-icon>
+        <div class="forgot-password-text">
+          <p>We'll send a password reset link to your email address.</p>
+          <div class="forgot-password-actions">
+            <button type="button" class="reset-btn" (click)="sendPasswordReset()">
+              Send Reset Link
+            </button>
+            <button type="button" class="cancel-btn" (click)="showForgotPassword = false">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="submit-btn"
+        [disabled]="loginForm.invalid || isLoading">
+        <span *ngIf="!isLoading" class="btn-content">
+          <mat-icon>login</mat-icon>
+          Sign In
+        </span>
+        <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+      </button>
+    </div>
+
+    <!-- Register Link -->
+    <div class="register-section">
+      <p class="register-text">
+        Don't have an account? 
+        <button type="button" class="register-link" (click)="openRegisterDialog()">
+          Create Account
+        </button>
+      </p>
+    </div>
+
+    <!-- Role-specific Help Text -->
+    <div class="help-section">
+      <div *ngIf="selectedRole === 'customer'" class="help-content">
+        <mat-icon>help_outline</mat-icon>
+        <p>Customer Login: Use your registered email and password to access your account.</p>
+      </div>
+      
+      <div *ngIf="selectedRole === 'vendor'" class="help-content">
+        <mat-icon>help_outline</mat-icon>
+        <p>Vendor Login: Use your business email and password to access your shop dashboard.</p>
+      </div>
+      
+      <div *ngIf="selectedRole === 'admin'" class="help-content">
+        <mat-icon>help_outline</mat-icon>
+        <p>Admin Login: Requires valid credentials and authorization code. Contact system administrator if needed.</p>
+      </div>
+    </div>
+  </form>
+</div>

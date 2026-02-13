@@ -1,0 +1,28 @@
+<div class="session-warning-dialog">
+  <div class="warning-icon">
+    <i class="fas fa-clock"></i>
+  </div>
+  
+  <h2>Session Expiring Soon</h2>
+  
+  <p class="warning-message">
+    Your session will expire in <strong>{{ displayTime }}</strong> due to inactivity.
+  </p>
+  
+  <p class="sub-message">
+    Would you like to stay logged in?
+  </p>
+  
+  <div class="countdown-bar">
+    <div class="countdown-progress" [style.width.%]="(timeRemaining / 5) * 100"></div>
+  </div>
+  
+  <div class="dialog-actions">
+    <button class="logout-btn" (click)="onLogout()">
+      <i class="fas fa-sign-out-alt"></i> Log Out
+    </button>
+    <button class="stay-btn" (click)="onStayLoggedIn()">
+      <i class="fas fa-check"></i> Stay Logged In
+    </button>
+  </div>
+</div>

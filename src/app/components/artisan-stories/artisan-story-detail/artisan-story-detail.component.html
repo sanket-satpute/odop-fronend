@@ -1,0 +1,485 @@
+<!-- Artisan Story Detail Page -->
+<div class="artisan-story-page" *ngIf="!isLoading && artisan">
+  
+  <!-- Hero Cover Section -->
+  <section class="hero-cover">
+    <div class="cover-image">
+      <img [src]="artisan.coverImageUrl || 'assets/images/artisan-cover-default.jpg'" 
+           [alt]="artisan.artisanName + ' workshop'">
+      <div class="cover-overlay"></div>
+    </div>
+    
+    <div class="hero-content">
+      <div class="container">
+        <div class="hero-grid">
+          <!-- Profile Card -->
+          <div class="profile-card">
+            <div class="profile-image">
+              <img [src]="artisan.profileImageUrl || 'assets/images/artisan-placeholder.jpg'" 
+                   [alt]="artisan.artisanName">
+              <span class="verified-badge" *ngIf="artisan.verified">
+                <i class="fas fa-check-circle"></i>
+              </span>
+            </div>
+            
+            <div class="profile-info">
+              <h1 class="artisan-name">{{ artisan.artisanName }}</h1>
+              <p class="artisan-name-hindi" *ngIf="artisan.artisanNameHindi">
+                {{ artisan.artisanNameHindi }}
+              </p>
+              <p class="artisan-title">{{ artisan.title }}</p>
+              
+              <div class="location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ getLocationString() }}</span>
+              </div>
+              
+              <div class="craft-info">
+                <span class="primary-craft">{{ artisan.primaryCraft }}</span>
+                <span class="experience">{{ artisan.yearsOfExperience }}+ years</span>
+              </div>
+              
+              <!-- Badges -->
+              <div class="artisan-badges">
+                <span class="badge badge-gi" *ngIf="artisan.giTagHolder">
+                  <i class="fas fa-certificate"></i> GI Tag Holder
+                </span>
+                <span class="badge badge-national" *ngIf="artisan.nationalAwardee">
+                  <i class="fas fa-award"></i> National Awardee
+                </span>
+                <span class="badge badge-state" *ngIf="artisan.stateAwardee">
+                  <i class="fas fa-medal"></i> State Awardee
+                </span>
+              </div>
+              
+              <!-- Action Buttons -->
+              <div class="profile-actions">
+                <button class="btn btn-primary" (click)="viewVendorShop()" *ngIf="artisan.vendorId">
+                  <i class="fas fa-store"></i> Visit Shop
+                </button>
+                <button class="btn btn-outline" (click)="contactArtisan()">
+                  <i class="fas fa-envelope"></i> Contact
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Stats Card -->
+          <div class="stats-card">
+            <div class="stat-item">
+              <span class="stat-value">{{ artisan.yearsOfExperience }}</span>
+              <span class="stat-label">Years of Experience</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ artisan.generationsInCraft }}</span>
+              <span class="stat-label">Generations in Craft</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ artisan.apprenticesTrained || 0 }}</span>
+              <span class="stat-label">Apprentices Trained</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ artisan.viewCount }}</span>
+              <span class="stat-label">Story Views</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Quote Section -->
+  <section class="quote-section" *ngIf="artisan.quote">
+    <div class="container">
+      <blockquote class="artisan-quote">
+        <i class="fas fa-quote-left quote-icon"></i>
+        <p class="quote-text">{{ artisan.quote }}</p>
+        <p class="quote-text-hindi" *ngIf="artisan.quoteHindi">{{ artisan.quoteHindi }}</p>
+        <cite>— {{ artisan.artisanName }}</cite>
+      </blockquote>
+    </div>
+  </section>
+  
+  <!-- Navigation Tabs -->
+  <nav class="story-tabs">
+    <div class="container">
+      <ul class="tab-list">
+        <li>
+          <button [class.active]="activeTab === 'story'" (click)="setActiveTab('story')">
+            <i class="fas fa-book-open"></i> Story
+          </button>
+        </li>
+        <li>
+          <button [class.active]="activeTab === 'gallery'" (click)="setActiveTab('gallery')">
+            <i class="fas fa-images"></i> Gallery
+          </button>
+        </li>
+        <li>
+          <button [class.active]="activeTab === 'awards'" (click)="setActiveTab('awards')">
+            <i class="fas fa-trophy"></i> Awards
+          </button>
+        </li>
+        <li>
+          <button [class.active]="activeTab === 'products'" (click)="setActiveTab('products')">
+            <i class="fas fa-box"></i> Products
+          </button>
+        </li>
+        <li *ngIf="artisan.videos?.length">
+          <button [class.active]="activeTab === 'videos'" (click)="setActiveTab('videos')">
+            <i class="fas fa-video"></i> Videos
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  
+  <!-- Tab Content -->
+  <main class="story-content">
+    <div class="container">
+      
+      <!-- Story Tab -->
+      <div class="tab-content" *ngIf="activeTab === 'story'">
+        <div class="story-layout">
+          <div class="main-story">
+            <!-- Short Bio -->
+            <div class="story-section intro-section">
+              <p class="intro-text">{{ artisan.shortBio }}</p>
+              <p class="intro-text-hindi" *ngIf="artisan.shortBioHindi">{{ artisan.shortBioHindi }}</p>
+            </div>
+            
+            <!-- Full Story -->
+            <div class="story-section full-story">
+              <h2 class="section-title">
+                <i class="fas fa-feather-alt"></i> The Story
+              </h2>
+              <div class="story-text" [innerHTML]="artisan.fullStory"></div>
+            </div>
+            
+            <!-- Story Sections -->
+            <div class="story-section" *ngFor="let section of artisan.storySections">
+              <h3 class="subsection-title">{{ section.title }}</h3>
+              <div class="story-text" [innerHTML]="section.content"></div>
+              <img *ngIf="section.imageUrl" 
+                   [src]="section.imageUrl" 
+                   [alt]="section.title"
+                   class="section-image">
+            </div>
+            
+            <!-- Craft Origin -->
+            <div class="story-section" *ngIf="artisan.craftOriginStory">
+              <h2 class="section-title">
+                <i class="fas fa-history"></i> Origin of the Craft
+              </h2>
+              <div class="story-text">{{ artisan.craftOriginStory }}</div>
+            </div>
+            
+            <!-- Family Background -->
+            <div class="story-section family-section" *ngIf="artisan.familyBackground">
+              <h2 class="section-title">
+                <i class="fas fa-users"></i> Family Legacy
+              </h2>
+              <div class="family-card">
+                <p>{{ artisan.familyBackground.familyHistory }}</p>
+                <div class="family-members" *ngIf="artisan.familyMembersInCraft.length">
+                  <h4>Family Members in Craft</h4>
+                  <ul>
+                    <li *ngFor="let member of artisan.familyMembersInCraft">{{ member }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Teaching Philosophy -->
+            <div class="story-section" *ngIf="artisan.teachingPhilosophy">
+              <h2 class="section-title">
+                <i class="fas fa-graduation-cap"></i> Teaching & Legacy
+              </h2>
+              <div class="story-text">{{ artisan.teachingPhilosophy }}</div>
+              <div class="apprentice-stat" *ngIf="artisan.apprenticesTrained">
+                <span class="stat-number">{{ artisan.apprenticesTrained }}</span>
+                <span class="stat-text">artisans trained and mentored</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Sidebar -->
+          <aside class="story-sidebar">
+            <!-- Workshop Card -->
+            <div class="sidebar-card workshop-card" *ngIf="artisan.workshopDescription">
+              <h3><i class="fas fa-tools"></i> The Workshop</h3>
+              <img *ngIf="artisan.workshopImageUrl" 
+                   [src]="artisan.workshopImageUrl" 
+                   alt="Workshop">
+              <p>{{ artisan.workshopDescription }}</p>
+            </div>
+            
+            <!-- GI Tag Info -->
+            <div class="sidebar-card gi-card" *ngIf="artisan.giTagHolder">
+              <h3><i class="fas fa-certificate"></i> GI Tag Details</h3>
+              <p>{{ artisan.giTagDetails }}</p>
+            </div>
+            
+            <!-- Available For -->
+            <div class="sidebar-card availability-card">
+              <h3><i class="fas fa-calendar-check"></i> Available For</h3>
+              <ul class="availability-list">
+                <li *ngIf="artisan.availableForWorkshops">
+                  <i class="fas fa-check"></i> Workshops & Training
+                </li>
+                <li *ngIf="artisan.availableForCommissions">
+                  <i class="fas fa-check"></i> Custom Commissions
+                </li>
+                <li *ngIf="artisan.exhibitions?.length">
+                  <i class="fas fa-check"></i> Exhibitions & Events
+                </li>
+              </ul>
+              <p class="workshop-details" *ngIf="artisan.workshopDetails">
+                {{ artisan.workshopDetails }}
+              </p>
+            </div>
+            
+            <!-- Share Card -->
+            <div class="sidebar-card share-card">
+              <h3><i class="fas fa-share-alt"></i> Share This Story</h3>
+              <div class="share-buttons">
+                <button class="share-btn facebook" (click)="shareOnFacebook()">
+                  <i class="fab fa-facebook-f"></i>
+                </button>
+                <button class="share-btn twitter" (click)="shareOnTwitter()">
+                  <i class="fab fa-twitter"></i>
+                </button>
+                <button class="share-btn whatsapp" (click)="shareOnWhatsApp()">
+                  <i class="fab fa-whatsapp"></i>
+                </button>
+                <button class="share-btn copy" (click)="copyLink()">
+                  <i class="fas fa-link"></i>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Contact Card -->
+            <div class="sidebar-card contact-card" *ngIf="artisan.contactInfo">
+              <h3><i class="fas fa-address-card"></i> Contact</h3>
+              <div class="contact-item" *ngIf="artisan.contactInfo.phone">
+                <i class="fas fa-phone"></i>
+                <span>{{ artisan.contactInfo.phone }}</span>
+              </div>
+              <div class="contact-item" *ngIf="artisan.contactInfo.email">
+                <i class="fas fa-envelope"></i>
+                <span>{{ artisan.contactInfo.email }}</span>
+              </div>
+              <!-- Social Links -->
+              <div class="social-links" *ngIf="artisan.socialLinks">
+                <a *ngIf="artisan.socialLinks.facebook" [href]="artisan.socialLinks.facebook" target="_blank">
+                  <i class="fab fa-facebook"></i>
+                </a>
+                <a *ngIf="artisan.socialLinks.instagram" [href]="artisan.socialLinks.instagram" target="_blank">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a *ngIf="artisan.socialLinks.youtube" [href]="artisan.socialLinks.youtube" target="_blank">
+                  <i class="fab fa-youtube"></i>
+                </a>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+      
+      <!-- Gallery Tab -->
+      <div class="tab-content" *ngIf="activeTab === 'gallery'">
+        <div class="gallery-grid" *ngIf="artisan.gallery?.length">
+          <div class="gallery-item" 
+               *ngFor="let item of artisan.gallery; let i = index"
+               (click)="openGallery(i)">
+            <img [src]="item.url" [alt]="item.caption || 'Gallery image'">
+            <div class="gallery-overlay">
+              <i class="fas fa-search-plus"></i>
+            </div>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="!artisan.gallery?.length">
+          <i class="fas fa-images"></i>
+          <p>No gallery images available</p>
+        </div>
+      </div>
+      
+      <!-- Awards Tab -->
+      <div class="tab-content" *ngIf="activeTab === 'awards'">
+        <div class="awards-grid" *ngIf="artisan.awards?.length">
+          <div class="award-card" *ngFor="let award of artisan.awards">
+            <div class="award-icon">
+              <i class="fas fa-trophy"></i>
+            </div>
+            <div class="award-info">
+              <h3>{{ award.name }}</h3>
+              <p class="award-year">{{ award.year }}</p>
+              <p class="award-org">{{ award.organization }}</p>
+              <p class="award-desc" *ngIf="award.description">{{ award.description }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Certifications -->
+        <div class="certifications-section" *ngIf="artisan.certifications?.length">
+          <h3 class="section-title">Certifications</h3>
+          <div class="cert-list">
+            <span class="cert-badge" *ngFor="let cert of artisan.certifications">
+              <i class="fas fa-certificate"></i> {{ cert }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="empty-state" *ngIf="!artisan.awards?.length && !artisan.certifications?.length">
+          <i class="fas fa-trophy"></i>
+          <p>No awards or certifications listed</p>
+        </div>
+      </div>
+      
+      <!-- Products Tab -->
+      <div class="tab-content" *ngIf="activeTab === 'products'">
+        <!-- Signature Works -->
+        <div class="signature-section" *ngIf="artisan.signatureWorks?.length">
+          <h2 class="section-title"><i class="fas fa-star"></i> Signature Works</h2>
+          <div class="signature-grid">
+            <div class="signature-card" *ngFor="let work of artisan.signatureWorks">
+              <img [src]="work.imageUrl" [alt]="work.name">
+              <div class="signature-info">
+                <h3>{{ work.name }}</h3>
+                <p>{{ work.description }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Featured Products -->
+        <div class="products-section" *ngIf="featuredProducts.length">
+          <h2 class="section-title"><i class="fas fa-box"></i> Products</h2>
+          <div class="products-grid">
+            <div class="product-card" 
+                 *ngFor="let product of featuredProducts"
+                 (click)="viewProduct(product.productId)">
+              <div class="product-image">
+                <img [src]="product.imageUrl || 'assets/images/product-placeholder.jpg'" 
+                     [alt]="product.productName">
+              </div>
+              <div class="product-info">
+                <h3>{{ product.productName }}</h3>
+                <p class="product-price">₹{{ product.price | number }}</p>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary" (click)="viewVendorShop()">
+            View All Products
+          </button>
+        </div>
+        
+        <div class="empty-state" *ngIf="!artisan.signatureWorks?.length && !featuredProducts.length">
+          <i class="fas fa-box-open"></i>
+          <p>No products available</p>
+        </div>
+      </div>
+      
+      <!-- Videos Tab -->
+      <div class="tab-content" *ngIf="activeTab === 'videos'">
+        <!-- Primary Video -->
+        <div class="primary-video" *ngIf="artisan.primaryVideoUrl">
+          <div class="video-wrapper" (click)="playVideo(artisan.primaryVideoUrl)">
+            <img [src]="artisan.primaryVideoThumbnail || 'assets/images/video-placeholder.jpg'" 
+                 alt="Primary video">
+            <div class="play-button">
+              <i class="fas fa-play"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Video Gallery -->
+        <div class="video-grid" *ngIf="artisan.videos.length">
+          <div class="video-card" 
+               *ngFor="let video of artisan.videos"
+               (click)="playVideo(video.videoUrl)">
+            <img [src]="video.thumbnailUrl || 'assets/images/video-placeholder.jpg'" 
+                 [alt]="video.title">
+            <div class="video-overlay">
+              <i class="fas fa-play"></i>
+            </div>
+            <p class="video-title">{{ video.title }}</p>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+  
+  <!-- Related Artisans -->
+  <section class="related-section" *ngIf="relatedArtisans.length">
+    <div class="container">
+      <h2 class="section-title">
+        <i class="fas fa-users"></i> More Artisan Stories
+      </h2>
+      <div class="related-grid">
+        <div class="related-card" 
+             *ngFor="let related of relatedArtisans"
+             (click)="viewArtisan(related)">
+          <img [src]="related.profileImageUrl || 'assets/images/artisan-placeholder.jpg'" 
+               [alt]="related.artisanName">
+          <div class="related-info">
+            <h3>{{ related.artisanName }}</h3>
+            <p>{{ related.primaryCraft }}</p>
+            <span>{{ related.district }}, {{ related.state }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading">
+  <div class="spinner"></div>
+  <p>Loading artisan story...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="error">
+  <i class="fas fa-exclamation-circle"></i>
+  <h2>Oops!</h2>
+  <p>{{ error }}</p>
+  <button class="btn btn-primary" routerLink="/artisan-stories">
+    Back to Stories
+  </button>
+</div>
+
+<!-- Gallery Modal -->
+<div class="modal gallery-modal" *ngIf="showGalleryModal" (click)="closeGallery()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeGallery()">
+      <i class="fas fa-times"></i>
+    </button>
+    <button class="nav-btn prev" (click)="prevImage()">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <img [src]="artisan?.gallery?.[selectedGalleryIndex]?.url" 
+         [alt]="artisan?.gallery?.[selectedGalleryIndex]?.caption">
+    <button class="nav-btn next" (click)="nextImage()">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+    <p class="image-caption" *ngIf="artisan?.gallery?.[selectedGalleryIndex]?.caption">
+      {{ artisan?.gallery?.[selectedGalleryIndex]?.caption }}
+    </p>
+  </div>
+</div>
+
+<!-- Video Modal -->
+<div class="modal video-modal" *ngIf="showVideoModal" (click)="closeVideo()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeVideo()">
+      <i class="fas fa-times"></i>
+    </button>
+    <iframe 
+      [src]="getSafeVideoUrl(selectedVideoUrl)"
+      frameborder="0" 
+      allowfullscreen>
+    </iframe>
+  </div>
+</div>

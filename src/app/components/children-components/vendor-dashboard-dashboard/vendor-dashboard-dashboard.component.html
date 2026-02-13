@@ -1,0 +1,256 @@
+<!-- Premium Vendor Dashboard -->
+<div class="dashboard-container">
+  
+  <!-- Welcome Header Section -->
+  <header class="welcome-header">
+    <div class="welcome-content">
+      <div class="welcome-text">
+        <span class="greeting-badge">
+          <i class="fas fa-sun"></i>
+          {{ greeting }}
+        </span>
+        <h1 class="welcome-title">Welcome back, <span class="vendor-name">{{ vendorName }}</span>!</h1>
+        <p class="welcome-subtitle">{{ currentTime }}</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-header" (click)="navigateTo('add-new-product')">
+          <i class="fas fa-plus"></i>
+          <span>Add Product</span>
+        </button>
+        <button class="btn-header btn-outline" (click)="navigateTo('vendor-analytics')">
+          <i class="fas fa-chart-line"></i>
+          <span>View Reports</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Loading State -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading dashboard...</p>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Content -->
+  <main class="dashboard-main" *ngIf="!isLoading">
+    <app-vendor-onboarding></app-vendor-onboarding>
+    
+    <!-- KPI Cards Section -->
+    <section class="kpi-section">
+      <div class="kpi-grid">
+        <div class="kpi-card" *ngFor="let kpi of kpiData" [style.--accent-color]="kpi.color" [style.--bg-color]="kpi.bgColor">
+          <div class="kpi-icon-wrapper" [style.background]="kpi.bgColor">
+            <i class="fas {{ kpi.icon }}" [style.color]="kpi.color"></i>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">{{ kpi.title }}</span>
+            <h3 class="kpi-value">{{ kpi.value }}</h3>
+            <div class="kpi-footer">
+              <span class="kpi-trend" [class.positive]="kpi.isPositive" [class.negative]="!kpi.isPositive">
+                <i class="fas" [class.fa-arrow-up]="kpi.isPositive" [class.fa-arrow-down]="!kpi.isPositive"></i>
+                {{ kpi.trend }}
+              </span>
+              <span class="kpi-period">{{ kpi.subValue }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="quick-actions-section">
+      <h2 class="section-title">Quick Actions</h2>
+      <div class="quick-actions-grid">
+        <button class="quick-action-card" *ngFor="let action of quickActions" 
+                [class]="'action-' + action.color"
+                (click)="navigateTo(action.route)">
+          <div class="action-icon">
+            <i class="fas {{ action.icon }}"></i>
+          </div>
+          <div class="action-info">
+            <span class="action-title">{{ action.title }}</span>
+            <span class="action-desc">{{ action.description }}</span>
+          </div>
+          <i class="fas fa-chevron-right action-arrow"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- Charts & Analytics Row -->
+    <section class="analytics-section">
+      <div class="analytics-grid">
+        
+        <!-- Sales Chart -->
+        <div class="chart-card sales-chart">
+          <div class="card-header">
+            <div class="header-left">
+              <h3>Sales Overview</h3>
+              <p>Daily revenue trend</p>
+            </div>
+            <div class="period-selector">
+              <button class="period-btn" [class.active]="selectedPeriod === '7D'" (click)="selectPeriod('7D')">7D</button>
+              <button class="period-btn" [class.active]="selectedPeriod === '30D'" (click)="selectPeriod('30D')">30D</button>
+              <button class="period-btn" [class.active]="selectedPeriod === '90D'" (click)="selectPeriod('90D')">90D</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <div class="bar-chart">
+              <div class="bar-wrapper" *ngFor="let value of salesChartData; let i = index">
+                <div class="bar" [style.height.%]="getBarHeight(value)">
+                  <span class="bar-tooltip">₹{{ value }}K</span>
+                </div>
+                <span class="bar-label">{{ salesLabels[i] }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Score -->
+        <div class="chart-card performance-card">
+          <div class="card-header">
+            <h3>Performance Score</h3>
+            <span class="score-badge excellent">Excellent</span>
+          </div>
+          <div class="performance-body">
+            <div class="score-circle">
+              <svg viewBox="0 0 120 120">
+                <circle class="score-bg" cx="60" cy="60" r="54"></circle>
+                <circle class="score-progress" cx="60" cy="60" r="54" 
+                        [style.stroke-dasharray]="(performanceScore / 100) * 339 + ', 339'"></circle>
+              </svg>
+              <div class="score-value">
+                <span class="score-number">{{ performanceScore }}</span>
+                <span class="score-label">Score</span>
+              </div>
+            </div>
+            <div class="performance-metrics">
+              <div class="metric-item">
+                <div class="metric-info">
+                  <span class="metric-label">Response Rate</span>
+                  <span class="metric-value">{{ responseRate }}%</span>
+                </div>
+                <div class="metric-bar">
+                  <div class="metric-progress" [style.width.%]="responseRate"></div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-info">
+                  <span class="metric-label">Fulfillment</span>
+                  <span class="metric-value">{{ fulfillmentRate }}%</span>
+                </div>
+                <div class="metric-bar">
+                  <div class="metric-progress success" [style.width.%]="fulfillmentRate"></div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-info">
+                  <span class="metric-label">Return Rate</span>
+                  <span class="metric-value">{{ returnRate }}%</span>
+                </div>
+                <div class="metric-bar">
+                  <div class="metric-progress warning" [style.width.%]="returnRate * 10"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Row: Orders, Top Products, Activity -->
+    <section class="bottom-section">
+      <div class="bottom-grid">
+        
+        <!-- Recent Orders -->
+        <div class="card orders-card">
+          <div class="card-header">
+            <div class="header-left">
+              <h3>Recent Orders</h3>
+              <p>Latest customer orders</p>
+            </div>
+            <button class="view-all-btn" (click)="navigateTo('vendor-orders')">
+              View All
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+          <div class="orders-list" *ngIf="recentOrders.length > 0">
+            <div class="order-item" *ngFor="let order of recentOrders">
+              <div class="order-customer">
+                <div class="customer-avatar">{{ order.customerInitial }}</div>
+                <div class="order-info">
+                  <span class="customer-name">{{ order.customer }}</span>
+                  <span class="order-id">{{ order.id }}</span>
+                </div>
+              </div>
+              <div class="order-product">{{ order.product }}</div>
+              <div class="order-amount">{{ order.amount }}</div>
+              <div class="order-status">
+                <span class="status-badge" [class]="order.statusColor">{{ order.status }}</span>
+              </div>
+              <button class="order-action" (click)="viewOrder(order.id)">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="recentOrders.length === 0">
+            <i class="fas fa-shopping-bag"></i>
+            <p>No orders yet</p>
+          </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+          
+          <!-- Top Products -->
+          <div class="card top-products-card">
+            <div class="card-header">
+              <h3>Top Products</h3>
+              <button class="view-all-btn" (click)="navigateTo('vendor-products')">
+                View All
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+            <div class="products-list">
+              <div class="product-item" *ngFor="let product of topProducts; let i = index">
+                <div class="product-rank">#{{ i + 1 }}</div>
+                <div class="product-info">
+                  <span class="product-name">{{ product.name }}</span>
+                  <span class="product-sales">{{ product.sales }} sales</span>
+                </div>
+                <div class="product-revenue">
+                  <span class="revenue-amount">{{ product.revenue }}</span>
+                  <span class="revenue-trend" [class.positive]="product.trend > 0" [class.negative]="product.trend < 0">
+                    <i class="fas" [class.fa-arrow-up]="product.trend > 0" [class.fa-arrow-down]="product.trend < 0"></i>
+                    {{ product.trend > 0 ? '+' : '' }}{{ product.trend }}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="card activity-card">
+            <div class="card-header">
+              <h3>Recent Activity</h3>
+            </div>
+            <div class="activity-list">
+              <div class="activity-item" *ngFor="let activity of recentActivity">
+                <div class="activity-icon" [class]="activity.iconBg">
+                  <i class="fas {{ activity.icon }}"></i>
+                </div>
+                <div class="activity-content">
+                  <span class="activity-title">{{ activity.title }}</span>
+                  <span class="activity-desc">{{ activity.description }}</span>
+                </div>
+                <span class="activity-time">{{ activity.time }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>

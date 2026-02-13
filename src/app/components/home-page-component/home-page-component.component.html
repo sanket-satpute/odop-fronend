@@ -1,0 +1,532 @@
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<!-- Scroll Indicator -->
+<div class="scroll-indicator">
+    <div class="scroll-progress" id="scrollProgress"></div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero" id="home">
+    <div class="geometric-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    <div class="hero-content">
+        <div class="hero-badge">
+            <i class="fas fa-award"></i>
+            Government of India Initiative
+        </div>
+        <h1>Empowering Local <span class="accent">Artisans</span><br>Across India</h1>
+        <p class="subtitle">Discover authentic, handcrafted products from every district of India. Supporting local communities while preserving our rich cultural heritage.</p>
+        <div class="hero-cta">
+            <a href="#products" class="btn btn-primary">
+                <i class="fas fa-store"></i>
+                Explore Products
+            </a>
+            <a href="#about" class="btn btn-secondary">
+                <i class="fas fa-play-circle"></i>
+                Learn More
+            </a>
+        </div>
+    </div>
+</section>
+
+<main>
+    <!-- Featured Products Section -->
+    <section class="section" id="products">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-badge">
+                    <i class="fas fa-star"></i>
+                    Featured Collection
+                </div>
+                <h2 class="section-title">Handpicked Premium Products</h2>
+                <p class="section-subtitle">Discover the finest craftsmanship from artisans across India, each product telling a unique story of tradition and excellence.</p>
+            </div>
+            
+            <!-- Dynamic Featured Products -->
+            <div class="products-grid" *ngIf="!isLoadingFeatured && featuredProducts.length > 0">
+                <div class="product-card fade-in" *ngFor="let product of featuredProducts" (click)="viewProduct(product.productId!)" style="cursor: pointer;">
+                    <div class="product-badge" *ngIf="product.giTagCertified">
+                        <i class="fas fa-certificate"></i> GI Tagged
+                    </div>
+                    <img [src]="product.productImageURL || 'assets/images/placeholder-product.jpg'" [alt]="product.productName" class="product-image">
+                    <h3>{{ product.productName }}</h3>
+                    <p class="product-origin" *ngIf="product.originDistrict">
+                        <i class="fas fa-map-marker-alt"></i> {{ product.originDistrict }}, {{ product.originState }}
+                    </p>
+                    <p class="product-description">{{ (product.productDescription || '') | slice:0:100 }}{{ (product.productDescription?.length || 0) > 100 ? '...' : '' }}</p>
+                    <div class="product-footer">
+                        <span class="price">₹{{ product.price | number }}</span>
+                        <span class="rating" *ngIf="product.rating">
+                            <i class="fas fa-star"></i> {{ product.rating | number:'1.1-1' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Skeleton State -->
+            <div class="products-grid" *ngIf="isLoadingFeatured">
+                <app-skeleton-loader type="product-card" [count]="6"></app-skeleton-loader>
+            </div>
+
+            <!-- Empty State - Show static cards when no products from DB -->
+            <div class="products-grid" *ngIf="!isLoadingFeatured && featuredProducts.length === 0">
+                <div class="product-card fade-in visible">
+                    <div class="product-icon"><i class="fas fa-music"></i></div>
+                    <img src="https://5.imimg.com/data5/BJ/IR/NY/SELLER-44236551/sitar-500x500.jpg" alt="Sitar" class="product-image">
+                    <h3>Traditional Sitar</h3>
+                    <p>Handcrafted musical instruments made by master artisans using traditional techniques.</p>
+                </div>
+                <div class="product-card fade-in visible">
+                    <div class="product-icon"><i class="fas fa-palette"></i></div>
+                    <img src="https://d2rdhxfof4qmbb.cloudfront.net/wp-content/uploads/20201027192535/iStock-901457976.jpg" alt="Madhubani" class="product-image">
+                    <h3>Madhubani Painting</h3>
+                    <p>Exquisite traditional paintings from Bihar with intricate patterns and vibrant colors.</p>
+                </div>
+                <div class="product-card fade-in visible">
+                    <div class="product-icon"><i class="fas fa-seedling"></i></div>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/PISTILLI_DI_ZAFFERANO.jpg/330px-PISTILLI_DI_ZAFFERANO.jpg" alt="Kashmir Saffron" class="product-image">
+                    <h3>Kashmir Saffron</h3>
+                    <p>World's finest saffron from the pristine valleys of Kashmir.</p>
+                </div>
+                <div class="product-card fade-in visible">
+                    <div class="product-icon"><i class="fas fa-leaf"></i></div>
+                    <img src="https://d2rdhxfof4qmbb.cloudfront.net/wp-content/uploads/20201027192742/download-25-1.jpg" alt="Bamboo Craft" class="product-image">
+                    <h3>Bamboo & Cane Craft</h3>
+                    <p>Eco-friendly handmade crafts from Northeast India.</p>
+                </div>
+                <div class="product-card fade-in visible">
+                    <div class="product-icon"><i class="fas fa-tshirt"></i></div>
+                    <img src="https://5.imimg.com/data5/UU/DB/MY-46826736/embroidered-kashmiri-shawl-500x500.jpg" alt="Kashmiri Shawl" class="product-image">
+                    <h3>Kashmiri Shawl</h3>
+                    <p>Luxurious handwoven shawls with intricate embroidery.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Recently Viewed Products -->
+    <app-recently-viewed [maxItems]="6" title="Recently Viewed"></app-recently-viewed>
+
+    <!-- Vendor Discovery Section -->
+    <app-vendor-discovery-card></app-vendor-discovery-card>
+
+    <!-- About Section -->
+    <section class="section" id="about">
+        <div class="container">
+            <div class="info-section slide-in-left">
+                <div class="info-content">
+                    <div class="section-badge">
+                        <i class="fas fa-info-circle"></i>
+                        About Initiative
+                    </div>
+                    <h2>What is <span style="color: #FFA500;">ODOP?</span></h2>
+                    <p>ODOP (One District One Product) is a transformative government initiative designed to promote unique regional specialties and crafts across India's diverse districts. This visionary program focuses on empowerment, uplifting local artisans and entrepreneurs while driving sustainable economic growth.</p>
+                    <p>Through strategic support and market linkages, ODOP contributes to the preservation of India's rich cultural heritage, ensuring traditional craftsmanship thrives for future generations while creating meaningful livelihood opportunities.</p>
+                    <div class="info-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <span>Empowering Artisans</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span>Economic Growth</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <span>Cultural Heritage</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <span>Global Reach</span>
+                        </div>
+                    </div>
+                    <a href="#impact" class="btn btn-primary" style="margin-top: 30px;">
+                        <i class="fas fa-arrow-right"></i>
+                        View Impact
+                    </a>
+                </div>
+                <div class="info-image slide-in-right">
+                    <img src="https://thedispatch.blob.core.windows.net/thedispatchimages/2022/03/Aatmnirbhar-Sena-One-District-One-Product-Scheme-1280x720-1.jpg" alt="ODOP Initiative">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Purpose Section -->
+    <section class="section" style="background: #f8fafc;">
+        <div class="container">
+            <div class="info-section">
+                <div class="info-image slide-in-left">
+                    <img src="https://img.freepik.com/premium-photo/cheerful-vendor-with-marigold-flowers-local-market_719364-3720.jpg" alt="Purpose of ODOP">
+                </div>
+                <div class="info-content slide-in-right">
+                    <div class="section-badge">
+                        <i class="fas fa-target"></i>
+                        Our Purpose
+                    </div>
+                    <h2>Driving India's <span style="color: #FFA500;">Economic Renaissance</span></h2>
+                    <p>ODOP stands as a dynamic force, propelling local vendors and fueling India's remarkable economic transformation. It champions unique regional specialties, fostering sustainable development while weaving a richer cultural tapestry across the nation.</p>
+                    <p>This initiative empowers artisans, preserves traditional crafts, and contributes significantly to India's cultural legacy. By prioritizing local economies, ODOP creates a thriving and diverse economic landscape, ensuring prosperity for communities nationwide.</p>
+                    <div class="info-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <span>Boost Local Sales</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <span>Preserve Traditions</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-handshake"></i>
+                            </div>
+                            <span>Community Support</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span>Quality Assurance</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Usage Section -->
+    <section class="section">
+        <div class="container">
+            <div class="info-section">
+                <div class="info-content slide-in-left">
+                    <div class="section-badge">
+                        <i class="fas fa-users-cog"></i>
+                        For Everyone
+                    </div>
+                    <h2>Who Can <span style="color: #FFA500;">Benefit?</span></h2>
+                    <p>ODOP creates an inclusive marketplace that welcomes everyone for seamless buying and selling experiences. Our platform bridges the gap between traditional artisans and modern consumers, fostering a dynamic ecosystem of growth and opportunity.</p>
+                    <p>Sellers find a comprehensive platform to register, showcase, and sell their products, expanding market reach and amplifying business growth. Buyers enjoy convenient access to authentic products without visiting physical stores, enriching their shopping journey with cultural discoveries.</p>
+                    <div class="info-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <span>Easy Selling Platform</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <span>Convenient Shopping</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <span>Nationwide Delivery</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span>Secure Payments</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-image slide-in-right">
+                    <img src="https://www.iasgyan.in//ig-uploads/images//ODOP_Wall.png" alt="ODOP Usage">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats" id="impact">
+        <div class="container">
+            <div class="stats-content">
+                <div class="section-header">
+                    <div class="section-badge" style="background: rgba(255, 255, 255, 0.1); color: #FFA500;">
+                        <i class="fas fa-chart-bar"></i>
+                        Our Impact
+                    </div>
+                    <h2 class="section-title" style="color: white;">Transforming Lives Across India</h2>
+                    <p class="section-subtitle" style="color: rgba(255, 255, 255, 0.8);">Measurable impact through sustainable development and community empowerment</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item fade-in">
+                        <div class="stat-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <div class="stat-number">700+</div>
+                        <div class="stat-label">Districts Covered</div>
+                    </div>
+                    
+                    <div class="stat-item fade-in">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-number">50K+</div>
+                        <div class="stat-label">Artisans Empowered</div>
+                    </div>
+                    
+                    <div class="stat-item fade-in">
+                        <div class="stat-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-number">1000+</div>
+                        <div class="stat-label">Unique Products</div>
+                    </div>
+                    
+                    <div class="stat-item fade-in">
+                        <div class="stat-icon">
+                            <i class="fas fa-rupee-sign"></i>
+                        </div>
+                        <div class="stat-number">₹500Cr+</div>
+                        <div class="stat-label">Revenue Generated</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-badge">
+                    <i class="fas fa-images"></i>
+                    Visual Journey
+                </div>
+                <h2 class="section-title">Discover ODOP Through Visuals</h2>
+                <p class="section-subtitle">Experience the beauty and diversity of India's traditional crafts and products through our curated gallery.</p>
+            </div>
+            
+            <div class="gallery-grid">
+                <div class="gallery-item fade-in">
+                    <img src="https://indbiz.gov.in/wp-content/uploads/2021/04/shutterstock_1731491647.jpg" alt="ODOP Artisans at Work">
+                    <div class="gallery-overlay">
+                        <h4>Artisans at Work</h4>
+                        <p>Traditional craftsmen creating masterpieces</p>
+                    </div>
+                </div>
+                
+                <div class="gallery-item fade-in">
+                    <img src="https://img.freepik.com/free-photo/chicken-farm-scene-with-poultry-people_23-2151462300.jpg" alt="Food Processing">
+                    <div class="gallery-overlay">
+                        <h4>Food Processing</h4>
+                        <p>Traditional food products and processing</p>
+                    </div>
+                </div>
+                
+                <div class="gallery-item fade-in">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRf5iPxAYTGaAKPK9fO8dNt0jgAWkemWDlQXQPpx0ddyySATDQtlhNuBs0iuKpxcXsftSg&usqp=CAU" alt="Textile Heritage">
+                    <div class="gallery-overlay">
+                        <h4>Textile Heritage</h4>
+                        <p>Rich tradition of Indian textiles</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta" id="contact">
+        <div class="container">
+            <div class="cta-card fade-in">
+                <div class="section-badge">
+                    <i class="fas fa-rocket"></i>
+                    Join the Movement
+                </div>
+                <h2 class="section-title">Ready to Explore India's Heritage?</h2>
+                <p class="section-subtitle">Start your journey with ODOP today. Discover authentic products, support local artisans, and be part of India's cultural renaissance.</p>
+                <div class="hero-cta" style="margin-top: 40px;">
+                    <a class="btn btn-primary" (click)="startPrimaryJourney()">
+                        <i class="fas" [class.fa-store]="!(userState.vendor && !userState.customer && !userState.admin)" [class.fa-tachometer-alt]="(userState.vendor && !userState.customer && !userState.admin)"></i>
+                        {{ (userState.vendor && !userState.customer && !userState.admin) ? 'Go to Vendor Dashboard' : 'Start Shopping' }}
+                    </a>
+                    <a class="btn btn-secondary" (click)="becomeASeller()">
+                        <i class="fas fa-user-plus"></i>
+                        Become a Seller
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+
+        // Loading Animation
+        window.addEventListener('load', () => {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            setTimeout(() => {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 500);
+            }, 1000);
+        });
+
+        // Scroll Progress Indicator
+        window.addEventListener('scroll', () => {
+            const scrollProgress = document.getElementById('scrollProgress');
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.offsetHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            scrollProgress.style.width = scrollPercent + '%';
+        });
+
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Intersection Observer for Animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Smooth Scrolling for Navigation Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Counter Animation for Stats
+        const animateCounters = () => {
+            const counters = document.querySelectorAll('.stat-number');
+            counters.forEach(counter => {
+                const target = counter.innerText;
+                const numericTarget = parseInt(target.replace(/[^\d]/g, ''));
+                const increment = numericTarget / 100;
+                let current = 0;
+                
+                const updateCounter = () => {
+                    if (current < numericTarget) {
+                        current += increment;
+                        if (target.includes('₹')) {
+                            counter.innerText = '₹' + Math.ceil(current) + (target.includes('Cr') ? 'Cr+' : 'K+');
+                        } else {
+                            counter.innerText = Math.ceil(current) + '+';
+                        }
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                
+                updateCounter();
+            });
+        };
+
+        // Trigger counter animation when stats section is visible
+        const statsSection = document.querySelector('.stats');
+        if (statsSection) {
+            const statsObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateCounters();
+                        statsObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            statsObserver.observe(statsSection);
+        }
+
+        // Enhanced hover effects for product cards
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-15px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Gallery item click effects
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Add click animation
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+
+        // Parallax effect for hero section
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelector('.hero');
+            const speed = scrolled * 0.5;
+            parallax.style.backgroundPosition = `center ${speed}px`;
+        });
+
+        // Dynamic year update
+        const currentYear = new Date().getFullYear();
+        document.querySelector('.footer-bottom p').innerHTML = 
+            `&copy; ${currentYear} ODOP India - Government of India Initiative. All rights reserved.`;
+    </script>
+
+
+
+
+

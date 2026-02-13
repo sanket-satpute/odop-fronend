@@ -1,0 +1,262 @@
+  <!-- Settings Component Template -->
+  <div class="settings-container">
+    <!-- Header Section -->
+    <div class="settings-header">
+      <div class="header-content">
+        <h1 class="settings-title">Settings</h1>
+        <p class="settings-subtitle">Control your preferences, notifications, and security</p>
+      </div>
+    </div>
+
+    <!-- Settings Cards Grid -->
+    <div class="settings-grid">
+      
+      <!-- Notification Preferences Card -->
+      <div class="settings-card notification-card">
+        <div class="card-header">
+          <div class="card-icon notification-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="m13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </div>
+          <div class="card-title-section">
+            <h3 class="card-title">Notification Preferences</h3>
+            <p class="card-description">Manage how you receive updates and alerts</p>
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <div class="toggle-group">
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <label class="toggle-label">App Notifications</label>
+                <span class="toggle-desc">Push notifications from the app</span>
+              </div>
+              <div class="toggle-switch" [class.active]="notificationSettings.app" (click)="toggleNotification('app')">
+                <div class="toggle-handle"></div>
+              </div>
+            </div>
+            
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <label class="toggle-label">Email Alerts</label>
+                <span class="toggle-desc">Important updates via email</span>
+              </div>
+              <div class="toggle-switch" [class.active]="notificationSettings.email" (click)="toggleNotification('email')">
+                <div class="toggle-handle"></div>
+              </div>
+            </div>
+            
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <label class="toggle-label">SMS Notifications</label>
+                <span class="toggle-desc">Text messages for critical alerts</span>
+              </div>
+              <div class="toggle-switch" [class.active]="notificationSettings.sms" (click)="toggleNotification('sms')">
+                <div class="toggle-handle"></div>
+              </div>
+            </div>
+            
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <label class="toggle-label">WhatsApp Updates</label>
+                <span class="toggle-desc">Service updates on WhatsApp</span>
+              </div>
+              <div class="toggle-switch" [class.active]="notificationSettings.whatsapp" (click)="toggleNotification('whatsapp')">
+                <div class="toggle-handle"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security & Privacy Card -->
+      <div class="settings-card security-card">
+        <div class="card-header">
+          <div class="card-icon security-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div class="card-title-section">
+            <h3 class="card-title">Security & Privacy</h3>
+            <p class="card-description">Protect your account and manage privacy settings</p>
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <div class="security-options">
+            <div class="security-item">
+              <div class="security-info">
+                <div class="security-main">
+                  <label class="security-label">Two-Factor Authentication</label>
+                  <span class="security-status" [class.enabled]="twoFactorEnabled">
+                    {{ twoFactorEnabled ? 'Enabled' : 'Disabled' }}
+                  </span>
+                </div>
+                <span class="security-desc">Add an extra layer of security to your account</span>
+              </div>
+              <button class="security-btn" [class.enabled]="twoFactorEnabled" (click)="toggleTwoFactor()">
+                {{ twoFactorEnabled ? 'Disable' : 'Enable' }}
+              </button>
+            </div>
+            
+            <div class="security-item">
+              <div class="security-info">
+                <label class="security-label">View Active Sessions</label>
+                <span class="security-desc">See where your account is currently signed in</span>
+              </div>
+              <button class="security-btn secondary" (click)="viewActiveSessions()">
+                View Sessions
+              </button>
+            </div>
+            
+            <div class="security-item">
+              <div class="security-info">
+                <label class="security-label">Download My Data</label>
+                <span class="security-desc">Export your account data and activity</span>
+              </div>
+              <button class="security-btn secondary" (click)="downloadData()">
+                Download
+              </button>
+            </div>
+            
+            <div class="security-item danger-item">
+              <div class="security-info">
+                <label class="security-label danger-label">Deactivate Account</label>
+                <span class="security-desc">Permanently disable your account</span>
+              </div>
+              <button class="security-btn danger" (click)="deactivateAccount()">
+                Deactivate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appearance & Accessibility Card -->
+      <div class="settings-card appearance-card">
+        <div class="card-header">
+          <div class="card-icon appearance-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path>
+            </svg>
+          </div>
+          <div class="card-title-section">
+            <h3 class="card-title">Appearance & Accessibility</h3>
+            <p class="card-description">Customize your viewing experience</p>
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <div class="appearance-options">
+            <div class="appearance-section">
+              <label class="section-label">Theme Mode</label>
+              <div class="theme-selector">
+                <div class="theme-option" [class.active]="themeMode === 'light'" (click)="setThemeMode('light')">
+                  <div class="theme-preview light-preview"></div>
+                  <span class="theme-name">Light</span>
+                </div>
+                <div class="theme-option" [class.active]="themeMode === 'dark'" (click)="setThemeMode('dark')">
+                  <div class="theme-preview dark-preview"></div>
+                  <span class="theme-name">Dark</span>
+                </div>
+                <div class="theme-option" [class.active]="themeMode === 'system'" (click)="setThemeMode('system')">
+                  <div class="theme-preview system-preview"></div>
+                  <span class="theme-name">System</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="appearance-section">
+              <label class="section-label">Font Size</label>
+              <div class="font-size-selector">
+                <div class="font-option" [class.active]="fontSize === 'small'" (click)="setFontSize('small')">
+                  <span class="font-preview small">Aa</span>
+                  <span class="font-name">Small</span>
+                </div>
+                <div class="font-option" [class.active]="fontSize === 'medium'" (click)="setFontSize('medium')">
+                  <span class="font-preview medium">Aa</span>
+                  <span class="font-name">Medium</span>
+                </div>
+                <div class="font-option" [class.active]="fontSize === 'large'" (click)="setFontSize('large')">
+                  <span class="font-preview large">Aa</span>
+                  <span class="font-name">Large</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="appearance-section">
+              <div class="contrast-toggle">
+                <div class="contrast-info">
+                  <label class="section-label">High Contrast Mode</label>
+                  <span class="contrast-desc">Improve readability with enhanced contrast</span>
+                </div>
+                <div class="toggle-switch" [class.active]="highContrast" (click)="toggleHighContrast()">
+                  <div class="toggle-handle"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connected Services Card -->
+      <div class="settings-card services-card">
+        <div class="card-header">
+          <div class="card-icon services-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            </svg>
+          </div>
+          <div class="card-title-section">
+            <h3 class="card-title">Connected Services</h3>
+            <p class="card-description">Manage your linked accounts and integrations</p>
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <div class="services-list">
+            <div class="service-item" *ngFor="let service of connectedServices">
+              <div class="service-info">
+                <div class="service-icon" [class.connected]="service.connected">
+                  <ng-container *ngIf="getServiceIconType(service) === 'font'; else textIcon">
+                    <i class="fab" [ngClass]="service.icon"></i>
+                  </ng-container>
+                  <ng-template #textIcon>
+                    <span class="service-text-icon">{{ getServiceTextIcon(service) }}</span>
+                  </ng-template>
+                </div>
+                <div class="service-details">
+                  <span class="service-name">{{ service.name }}</span>
+                  <span class="service-status" [class.connected]="service.connected">
+                    {{ service.connected ? 'Connected' : 'Disconnected' }}
+                  </span>
+                </div>
+              </div>
+              <button class="service-btn" 
+                      [class.disconnect]="service.connected"
+                      [class.connect]="!service.connected"
+                      (click)="toggleService(service)">
+                {{ service.connected ? 'Disconnect' : 'Connect' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Changes Button -->
+    <div class="save-section">
+      <button class="save-btn" (click)="saveChanges()" [disabled]="!hasChanges">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17,21 17,13 7,13 7,21"></polyline>
+          <polyline points="7,3 7,8 15,8"></polyline>
+        </svg>
+        Save All Changes
+      </button>
+    </div>
+  </div>
