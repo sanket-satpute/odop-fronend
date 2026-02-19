@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 // Interfaces matching backend models
 export interface NotificationChannels {
@@ -97,7 +98,7 @@ export interface CustomerPreferences {
 })
 export class CustomerPreferencesService {
 
-  private baseUrl = 'http://localhost:50982/odop/customer';
+  private baseUrl = `${environment.apiUrl}/odop/customer`;
 
   // Cached preferences
   private preferencesSubject = new BehaviorSubject<CustomerPreferences | null>(null);

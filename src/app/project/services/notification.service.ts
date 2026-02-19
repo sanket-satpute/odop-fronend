@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, delay, map, tap } from 'rxjs/operators';
 import { UserStateService } from './user-state.service';
+import { environment } from '../../../environments/environment';
 
 export interface AppNotification {
   id: string;
@@ -48,7 +49,7 @@ interface ApiNotification {
 })
 export class NotificationService {
   
-  private baseUrl = 'http://localhost:50982/odop/customer';
+  private baseUrl = `${environment.apiUrl}/odop/customer`;
   private useApi = true; // Toggle to use API vs local data
 
   private notificationsSubject = new BehaviorSubject<AppNotification[]>([]);

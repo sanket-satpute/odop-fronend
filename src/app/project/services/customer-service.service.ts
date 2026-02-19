@@ -85,7 +85,7 @@ export class CustomerServiceService {
     const url = `${this.mainUrl}/download/${fileId}`;
     return this.http.get(url, { responseType: 'blob' });
   }
-// http://localhost:50982/odop/customer/download/1Va_5eW3HVdu6QmuqdPS12s63xhcBct2k
+// /odop/customer/download/{fileId}
 
   getAllCustomersCount(): Observable<number> {
     return this.getAllCustomers().pipe(

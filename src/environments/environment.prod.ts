@@ -1,7 +1,7 @@
 // Production environment configuration
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://odop-backend.onrender.com/',
+  apiBaseUrl: 'https://odop-backend.onrender.com/odop/',
   apiUrl: 'https://odop-backend.onrender.com',  // Base API URL without path
   authUrl: 'https://odop-backend.onrender.com/authenticate',
   

@@ -8,5 +8,5 @@ export const GlobalVariable = Object.freeze({
     APP_VERSION: environment.appVersion
 });
 
-// Legacy support - keeping old comment for reference
-// http://localhost:50982/odop/customer/create_account
+// Legacy support - example endpoint format:
+// /odop/customer/create_account
