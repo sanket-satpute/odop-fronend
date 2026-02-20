@@ -7,10 +7,12 @@
     "build": "ng build",
     "vercel-build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "seed:data": "node scripts/seed-odop-models.mjs",
+    "seed:data:dry": "node scripts/seed-odop-models.mjs --dry-run"
   },
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "private": true,
   "dependencies": {
