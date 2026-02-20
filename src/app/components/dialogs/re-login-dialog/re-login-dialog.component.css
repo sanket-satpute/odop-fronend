@@ -1,0 +1,335 @@
+.relogin-dialog-container {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.relogin-dialog-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.relogin-dialog-container::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 3px;
+}
+
+.relogin-dialog-container::-webkit-scrollbar-thumb {
+  background: #ffc966;
+  border-radius: 3px;
+}
+
+/* ===== HEADER ===== */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 2rem 2rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #fff8ee 0%, #fff 100%);
+}
+
+.header-content {
+  flex: 1;
+  text-align: center;
+  padding-right: 2rem;
+}
+
+.warning-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffe5a0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 12px rgba(255, 165, 0, 0);
+  }
+}
+
+.warning-icon {
+  font-size: 2rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  color: #e69500;
+}
+
+.dialog-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.025em;
+}
+
+.dialog-subtitle {
+  font-size: 0.88rem;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: unset;
+  flex-shrink: 0;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.close-btn:hover {
+  background: #f8f9fa;
+  color: #dc3545;
+}
+
+/* ===== ERROR MESSAGE ===== */
+.error-message {
+  margin: 1rem 2rem 0;
+  padding: 0.75rem 1rem;
+  background: #fef9f9;
+  border: 1px solid #f3b7bd;
+  border-radius: 8px;
+  color: #bd2130;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  animation: shake 0.5s ease-in-out;
+}
+
+.error-message mat-icon {
+  font-size: 1.1rem;
+  color: #dc3545;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* ===== FORM ===== */
+.relogin-form {
+  padding: 1.5rem 2rem 2rem;
+}
+
+.form-row {
+  margin-bottom: 1rem;
+}
+
+.email-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin: -0.5rem 0 0.75rem 0.25rem;
+}
+
+.email-hint mat-icon {
+  font-size: 0.9rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  color: #ffa500;
+}
+
+.email-hint strong {
+  color: #ffa500;
+}
+
+::ng-deep .relogin-dialog-container .mat-mdc-form-field {
+  width: 100%;
+}
+
+::ng-deep .relogin-dialog-container .mat-mdc-form-field.full-width {
+  width: 100%;
+}
+
+::ng-deep .relogin-dialog-container .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  background: #fff;
+  border-radius: 8px;
+}
+
+::ng-deep .relogin-dialog-container .mat-mdc-form-field .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex {
+  padding: 0.25rem 0.75rem;
+}
+
+::ng-deep .relogin-dialog-container .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline .mat-mdc-notched-outline-start,
+::ng-deep .relogin-dialog-container .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline .mat-mdc-notched-outline-middle,
+::ng-deep .relogin-dialog-container .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline .mat-mdc-notched-outline-end {
+  border-color: #ffa500;
+  border-width: 2px;
+}
+
+::ng-deep .relogin-dialog-container .mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
+  color: #ffa500;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1.5rem 0 1rem;
+}
+
+.submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #ffa500, #cc8400);
+  color: #fff;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 165, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn .btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.submit-btn .btn-content mat-icon {
+  font-size: 1.1rem;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 165, 0, 0.4);
+  background: linear-gradient(135deg, #ffae1a, #ffa500);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 16px rgba(255, 165, 0, 0.15);
+}
+
+.submit-btn mat-spinner {
+  margin: 0 auto;
+}
+
+::ng-deep .submit-btn mat-spinner circle {
+  stroke: #fff;
+}
+
+.cancel-btn-full {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.5rem;
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn-full:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.cancel-btn-full:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancel-btn-full mat-icon {
+  font-size: 1.1rem;
+}
+
+/* ===== INFO SECTION ===== */
+.info-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #fff8ee;
+  border: 1px solid #ffe5a0;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.info-section mat-icon {
+  color: #e69500;
+  font-size: 1rem;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}
+
+.info-section p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #8a6d3b;
+  line-height: 1.4;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .dialog-header {
+    padding: 1.5rem 1.5rem 1rem;
+  }
+
+  .relogin-form {
+    padding: 1rem 1.5rem 1.5rem;
+  }
+
+  .warning-icon-wrapper {
+    width: 52px;
+    height: 52px;
+  }
+
+  .warning-icon {
+    font-size: 1.6rem !important;
+    width: 1.6rem !important;
+    height: 1.6rem !important;
+  }
+
+  .dialog-title {
+    font-size: 1.2rem;
+  }
+}

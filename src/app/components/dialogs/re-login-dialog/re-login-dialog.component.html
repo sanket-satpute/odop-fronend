@@ -1,0 +1,94 @@
+<div class="relogin-dialog-container">
+  <!-- Header with Cancel button -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="warning-icon-wrapper">
+        <mat-icon class="warning-icon">lock_clock</mat-icon>
+      </div>
+      <h2 class="dialog-title">Session Expired</h2>
+      <p class="dialog-subtitle">Your session has expired due to inactivity. Please enter your password to continue.</p>
+    </div>
+    <!-- Cancel (X) button at top-right -->
+    <button class="close-btn" (click)="onCancel()" type="button" title="Cancel and logout">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="loginError" class="error-message">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ loginError }}</span>
+  </div>
+
+  <!-- Re-Login Form -->
+  <form [formGroup]="reLoginForm" (ngSubmit)="onSubmit()" class="relogin-form">
+    
+    <!-- Email Field (read-only, pre-filled) -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email Address</mat-label>
+        <input 
+          matInput 
+          type="email" 
+          formControlName="email" 
+          readonly>
+        <mat-icon matSuffix>email</mat-icon>
+      </mat-form-field>
+      <p class="email-hint">
+        <mat-icon>info</mat-icon>
+        Logging in as <strong>{{ data.role | titlecase }}</strong>
+      </p>
+    </div>
+
+    <!-- Password Field -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input 
+          matInput 
+          [type]="hidePassword ? 'password' : 'text'" 
+          formControlName="password" 
+          placeholder="Enter your password"
+          autofocus>
+        <button 
+          type="button" 
+          mat-icon-button 
+          matSuffix 
+          (click)="hidePassword = !hidePassword"
+          [title]="hidePassword ? 'Show password' : 'Hide password'">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error>{{ getPasswordError() }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="submit-btn"
+        [disabled]="reLoginForm.invalid || isLoading">
+        <span *ngIf="!isLoading" class="btn-content">
+          <mat-icon>login</mat-icon>
+          Re-Login
+        </span>
+        <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+      </button>
+
+      <button 
+        type="button" 
+        class="cancel-btn-full"
+        (click)="onCancel()"
+        [disabled]="isLoading">
+        <mat-icon>logout</mat-icon>
+        Cancel & Logout
+      </button>
+    </div>
+
+    <!-- Info Text -->
+    <div class="info-section">
+      <mat-icon>info</mat-icon>
+      <p>If you cancel, all your saved data will be cleared and you will be logged out.</p>
+    </div>
+  </form>
+</div>

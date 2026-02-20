@@ -178,7 +178,7 @@ export class UserStateService implements OnDestroy {
     };
     localStorage.setItem('cart_update', JSON.stringify(updateData));
     this.cartCountSubject.next(cartItems.length);
-    
+
     // Update customer object AND trigger change detection
     if (this.customer) {
       this.customer.cartProductIds = cartItems;
@@ -196,7 +196,7 @@ export class UserStateService implements OnDestroy {
     };
     localStorage.setItem('wishlist_update', JSON.stringify(updateData));
     this.wishlistCountSubject.next(wishlistItems.length);
-    
+
     // Update customer object AND trigger change detection
     if (this.customer) {
       this.customer.wishlistProductIds = wishlistItems;
@@ -288,6 +288,75 @@ export class UserStateService implements OnDestroy {
   // Get current user (regardless of type)
   getCurrentUser(): Customer | Vendor | Admin | null {
     return this.customer || this.vendor || this.admin;
+  }
+
+  /**
+   * Check if the JWT token stored in localStorage is expired.
+   * 
+   * HOW IT WORKS:
+   * A JWT token has 3 parts separated by dots: header.payload.signature
+   * The payload (middle part) is a Base64-encoded JSON that contains an "exp" field
+   * — the expiration time as a Unix timestamp (seconds since epoch).
+   * We decode it, multiply by 1000 (to convert to milliseconds), and compare with Date.now().
+   * 
+   * WHY NO API CALL:
+   * We can check expiry entirely on the client side because the expiration is embedded
+   * in the token itself. No need to call the server just to check if it's expired.
+   * 
+   * RETURNS: true if expired or invalid, false if valid or no token exists
+   */
+  isTokenExpired(): boolean {
+    const token = localStorage.getItem('jwt');
+    if (!token) return false; // No token = user was never logged in, not an expiry issue
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const payload = JSON.parse(atob(payloadBase64));
+      const expirationMs = payload.exp * 1000; // Convert seconds to milliseconds
+      return expirationMs < Date.now();
+    } catch {
+      // If we can't decode the token, treat it as expired/invalid
+      return true;
+    }
+  }
+
+  /**
+   * Get the email of the last logged-in user from localStorage.
+   * 
+   * WHY: When showing the re-login dialog, we need to pre-fill the email field
+   * so the user doesn't have to type it again. The email is stored in the user
+   * object (customer/vendor/admin) in localStorage.
+   * 
+   * RETURNS: The email string, or null if no user is stored.
+   */
+  getStoredEmail(): string | null {
+    const storedCustomer = localStorage.getItem('customer');
+    if (storedCustomer) {
+      try { return JSON.parse(storedCustomer).emailAddress || null; } catch { return null; }
+    }
+    const storedVendor = localStorage.getItem('vendor');
+    if (storedVendor) {
+      try { return JSON.parse(storedVendor).emailAddress || null; } catch { return null; }
+    }
+    const storedAdmin = localStorage.getItem('admin');
+    if (storedAdmin) {
+      try { return JSON.parse(storedAdmin).emailAddress || null; } catch { return null; }
+    }
+    return null;
+  }
+
+  /**
+   * Get the role of the last logged-in user from localStorage.
+   * 
+   * WHY: When calling the /authenticate endpoint again, we need to pass the role
+   * so the backend knows which user collection to search in.
+   * 
+   * RETURNS: 'customer' | 'vendor' | 'admin' | null
+   */
+  getStoredRole(): 'customer' | 'vendor' | 'admin' | null {
+    if (localStorage.getItem('customer')) return 'customer';
+    if (localStorage.getItem('vendor')) return 'vendor';
+    if (localStorage.getItem('admin')) return 'admin';
+    return null;
   }
 
   ngOnDestroy(): void {

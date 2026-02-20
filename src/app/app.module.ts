@@ -128,6 +128,7 @@ import { VendorDirectoryPageComponent } from './components/vendor-directory-page
 import { CategoryLandingPageComponent } from './components/category-landing-page/category-landing-page.component';
 import { OrderReturnsPageComponent } from './components/order-returns-page/order-returns-page.component';
 import { SessionWarningDialogComponent } from './components/dialogs/session-warning-dialog/session-warning-dialog.component';
+import { ReLoginDialogComponent } from './components/dialogs/re-login-dialog/re-login-dialog.component';
 import { CustomerAddressesComponent } from './components/children-components/customer-dashboard-compo/customer-addresses/customer-addresses.component';
 import { LiveChatWidgetComponent } from './components/live-chat-widget/live-chat-widget.component';
 import { EmailPreferencesComponent } from './components/children-components/customer-dashboard-compo/email-preferences/email-preferences.component';
@@ -235,6 +236,7 @@ import { SafeUrlPipe } from './project/pipes/safe-url.pipe';
     CategoryLandingPageComponent,
     OrderReturnsPageComponent,
     SessionWarningDialogComponent,
+    ReLoginDialogComponent,
     CustomerAddressesComponent,
     EmailPreferencesComponent,
     VendorReviewsComponent,
