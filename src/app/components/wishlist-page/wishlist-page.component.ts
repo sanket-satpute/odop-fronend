@@ -4,7 +4,9 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { WishlistService, WishlistItemDto } from '../../project/services/wishlist.service';
-import { DataHandlerService } from '../../project/services/data-handler.service';
+import { CartServiceService } from '../../project/services/cart-service.service';
+import { UserStateService } from '../../project/services/user-state.service';
+import { Cart } from '../../project/models/cart';
 
 export interface WishlistItem {
   id: string;
@@ -34,7 +36,8 @@ export class WishlistPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private wishlistService: WishlistService,
-    private dataHandler: DataHandlerService,
+    private cartService: CartServiceService,
+    private userState: UserStateService,
     private router: Router,
     private snackBar: MatSnackBar
   ) {}
@@ -152,16 +155,31 @@ export class WishlistPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const cartItem = {
+    const customerId = this.userState.customer?.customerId;
+    if (!customerId) {
+      this.showSnackbar('Please login to add items to cart', 'warning');
+      return;
+    }
+
+    const cartItem: Cart = {
+      customerId,
       productId: item.id,
-      productName: item.name,
-      price: item.price,
-      quantity: 1,
-      image: item.image
+      quantity: 1
     };
 
-    this.dataHandler.addToCart(cartItem);
-    this.showSnackbar(`${item.name} added to cart!`, 'success');
+    this.cartService.registerCart(cartItem)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          const current = this.userState.customer?.cartProductIds || [];
+          const updated = Array.from(new Set([...current, item.id]));
+          this.userState.broadcastCartUpdate(updated);
+          this.showSnackbar(`${item.name} added to cart!`, 'success');
+        },
+        error: () => {
+          this.showSnackbar('Failed to add item to cart', 'error');
+        }
+      });
   }
 
   removeFromWishlist(item: WishlistItem, event: Event): void {
@@ -210,18 +228,52 @@ export class WishlistPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    inStockItems.forEach(item => {
-      const cartItem = {
-        productId: item.id,
-        productName: item.name,
-        price: item.price,
-        quantity: 1,
-        image: item.image
-      };
-      this.dataHandler.addToCart(cartItem);
-    });
+    const customerId = this.userState.customer?.customerId;
+    if (!customerId) {
+      this.showSnackbar('Please login to add items to cart', 'warning');
+      return;
+    }
 
-    this.showSnackbar(`${inStockItems.length} items added to cart!`, 'success');
+    let completed = 0;
+    let successCount = 0;
+    const existing = this.userState.customer?.cartProductIds || [];
+    const successfulIds: string[] = [];
+
+    inStockItems.forEach(item => {
+      const cartItem: Cart = {
+        customerId,
+        productId: item.id,
+        quantity: 1
+      };
+
+      this.cartService.registerCart(cartItem)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            successCount++;
+            successfulIds.push(item.id);
+            completed++;
+            if (completed === inStockItems.length) {
+              const updated = Array.from(new Set([...existing, ...successfulIds]));
+              this.userState.broadcastCartUpdate(updated);
+              this.showSnackbar(`${successCount} item(s) added to cart!`, successCount > 0 ? 'success' : 'warning');
+            }
+          },
+          error: () => {
+            completed++;
+            if (completed === inStockItems.length) {
+              if (successCount > 0) {
+                const updated = Array.from(new Set([...existing, ...successfulIds]));
+                this.userState.broadcastCartUpdate(updated);
+              }
+              this.showSnackbar(
+                successCount > 0 ? `${successCount} item(s) added. Some failed.` : 'Failed to add items to cart',
+                successCount > 0 ? 'warning' : 'error'
+              );
+            }
+          }
+        });
+    });
   }
 
   goToProducts(): void {

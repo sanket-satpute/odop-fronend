@@ -11,7 +11,7 @@ import { AddressService, Address } from 'src/app/project/services/address.servic
 })
 export class CustomerAddressesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   addresses: Address[] = [];
   showAddressForm: boolean = false;
   editingAddress: Address | null = null;
@@ -30,7 +30,7 @@ export class CustomerAddressesComponent implements OnInit, OnDestroy {
     state: '',
     pincode: '',
     landmark: '',
-    isDefault: false
+    isDefault: true
   };
 
   states: string[] = [];
@@ -54,7 +54,7 @@ export class CustomerAddressesComponent implements OnInit, OnDestroy {
   loadAddresses(): void {
     this.isLoading = true;
     this.loadError = '';
-    
+
     this.addressService.getAddresses()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -81,7 +81,7 @@ export class CustomerAddressesComponent implements OnInit, OnDestroy {
 
   openEditForm(address: Address): void {
     this.editingAddress = address;
-    this.formData = { 
+    this.formData = {
       type: address.type,
       name: address.name,
       phone: address.phone,
@@ -115,7 +115,7 @@ export class CustomerAddressesComponent implements OnInit, OnDestroy {
       state: '',
       pincode: '',
       landmark: '',
-      isDefault: false
+      isDefault: true
     };
   }
 
@@ -200,7 +200,7 @@ export class CustomerAddressesComponent implements OnInit, OnDestroy {
 
   deleteAddress(address: Address): void {
     if (!address.addressId) return;
-    
+
     if (confirm('Are you sure you want to delete this address?')) {
       this.addressService.deleteAddress(address.addressId)
         .pipe(takeUntil(this.destroy$))
@@ -219,7 +219,7 @@ export class CustomerAddressesComponent implements OnInit, OnDestroy {
 
   setAsDefault(address: Address): void {
     if (!address.addressId || address.isDefault) return;
-    
+
     this.addressService.setDefaultAddress(address.addressId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({

@@ -5,6 +5,9 @@ import { CustomerServiceService } from 'src/app/project/services/customer-servic
 import { VendorServiceService } from 'src/app/project/services/vendor-service.service';
 import { CustomerDto } from 'src/app/project/models/customer';
 import { VendorDto } from 'src/app/project/models/vendor';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 export interface OrderStat {
   type: string;
@@ -77,7 +80,8 @@ export class AdminDashboardOrdersComponent implements OnInit, OnDestroy {
   constructor(
     private orderService: OrderService,
     private customerService: CustomerServiceService,
-    private vendorService: VendorServiceService
+    private vendorService: VendorServiceService,
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
@@ -106,6 +110,7 @@ export class AdminDashboardOrdersComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         this.applyFilters();
         this.extractVendors();
+        this.calculateOrderStats();
         // Fetch customer and vendor info for all orders (cache for performance)
         mappedOrders.forEach(order => {
           if (order.customer.id && !this.customerCache[order.customer.id]) {
@@ -147,11 +152,13 @@ export class AdminDashboardOrdersComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.error = err.message || 'Failed to load orders.';
         this.isLoading = false;
+        this.orderStats = [];
       }
     });
   }
 
   mapBackendOrderToUI(order: BackendOrder): Order {
+    const normalizedStatus = this.normalizeOrderStatus(order.orderStatus);
     return {
       id: order.orderId || '',
       customer: {
@@ -168,12 +175,44 @@ export class AdminDashboardOrdersComponent implements OnInit, OnDestroy {
         phone: '',
         logo: ''
       },
-      amount: order.totalAmount || 0,
-      status: (order.orderStatus as any) || 'pending',
-      paymentStatus: (order.paymentMethod as any) || 'paid',
+      amount: order.finalAmount || order.totalAmount || 0,
+      status: normalizedStatus,
+      paymentStatus: this.normalizePaymentStatus(order.paymentStatus, order.paymentMethod),
       placedOn: order.orderDateTime ? new Date(order.orderDateTime) : new Date(),
-      products: order.productList || []
+      products: order.orderItems || order.productList || []
     };
+  }
+
+  private normalizeOrderStatus(status?: string): Order['status'] {
+    const value = (status || '').toLowerCase();
+    if (value === 'delivered') return 'delivered';
+    if (value === 'cancelled' || value === 'canceled' || value === 'returned') return 'cancelled';
+    if (value === 'shipped' || value === 'out_for_delivery' || value === 'out for delivery' || value === 'dispatched') return 'dispatched';
+    return 'pending';
+  }
+
+  private normalizePaymentStatus(paymentStatus?: string, paymentMethod?: string): Order['paymentStatus'] {
+    const status = (paymentStatus || '').toLowerCase();
+    if (status.includes('paid') || status.includes('success')) return 'paid';
+    if (status.includes('fail') || status.includes('refund')) return 'failed';
+    if ((paymentMethod || '').toLowerCase() === 'cod') return 'pending';
+    return status ? 'pending' : 'pending';
+  }
+
+  private calculateOrderStats(): void {
+    const total = this.orders.length;
+    const pending = this.orders.filter(o => o.status === 'pending').length;
+    const dispatched = this.orders.filter(o => o.status === 'dispatched').length;
+    const delivered = this.orders.filter(o => o.status === 'delivered').length;
+    const cancelled = this.orders.filter(o => o.status === 'cancelled').length;
+
+    this.orderStats = [
+      { type: 'total', label: 'Total Orders', count: total, icon: 'fas fa-shopping-cart', change: 0 },
+      { type: 'pending', label: 'Pending Orders', count: pending, icon: 'fas fa-clock', change: 0 },
+      { type: 'dispatched', label: 'Dispatched', count: dispatched, icon: 'fas fa-shipping-fast', change: 0 },
+      { type: 'delivered', label: 'Delivered', count: delivered, icon: 'fas fa-check-circle', change: 0 },
+      { type: 'cancelled', label: 'Cancelled', count: cancelled, icon: 'fas fa-times-circle', change: 0 }
+    ];
   }
 
   extractVendors(): void {
@@ -190,105 +229,6 @@ export class AdminDashboardOrdersComponent implements OnInit, OnDestroy {
     this.fetchOrders();
     this.selectedOrders = [];
     this.allSelected = false;
-  }
-
-  loadInitialData(): void {
-    this.isLoading = true;
-    
-    // Simulate API call with mock data
-    setTimeout(() => {
-      this.orders = this.generateMockOrders();
-      this.filteredOrders = [...this.orders];
-      this.totalOrders = this.orders.length;
-      this.totalPages = Math.ceil(this.totalOrders / this.pageSize);
-      this.isLoading = false;
-    }, 1000);
-  }
-
-  loadOrderStats(): void {
-    // Mock stats data
-    this.orderStats = [
-      {
-        type: 'total',
-        label: 'Total Orders',
-        count: 1247,
-        icon: 'fas fa-shopping-cart',
-        change: 12.5
-      },
-      {
-        type: 'pending',
-        label: 'Pending Orders',
-        count: 89,
-        icon: 'fas fa-clock',
-        change: -3.2
-      },
-      {
-        type: 'dispatched',
-        label: 'Dispatched',
-        count: 156,
-        icon: 'fas fa-shipping-fast',
-        change: 8.1
-      },
-      {
-        type: 'delivered',
-        label: 'Delivered',
-        count: 987,
-        icon: 'fas fa-check-circle',
-        change: 15.3
-      },
-      {
-        type: 'cancelled',
-        label: 'Cancelled',
-        count: 15,
-        icon: 'fas fa-times-circle',
-        change: -5.7
-      }
-    ];
-  }
-
-  loadVendors(): void {
-    // Mock vendors data
-    this.vendors = [
-      { id: '1', name: 'TechStore Pro', email: 'contact@techstore.com', phone: '+91 98765 43210', logo: 'https://via.placeholder.com/40x40/4F46E5/FFFFFF?text=TS' },
-      { id: '2', name: 'Fashion Hub', email: 'info@fashionhub.com', phone: '+91 87654 32109', logo: 'https://via.placeholder.com/40x40/EC4899/FFFFFF?text=FH' },
-      { id: '3', name: 'Home Essentials', email: 'support@homeessentials.com', phone: '+91 76543 21098', logo: 'https://via.placeholder.com/40x40/10B981/FFFFFF?text=HE' },
-      { id: '4', name: 'Sports World', email: 'orders@sportsworld.com', phone: '+91 65432 10987', logo: 'https://via.placeholder.com/40x40/F59E0B/FFFFFF?text=SW' },
-      { id: '5', name: 'Book Palace', email: 'hello@bookpalace.com', phone: '+91 54321 09876', logo: 'https://via.placeholder.com/40x40/8B5CF6/FFFFFF?text=BP' }
-    ];
-  }
-
-  generateMockOrders(): Order[] {
-    const mockOrders: Order[] = [];
-    const statuses: ('pending' | 'dispatched' | 'delivered' | 'cancelled')[] = ['pending', 'dispatched', 'delivered', 'cancelled'];
-    const paymentStatuses: ('paid' | 'pending' | 'failed')[] = ['paid', 'pending', 'failed'];
-    
-    const customers: Customer[] = [
-      { id: '1', name: 'Rajesh Kumar', email: 'rajesh.kumar@email.com', phone: '+91 98765 43210', avatar: 'https://via.placeholder.com/40x40/3B82F6/FFFFFF?text=RK' },
-      { id: '2', name: 'Priya Sharma', email: 'priya.sharma@email.com', phone: '+91 87654 32109', avatar: 'https://via.placeholder.com/40x40/EC4899/FFFFFF?text=PS' },
-      { id: '3', name: 'Amit Patel', email: 'amit.patel@email.com', phone: '+91 76543 21098', avatar: 'https://via.placeholder.com/40x40/10B981/FFFFFF?text=AP' },
-      { id: '4', name: 'Sneha Gupta', email: 'sneha.gupta@email.com', phone: '+91 65432 10987', avatar: 'https://via.placeholder.com/40x40/F59E0B/FFFFFF?text=SG' },
-      { id: '5', name: 'Vikram Singh', email: 'vikram.singh@email.com', phone: '+91 54321 09876', avatar: 'https://via.placeholder.com/40x40/8B5CF6/FFFFFF?text=VS' }
-    ];
-
-    for (let i = 1; i <= 50; i++) {
-      const customer = customers[Math.floor(Math.random() * customers.length)];
-      const vendor = this.vendors[Math.floor(Math.random() * this.vendors.length)];
-      const status = statuses[Math.floor(Math.random() * statuses.length)];
-      const paymentStatus = paymentStatuses[Math.floor(Math.random() * paymentStatuses.length)];
-      
-      mockOrders.push({
-        id: `ORD${String(i).padStart(6, '0')}`,
-        customer: customer,
-        vendor: vendor,
-        amount: Math.floor(Math.random() * 50000) + 500,
-        status: status,
-        paymentStatus: paymentStatus,
-        placedOn: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000),
-        products: []
-      });
-    }
-
-    return mockOrders.sort((a, b) => b.placedOn.getTime() - a.placedOn.getTime());
   }
 
   // Search and Filter Methods
@@ -425,91 +365,150 @@ export class AdminDashboardOrdersComponent implements OnInit, OnDestroy {
   }
 
   editOrder(order: Order): void {
-    console.log('Edit order:', order);
-    // Implement edit functionality
+    this.viewOrderDetails(order);
   }
 
   cancelOrder(order: Order): void {
     if (confirm(`Are you sure you want to cancel order ${order.id}?`)) {
-      const index = this.orders.findIndex(o => o.id === order.id);
-      if (index > -1) {
-        this.orders[index].status = 'cancelled';
-        this.applyFilters();
-      }
+      this.orderService.cancelOrder(order.id)
+        .pipe(catchError(() => of(null)))
+        .subscribe((updated: BackendOrder | null) => {
+          if (!updated) {
+            this.snackBar.open('Failed to cancel order', 'Close', { duration: 3000 });
+            return;
+          }
+          this.applyStatusLocally(order.id, 'cancelled');
+          this.snackBar.open('Order cancelled', 'Close', { duration: 2500 });
+        });
     }
   }
 
   updateOrderStatus(newStatus: 'pending' | 'dispatched' | 'delivered' | 'cancelled'): void {
     if (this.selectedOrder) {
-      const index = this.orders.findIndex(o => o.id === this.selectedOrder!.id);
-      if (index > -1) {
-        this.orders[index].status = newStatus;
-        this.selectedOrder.status = newStatus;
-        this.applyFilters();
-      }
+      const backendStatus = newStatus === 'dispatched' ? 'Shipped' :
+                            newStatus === 'delivered' ? 'Delivered' :
+                            newStatus === 'cancelled' ? 'Cancelled' : 'Pending';
+
+      this.orderService.updateOrderStatus(this.selectedOrder.id, backendStatus)
+        .pipe(catchError(() => of(null)))
+        .subscribe((updated: BackendOrder | null) => {
+          if (!updated) {
+            this.snackBar.open('Failed to update order status', 'Close', { duration: 3000 });
+            return;
+          }
+          this.applyStatusLocally(this.selectedOrder!.id, newStatus);
+          this.snackBar.open(`Order marked as ${newStatus}`, 'Close', { duration: 2500 });
+        });
     }
   }
 
   processRefund(): void {
     if (this.selectedOrder) {
-      console.log('Processing refund for order:', this.selectedOrder.id);
-      // Implement refund functionality
+      this.orderService.updateOrderStatus(this.selectedOrder.id, 'Refunded')
+        .pipe(catchError(() => of(null)))
+        .subscribe((updated: BackendOrder | null) => {
+          if (!updated) {
+            this.snackBar.open('Failed to process refund', 'Close', { duration: 3000 });
+            return;
+          }
+          this.applyPaymentStatusLocally(this.selectedOrder!.id, 'failed');
+          this.snackBar.open('Refund processed', 'Close', { duration: 2500 });
+        });
     }
   }
 
   // Bulk Actions
   bulkDispatch(): void {
+    if (this.selectedOrders.length === 0) return;
     if (confirm(`Mark ${this.selectedOrders.length} orders as dispatched?`)) {
-      this.selectedOrders.forEach(orderId => {
-        const index = this.orders.findIndex(o => o.id === orderId);
-        if (index > -1 && this.orders[index].status === 'pending') {
-          this.orders[index].status = 'dispatched';
-        }
+      const calls = this.selectedOrders.map(orderId =>
+        this.orderService.updateOrderStatus(orderId, 'Shipped').pipe(catchError(() => of(null)))
+      );
+      forkJoin(calls).subscribe(results => {
+        const okIds = this.selectedOrders.filter((_, idx) => !!results[idx]);
+        okIds.forEach(id => this.applyStatusLocally(id, 'dispatched', false));
+        this.finishBulkAction(okIds.length, this.selectedOrders.length, 'dispatched');
       });
-      this.applyFilters();
-      this.selectedOrders = [];
-      this.allSelected = false;
     }
   }
 
   bulkDeliver(): void {
+    if (this.selectedOrders.length === 0) return;
     if (confirm(`Mark ${this.selectedOrders.length} orders as delivered?`)) {
-      this.selectedOrders.forEach(orderId => {
-        const index = this.orders.findIndex(o => o.id === orderId);
-        if (index > -1 && this.orders[index].status === 'dispatched') {
-          this.orders[index].status = 'delivered';
-        }
+      const calls = this.selectedOrders.map(orderId =>
+        this.orderService.updateOrderStatus(orderId, 'Delivered').pipe(catchError(() => of(null)))
+      );
+      forkJoin(calls).subscribe(results => {
+        const okIds = this.selectedOrders.filter((_, idx) => !!results[idx]);
+        okIds.forEach(id => this.applyStatusLocally(id, 'delivered', false));
+        this.finishBulkAction(okIds.length, this.selectedOrders.length, 'delivered');
       });
-      this.applyFilters();
-      this.selectedOrders = [];
-      this.allSelected = false;
     }
   }
 
   bulkCancel(): void {
+    if (this.selectedOrders.length === 0) return;
     if (confirm(`Cancel ${this.selectedOrders.length} orders?`)) {
-      this.selectedOrders.forEach(orderId => {
-        const index = this.orders.findIndex(o => o.id === orderId);
-        if (index > -1 && this.orders[index].status !== 'delivered') {
-          this.orders[index].status = 'cancelled';
-        }
+      const calls = this.selectedOrders.map(orderId =>
+        this.orderService.cancelOrder(orderId).pipe(catchError(() => of(null)))
+      );
+      forkJoin(calls).subscribe(results => {
+        const okIds = this.selectedOrders.filter((_, idx) => !!results[idx]);
+        okIds.forEach(id => this.applyStatusLocally(id, 'cancelled', false));
+        this.finishBulkAction(okIds.length, this.selectedOrders.length, 'cancelled');
       });
-      this.applyFilters();
-      this.selectedOrders = [];
-      this.allSelected = false;
     }
   }
 
   exportToExcel(): void {
-    console.log('Exporting orders to Excel...');
-    // Implement Excel export functionality
-    const selectedOrdersData = this.orders.filter(order => 
-      this.selectedOrders.includes(order.id)
-    );
+    const selectedOrdersData = this.orders.filter(order => this.selectedOrders.includes(order.id));
+    const source = selectedOrdersData.length > 0 ? selectedOrdersData : this.filteredOrders;
     
     // Create CSV content
-    const csvContent = this.convertToCSV(selectedOrdersData);
+    const csvContent = this.convertToCSV(source);
     this.downloadCSV(csvContent, 'orders-export.csv');
+    this.snackBar.open(`Exported ${source.length} order(s)`, 'Close', { duration: 2500 });
+  }
+
+  private applyStatusLocally(orderId: string, status: Order['status'], recalc: boolean = true): void {
+    const index = this.orders.findIndex(o => o.id === orderId);
+    if (index !== -1) {
+      this.orders[index].status = status;
+      if (this.selectedOrder?.id === orderId) {
+        this.selectedOrder.status = status;
+      }
+    }
+    if (recalc) {
+      this.applyFilters();
+      this.calculateOrderStats();
+    }
+  }
+
+  private applyPaymentStatusLocally(orderId: string, paymentStatus: Order['paymentStatus']): void {
+    const index = this.orders.findIndex(o => o.id === orderId);
+    if (index !== -1) {
+      this.orders[index].paymentStatus = paymentStatus;
+      if (this.selectedOrder?.id === orderId) {
+        this.selectedOrder.paymentStatus = paymentStatus;
+      }
+    }
+    this.applyFilters();
+    this.calculateOrderStats();
+  }
+
+  private finishBulkAction(successCount: number, total: number, action: string): void {
+    this.applyFilters();
+    this.calculateOrderStats();
+    this.selectedOrders = [];
+    this.allSelected = false;
+
+    if (successCount === total) {
+      this.snackBar.open(`Marked ${successCount} order(s) as ${action}`, 'Close', { duration: 2500 });
+    } else if (successCount > 0) {
+      this.snackBar.open(`${successCount}/${total} order(s) updated`, 'Close', { duration: 3000 });
+    } else {
+      this.snackBar.open('No orders were updated', 'Close', { duration: 3000 });
+    }
   }
 
   private convertToCSV(orders: Order[]): string {

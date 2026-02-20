@@ -1,0 +1,165 @@
+
+Warning: This is a simple server for use in testing or debugging Angular applications
+locally. It hasn't been reviewed for security issues.
+
+Binding this server to an open connection can result in compromising your application or
+computer. Using a different host than the one passed to the "--host" flag might result in
+websocket connection issues. You might need to use "--disable-host-check" if that's the
+case.
+    
+- Generating browser application bundles (phase: setup)...
+√ Browser application bundle generation complete.
+
+Warning: src/app/components/festivals/festival-detail/festival-detail.component.html:97:59 - warning NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.
+
+97             <span class="stat-value">{{ festival.regions?.length || 0 }}</span>
+                                                             ~~~~~~
+
+  src/app/components/festivals/festival-detail/festival-detail.component.ts:62:16
+    62   templateUrl: './festival-detail.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component FestivalDetailComponent.
+
+
+Warning: src/app/components/main-starter/main-starter.component.html:136:63 - warning NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.
+
+136                     <h2>{{ getDisplayName(userState.customer?.fullName) }}</h2>
+                                                                  ~~~~~~~~
+
+  src/app/components/main-starter/main-starter.component.ts:36:16
+    36   templateUrl: './main-starter.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component MainStarterComponent.
+
+
+Warning: src/app/components/main-starter/main-starter.component.html:165:65 - warning NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.
+
+165                         <h2>{{ getDisplayName(userState.vendor?.shoppeeName) }}</h2>
+                                                                    ~~~~~~~~~~~
+
+  src/app/components/main-starter/main-starter.component.ts:36:16
+    36   templateUrl: './main-starter.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component MainStarterComponent.
+
+
+Warning: src/app/components/main-starter/main-starter.component.html:192:64 - warning NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.
+
+192                         <h2>{{ getDisplayName(userState.admin?.fullName) }}</h2>
+                                                                   ~~~~~~~~
+
+  src/app/components/main-starter/main-starter.component.ts:36:16
+    36   templateUrl: './main-starter.component.html',
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component MainStarterComponent.
+
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/components/dialogs/register-dialog/register-dialog.imports.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/components/product-variant-selector/product-variant-selector.component.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/data/index.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/data/india-locations-2.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/data/india-locations-3.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/data/india-locations-4.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/data/india-locations.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/guards/index.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/models/base/base.component.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/models/interfaces/data-states.interface.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/pipes/translate.pipe.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/services/http-base.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/services/session-persistence.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/services/shipping.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/project/services/translation.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/services/notification.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/app/services/product-variant.service.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:/Users/lenovo/Drive D/Other Drive/C-Drive/Desktop-Folder/Project/ODOP Project/odop-project/src/environments/environment.prod.ts is part of the TypeScript compilation but it's unused.
+Add only entry points to the 'files' or 'include' properties in your tsconfig.
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.array.index-of.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.array.iterator.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.array.reduce.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.array.reverse.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.promise.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.regexp.to-string.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.string.ends-with.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.string.includes.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.string.match.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.string.replace.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.string.split.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.string.starts-with.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/es.string.trim.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'core-js/modules/web.dom-collections.iterator.js'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'raf'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\canvg\lib\index.es.js depends on 'rgbcolor'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\node_modules\jspdf\dist\jspdf.es.min.js depends on 'html2canvas'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: c:\Users\lenovo\Drive D\Other Drive\C-Drive\Desktop-Folder\Project\ODOP Project\odop-project\src\app\services\chat.service.ts depends on 'sockjs-client'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+

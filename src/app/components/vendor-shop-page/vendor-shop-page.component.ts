@@ -7,7 +7,7 @@ import { ProductServiceService } from '../../project/services/product-service.se
 import { CartServiceService } from '../../project/services/cart-service.service';
 import { WishlistService } from '../../project/services/wishlist.service';
 import { UserStateService } from '../../project/services/user-state.service';
-import { ReviewService, Review, VendorRating } from '../../project/services/review.service';
+import { ReviewService, Review } from '../../project/services/review.service';
 import { VendorDto } from '../../project/models/vendor';
 import { Product } from '../../project/models/product';
 import { Cart } from '../../project/models/cart';
@@ -93,7 +93,7 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
   showGalleryModal = false;
   galleryModalIndex = 0;
 
-  // Shop reviews (mock data - in production from API)
+  // Shop reviews
   shopReviews: ShopReview[] = [];
   averageShopRating = 4.5;
   totalShopReviews = 0;
@@ -160,20 +160,18 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
     this.vendorService.getVendorById(vendorId)
       .pipe(
         takeUntil(this.destroy$),
-        retry(2), // Retry twice on failure
-        catchError(error => {
-          console.error('Error loading vendor:', error);
-          // Return mock data as fallback
-          return of(this.getMockVendor(vendorId));
-        })
+        retry(2)
       )
       .subscribe({
         next: (vendor) => {
           if (vendor && vendor.vendorId) {
             this.vendor = vendor;
           } else {
-            // Use mock data if vendor data is incomplete
-            this.vendor = this.getMockVendor(vendorId);
+            this.vendor = null;
+            this.vendorNotFound = true;
+            this.vendorError = 'Vendor not found';
+            this.isLoading = false;
+            return;
           }
           this.isLoading = false;
           this.initializeGallery();
@@ -186,13 +184,10 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Failed to load vendor after retries:', error);
-          this.vendor = this.getMockVendor(vendorId);
+          this.vendor = null;
+          this.vendorNotFound = true;
+          this.vendorError = 'Failed to load vendor details';
           this.isLoading = false;
-          this.initializeGallery();
-          this.generateTrustMetrics();
-          this.loadVendorProducts(vendorId);
-          this.loadVendorReviews(vendorId);
-          this.loadRelatedVendors();
         }
       });
   }
@@ -232,14 +227,20 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
             this.calculateRatingDistribution();
           }
         } else {
-          // Generate mock reviews if none from API
-          this.generateMockReviews();
+          this.shopReviews = [];
+          this.totalShopReviews = 0;
+          this.averageShopRating = 0;
+          this.ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
         }
         this.reviewsLoading = false;
         this.generateTrustMetrics(); // Update trust metrics with review data
       },
       error: () => {
-        this.generateMockReviews();
+        this.shopReviews = [];
+        this.totalShopReviews = 0;
+        this.averageShopRating = 0;
+        this.ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        this.reviewsError = 'Failed to load reviews';
         this.reviewsLoading = false;
       }
     });
@@ -250,239 +251,13 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
     return {
       id: review.reviewId,
       customerName: review.customerName || 'Anonymous',
-      customerImage: `https://ui-avatars.com/api/?name=${encodeURIComponent(review.customerName || 'A')}&background=random`,
-      rating: review.rating,
+      customerImage: `https://ui-avatars.com/api/?name=${encodeURIComponent(review.customerName || 'A')}&background=0D8ABC&color=fff`,
+      rating: Number(review.rating || 0),
       comment: review.comment,
-      date: new Date(review.createdAt),
+      date: review.createdAt ? new Date(review.createdAt) : new Date(),
       helpful: review.helpfulCount || 0,
       verified: review.isVerifiedPurchase
     };
-  }
-
-  getMockVendor(vendorId: string): VendorDto {
-    return {
-      vendorId: vendorId,
-      fullName: 'Ramesh Kumar Sharma',
-      email: 'ramesh.crafts@example.com',
-      phone: '+91 98765 43210',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-      shoppeeName: 'Sharma Handicrafts & Traditional Arts',
-      shopDescription: 'Welcome to Sharma Handicrafts, where tradition meets artistry. For over three generations, our family has been preserving the rich heritage of Indian handicrafts. Each piece we create tells a story of dedication, skill, and cultural pride. We specialize in traditional Rajasthani textiles, hand-painted pottery, and intricate wood carvings that capture the essence of our vibrant culture. Our workshop is a place where ancient techniques are kept alive, passed down from master craftsmen who learned from their fathers and grandfathers before them.',
-      shopImages: [
-        'https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?w=800',
-        'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800',
-        'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800',
-        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
-        'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800'
-      ],
-      shopLatitude: 26.9124,
-      shopLongitude: 75.7873,
-      shopAddress: '45, Craft Bazaar, Near City Palace',
-      locationState: 'Rajasthan',
-      locationDistrict: 'Jaipur',
-      pincode: '302001',
-      businessStartDate: new Date('2008-03-15'),
-      isVerified: true,
-      giTagCertified: true,
-      deliveryOptions: ['Standard Shipping', 'Express Delivery', 'Local Pickup'],
-      returnPolicy: '7-day easy returns on all products. Items must be in original condition with tags intact.',
-      qualityPolicy: 'Every product is handcrafted with care and undergoes strict quality checks before shipping.',
-      // Contact Information
-      contactNumber: '+91 98765 43210',
-      emailAddress: 'ramesh.crafts@example.com',
-      whatsappNumber: '+919876543210',
-      websiteUrl: 'https://sharmahandicrafts.example.com',
-      // Shop Visit Details
-      isPhysicalVisitAllowed: true,
-      shopTimings: '10:00 AM - 7:00 PM',
-      shopClosedDays: 'Sunday',
-      // Specializations
-      specializations: ['Blue Pottery', 'Block Printing', 'Wood Carving', 'Traditional Textiles', 'Lacquer Work'],
-    } as unknown as VendorDto;
-  }
-
-  getMockProducts(): Product[] {
-    return [
-      {
-        productId: 'mock-1',
-        productName: 'Hand-Painted Blue Pottery Vase',
-        description: 'Exquisite hand-painted blue pottery vase featuring traditional Jaipur floral motifs',
-        price: 2499,
-        discountedPrice: 1999,
-        images: ['https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400'],
-        subCategory: 'Pottery',
-        craftType: 'Blue Pottery',
-        origin: 'Jaipur, Rajasthan',
-        isGITagged: true,
-        rating: 4.8,
-        totalReviews: 124,
-        totalSold: 89,
-        stockQuantity: 15,
-        vendorId: this.vendor?.vendorId
-      },
-      {
-        productId: 'mock-2',
-        productName: 'Rajasthani Block Print Bedsheet Set',
-        description: 'Premium cotton bedsheet with traditional block print patterns, includes 2 pillow covers',
-        price: 3999,
-        discountedPrice: 3199,
-        images: ['https://images.unsplash.com/photo-1582582621959-48d27397dc69?w=400'],
-        subCategory: 'Textiles',
-        craftType: 'Block Print',
-        origin: 'Sanganer, Rajasthan',
-        isGITagged: true,
-        rating: 4.9,
-        totalReviews: 256,
-        totalSold: 312,
-        stockQuantity: 25,
-        vendorId: this.vendor?.vendorId
-      },
-      {
-        productId: 'mock-3',
-        productName: 'Handcrafted Wooden Elephant Figurine',
-        description: 'Intricately carved wooden elephant with brass inlay work',
-        price: 1899,
-        images: ['https://images.unsplash.com/photo-1602507364286-98c4c82fc66d?w=400'],
-        subCategory: 'Woodwork',
-        craftType: 'Wood Carving',
-        origin: 'Jodhpur, Rajasthan',
-        isGITagged: false,
-        rating: 4.7,
-        totalReviews: 89,
-        totalSold: 156,
-        stockQuantity: 20,
-        vendorId: this.vendor?.vendorId
-      },
-      {
-        productId: 'mock-4',
-        productName: 'Traditional Bandhani Silk Dupatta',
-        description: 'Vibrant bandhani tie-dye silk dupatta in stunning crimson and gold',
-        price: 4599,
-        discountedPrice: 3899,
-        images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400'],
-        subCategory: 'Textiles',
-        craftType: 'Bandhani',
-        origin: 'Jodhpur, Rajasthan',
-        isGITagged: true,
-        rating: 4.9,
-        totalReviews: 178,
-        totalSold: 234,
-        stockQuantity: 12,
-        vendorId: this.vendor?.vendorId
-      },
-      {
-        productId: 'mock-5',
-        productName: 'Brass Diya Set (Pack of 5)',
-        description: 'Traditional brass oil lamps with intricate engravings, perfect for festivals',
-        price: 1299,
-        images: ['https://images.unsplash.com/photo-1606293926075-69a00dbfde81?w=400'],
-        subCategory: 'Metalwork',
-        craftType: 'Brass Work',
-        origin: 'Jaipur, Rajasthan',
-        isGITagged: false,
-        rating: 4.6,
-        totalReviews: 67,
-        totalSold: 445,
-        stockQuantity: 50,
-        vendorId: this.vendor?.vendorId
-      },
-      {
-        productId: 'mock-6',
-        productName: 'Miniature Painting - Royal Procession',
-        description: 'Authentic Rajasthani miniature painting on silk depicting a royal Mughal procession',
-        price: 8999,
-        discountedPrice: 7499,
-        images: ['https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400'],
-        subCategory: 'Art',
-        craftType: 'Miniature Painting',
-        origin: 'Udaipur, Rajasthan',
-        isGITagged: true,
-        rating: 5.0,
-        totalReviews: 45,
-        totalSold: 28,
-        stockQuantity: 5,
-        vendorId: this.vendor?.vendorId
-      },
-      {
-        productId: 'mock-7',
-        productName: 'Lac Bangle Set - Bridal Collection',
-        description: 'Set of 12 handcrafted lac bangles with stone and mirror work',
-        price: 1599,
-        images: ['https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400'],
-        subCategory: 'Jewelry',
-        craftType: 'Lac Work',
-        origin: 'Jaipur, Rajasthan',
-        isGITagged: false,
-        rating: 4.8,
-        totalReviews: 234,
-        totalSold: 567,
-        stockQuantity: 30,
-        vendorId: this.vendor?.vendorId
-      },
-      {
-        productId: 'mock-8',
-        productName: 'Jaipuri Razai (Cotton Quilt)',
-        description: 'Premium handmade cotton quilt with traditional Sanganeri print',
-        price: 5499,
-        discountedPrice: 4499,
-        images: ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400'],
-        subCategory: 'Textiles',
-        craftType: 'Hand Quilting',
-        origin: 'Sanganer, Rajasthan',
-        isGITagged: true,
-        rating: 4.9,
-        totalReviews: 312,
-        totalSold: 198,
-        stockQuantity: 18,
-        vendorId: this.vendor?.vendorId
-      }
-    ] as unknown as Product[];
-  }
-
-  getMockRelatedVendors(): VendorDto[] {
-    return [
-      {
-        vendorId: 'related-1',
-        fullName: 'Priya Devi',
-        shoppeeName: 'Devi Traditional Textiles',
-        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
-        locationDistrict: 'Jodhpur',
-        locationState: 'Rajasthan',
-        isVerified: true,
-        shopImages: ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400']
-      },
-      {
-        vendorId: 'related-2',
-        fullName: 'Mohan Lal Kumhar',
-        shoppeeName: 'Blue Pottery House',
-        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
-        locationDistrict: 'Jaipur',
-        locationState: 'Rajasthan',
-        isVerified: true,
-        giTagCertified: true,
-        shopImages: ['https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?w=400']
-      },
-      {
-        vendorId: 'related-3',
-        fullName: 'Sunita Meena',
-        shoppeeName: 'Meena Craft Studio',
-        image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
-        locationDistrict: 'Udaipur',
-        locationState: 'Rajasthan',
-        isVerified: true,
-        shopImages: ['https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400']
-      },
-      {
-        vendorId: 'related-4',
-        fullName: 'Arjun Singh',
-        shoppeeName: 'Royal Rajasthan Handicrafts',
-        image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
-        locationDistrict: 'Bikaner',
-        locationState: 'Rajasthan',
-        isVerified: false,
-        shopImages: ['https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400']
-      }
-    ] as unknown as VendorDto[];
   }
 
   loadVendorProducts(vendorId: string): void {
@@ -500,12 +275,7 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (products) => {
-          if (products && products.length > 0) {
-            this.products = products;
-          } else {
-            // Use mock products if none returned
-            this.products = this.getMockProducts();
-          }
+          this.products = products || [];
           this.filteredProducts = [...this.products];
           this.extractCategories();
           this.calculatePagination();
@@ -513,11 +283,12 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
           this.generateTrustMetrics(); // Update product count in trust metrics
         },
         error: () => {
-          this.products = this.getMockProducts();
+          this.products = [];
           this.filteredProducts = [...this.products];
           this.extractCategories();
           this.calculatePagination();
           this.productsLoading = false;
+          this.productsError = 'Failed to load products';
         }
       });
   }
@@ -541,21 +312,18 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
               this.relatedVendors = vendors
                 .filter(v => v.vendorId !== this.vendor?.vendorId)
                 .slice(0, 4);
-            }
-            // If no related vendors found, use mock data
-            if (this.relatedVendors.length === 0) {
-              this.relatedVendors = this.getMockRelatedVendors();
+            } else {
+              this.relatedVendors = [];
             }
             this.relatedVendorsLoading = false;
           },
           error: () => {
-            this.relatedVendors = this.getMockRelatedVendors();
+            this.relatedVendors = [];
             this.relatedVendorsLoading = false;
           }
         });
     } else {
-      // Use mock related vendors if no state
-      this.relatedVendors = this.getMockRelatedVendors();
+      this.relatedVendors = [];
       this.relatedVendorsLoading = false;
     }
   }
@@ -567,15 +335,10 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
     if (this.vendor?.shopImages && this.vendor.shopImages.length > 0) {
       this.galleryImages.push(...this.vendor.shopImages);
     }
-    
-    // Add demo images if none available
-    if (this.galleryImages.length === 0) {
-      this.galleryImages = [
-        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1555529771-7888783a18d3?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800&h=600&fit=crop'
-      ];
+
+    // Use real vendor profile image as fallback, not mock gallery data
+    if (this.galleryImages.length === 0 && this.vendor?.profilePictureUrl) {
+      this.galleryImages = [this.vendor.profilePictureUrl];
     }
   }
 
@@ -619,39 +382,6 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
         description: 'Customer satisfaction'
       }
     ];
-  }
-
-  generateMockReviews(): void {
-    // Generate realistic mock reviews - in production these come from API
-    const reviewers = [
-      { name: 'Priya Sharma', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face' },
-      { name: 'Rahul Verma', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' },
-      { name: 'Anita Patel', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face' },
-      { name: 'Vikram Singh', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face' },
-      { name: 'Meera Reddy', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face' }
-    ];
-
-    const comments = [
-      'Excellent quality products and very responsive seller. Highly recommend!',
-      'Authentic handicrafts with great attention to detail. Loved the packaging too.',
-      'Fast delivery and product was exactly as described. Will buy again!',
-      'The artisan craftsmanship is outstanding. Supporting local talent feels great.',
-      'Great communication throughout. The seller helped me choose the perfect gift.'
-    ];
-
-    this.shopReviews = reviewers.map((reviewer, index) => ({
-      id: `review-${index}`,
-      customerName: reviewer.name,
-      customerImage: reviewer.image,
-      rating: Math.floor(Math.random() * 2) + 4, // 4 or 5 stars
-      comment: comments[index],
-      date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-      verified: Math.random() > 0.3,
-      helpful: Math.floor(Math.random() * 50)
-    }));
-
-    this.totalShopReviews = this.shopReviews.length;
-    this.calculateRatingDistribution();
   }
 
   calculateRatingDistribution(): void {
@@ -708,11 +438,7 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
         result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case 'newest':
-        result.sort((a, b) => {
-          const dateA = new Date(a.popularityScore || 0).getTime();
-          const dateB = new Date(b.popularityScore || 0).getTime();
-          return dateB - dateA;
-        });
+        result.sort((a, b) => (b.popularityScore || 0) - (a.popularityScore || 0));
         break;
       case 'bestselling':
         result.sort((a, b) => (b.totalSold || 0) - (a.totalSold || 0));
@@ -794,7 +520,7 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
           duration: 3000,
           panelClass: ['success-snackbar']
         }).onAction().subscribe(() => {
-          this.router.navigate(['/cart']);
+          this.router.navigate(['/shopping_cart']);
         });
       },
       error: () => {
@@ -1161,3 +887,4 @@ export class VendorShopPageComponent implements OnInit, OnDestroy {
     return vendor.vendorId || index.toString();
   }
 }
+

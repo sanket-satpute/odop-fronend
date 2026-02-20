@@ -619,8 +619,14 @@
               </div>
             </div>
 
+            <div class="no-reviews" *ngIf="reviewsError">
+              <i class="fas fa-exclamation-circle"></i>
+              <h3>Unable to Load Reviews</h3>
+              <p>{{ reviewsError }}</p>
+            </div>
+
             <!-- No Reviews State -->
-            <div class="no-reviews" *ngIf="shopReviews.length === 0">
+            <div class="no-reviews" *ngIf="!reviewsError && shopReviews.length === 0">
               <i class="fas fa-comments"></i>
               <h3>No Reviews Yet</h3>
               <p>Be the first to review this shop!</p>

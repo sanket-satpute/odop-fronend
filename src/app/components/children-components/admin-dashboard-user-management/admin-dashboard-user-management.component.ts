@@ -1,12 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, HostListener, ElementRef } from '@angular/core';
 import { AdminServiceService } from 'src/app/project/services/admin-service.service';
 import { CustomerServiceService } from 'src/app/project/services/customer-service.service';
 import { VendorServiceService } from 'src/app/project/services/vendor-service.service';
 import { forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
-// dropdown
-import { OnInit, OnDestroy, Output, EventEmitter, HostListener, ElementRef } from '@angular/core';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface Role {
   value: string;
@@ -29,11 +27,12 @@ interface FilterOptions {
 // natural
 
 export interface User {
-  id: number;
+  id: string;
+  backendId: string;
   name: string;
-  phone: number
+  phone: number;
   email: string;
-  role: string;
+  role: 'customer' | 'vendor' | 'admin';
   status: string;
   createdAt: Date;
   profilePicture: string;
@@ -69,32 +68,9 @@ export class AdminDashboardUserManagementComponent {
     private customerService: CustomerServiceService,
     private adminService: AdminServiceService,
     private vendorService: VendorServiceService,
-    private elementRef: ElementRef
-  ) {
-    // Initialize with some dummy data
-    this.allUsers = [
-      {
-        id: 1,
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: +911234567890,
-        role: 'admin',
-        status: 'active',
-        createdAt: new Date('2023-01-01'),
-        profilePicture: 'https://via.placeholder.com/100'
-      },
-      {
-        id: 2,
-        name: 'Jane Smith',
-        email: 'jane.smith@example.com',
-        phone: +911234567890,
-        role: 'customer',
-        status: 'inactive',
-        createdAt: new Date('2023-02-01'),
-        profilePicture: 'https://via.placeholder.com/100'
-      }
-    ];
-  }
+    private elementRef: ElementRef,
+    private snackBar: MatSnackBar
+  ) {}
 // https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face
   ngOnInit() {
     this.startFetchingUsers();
@@ -118,24 +94,14 @@ export class AdminDashboardUserManagementComponent {
 
   startFetchingUsers() {
     this.fetchAllUsers();
-    this.updateCounts();
-    this.filterUsers();
   }
 
   updateCounts() {
-    this.totalUsersCount = this.allUsers.length;
-    this.customerService.getAllCustomersCount().subscribe(count => {
-      this.totalCustomersCount = count;
-      this.updateTotalUsers();
-    });
-    this.adminService.getAllAdminCount().subscribe(count => {
-      this.totalAdminsCount = count;
-      this.updateTotalUsers();
-    });
-    this.vendorService.getAllVendorsCount().subscribe(count => {
-      this.totalVendorsCount = count;
-      this.updateTotalUsers();
-    });
+    this.totalCustomersCount = this.allUsers.filter(u => u.role === 'customer').length;
+    this.totalVendorsCount = this.allUsers.filter(u => u.role === 'vendor').length;
+    this.totalAdminsCount = this.allUsers.filter(u => u.role === 'admin').length;
+    this.updateTotalUsers();
+    this.updateRoleCounts();
   }
 
   updateTotalUsers() {
@@ -147,25 +113,12 @@ export class AdminDashboardUserManagementComponent {
 
   onTabChange(tab: string) {
     this.selectedRole = tab;
-    this.filterUsers();
+    this.applyAllFilters();
   }
 
 
   filterUsers() {
-    const query = this.searchQuery.toLowerCase();
-
-    this.filteredUsers = this.allUsers.filter(user => {
-      const matchesRole = this.selectedRole === 'all' || user.role === this.selectedRole;
-      const matchesSearch =
-        user.name.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query) ||
-        user.phone.toString().includes(query);
-
-      return matchesRole && matchesSearch;
-    });
-
-    this.currentPage = 1; // Reset to first page
-    this.updatePaginatedUsers();
+    this.applyAllFilters();
   }
 
 
@@ -177,69 +130,82 @@ export class AdminDashboardUserManagementComponent {
       admins: this.adminService.getAllAdmins()
     }).subscribe(({ customers, vendors, admins }) => {
 
-      const mappedCustomers: User[] = customers.map((cust, i) => ({
-        id: i + 1, // or cust.customerId if available and unique
+      const mappedCustomers: User[] = customers.map((cust) => ({
+        id: cust.customerId || '',
+        backendId: cust.customerId || '',
         name: cust.fullName || 'Unnamed Customer',
         email: cust.emailAddress || '',
         role: 'customer',
         phone: cust.contactNumber || 0,
-        status: cust.status || 'inactive',
+        status: (cust.status || 'inactive').toLowerCase(),
         createdAt: new Date(cust.createdAt || new Date()),
         profilePicture: cust.profilePicturePath || 'assets/images/avatar-placeholder.svg'
       }));
 
-      const mappedVendors: User[] = vendors.map((vendor, i) => ({
-        id: i + 1000, // offset ID to avoid conflicts
+      const mappedVendors: User[] = vendors.map((vendor) => ({
+        id: vendor.vendorId || '',
+        backendId: vendor.vendorId || '',
         name: vendor.shopkeeperName || 'Unnamed Vendor',
         email: vendor.emailAddress || '',
         role: 'vendor',
         phone: vendor.contactNumber || 0,
-        status: vendor.status || 'inactive',
+        status: (vendor.status || 'inactive').toLowerCase(),
         createdAt: new Date(vendor.createdAt || new Date()),
         profilePicture: vendor.profilePictureUrl || 'assets/images/avatar-placeholder.svg'
       }));
 
-      const mappedAdmins: User[] = admins.map((admin, i) => ({
-        id: i + 2000,
+      const mappedAdmins: User[] = admins.map((admin) => ({
+        id: admin.adminId || '',
+        backendId: admin.adminId || '',
         name: admin.fullName || 'Unnamed Admin',
         email: admin.emailAddress || '',
         role: 'admin',
         phone: admin.contactNumber || 0,
-        status: (admin.active) ? 'active' : 'inactive',
+        status: admin.active ? 'active' : 'inactive',
         createdAt: new Date(admin.createdAt || new Date()),
         profilePicture: admin.profilePicturePath || 'assets/images/avatar-placeholder.svg'
       }));
 
-      // 🔀 Combine and shuffle all users
-      const combinedUsers = [...mappedCustomers, ...mappedVendors, ...mappedAdmins];
-      this.allUsers = this.shuffleArray(combinedUsers);
-      this.filteredUsers = [...this.allUsers]; // Initially show all
-      this.filterUsers(); // Apply any existing filters
+      this.allUsers = [...mappedCustomers, ...mappedVendors, ...mappedAdmins];
+      this.updateCounts();
+      this.applyAllFilters();
+    }, () => {
+      this.snackBar.open('Failed to load users', 'Close', { duration: 3000 });
     });
-  }
-
-  shuffleArray<T>(array: T[]): T[] {
-    return array
-      .map(value => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value);
   }
 
 
   openModal(user: User) {
-      console.log('View user:', user);
-      // Trigger modal here
-    }
+    this.snackBar.open(`User: ${user.name} (${user.role})`, 'Close', { duration: 2500 });
+  }
 
-    editUser(user: User) {
-      console.log('Edit user:', user);
-      // Navigate or open edit form/modal
-    }
+  editUser(user: User) {
+    this.snackBar.open('Direct edit is not configured for this role yet', 'Close', { duration: 2500 });
+  }
 
-    deleteUser(user: User) {
-      console.log('Delete user:', user);
-      // Confirm and delete logic
+  deleteUser(user: User) {
+    if (!user.backendId) {
+      this.snackBar.open('User ID is missing', 'Close', { duration: 2500 });
+      return;
     }
+    if (!confirm(`Delete ${user.role} "${user.name}"?`)) return;
+
+    const onSuccess = () => {
+      this.snackBar.open(`${user.role} deleted`, 'Close', { duration: 2500 });
+      this.fetchAllUsers();
+    };
+    const onError = () => this.snackBar.open(`Failed to delete ${user.role}`, 'Close', { duration: 3000 });
+
+    if (user.role === 'customer') {
+      this.customerService.deleteCustomerById(user.backendId).subscribe({ next: onSuccess, error: onError });
+      return;
+    }
+    if (user.role === 'vendor') {
+      this.vendorService.deleteVendorById(user.backendId).subscribe({ next: onSuccess, error: onError });
+      return;
+    }
+    this.adminService.deleteAdminById(user.backendId).subscribe({ next: onSuccess, error: onError });
+  }
 
     // pagination logic
     updatePaginatedUsers(): void {
@@ -300,9 +266,9 @@ export class AdminDashboardUserManagementComponent {
   
   // Role options with counts
   roles: Role[] = [
-    { value: 'admin', label: 'Administrator', count: 12 },
-    { value: 'vendor', label: 'Vendor', count: 148 },
-    { value: 'customer', label: 'Customer', count: 2847 }
+    { value: 'admin', label: 'Administrator', count: 0 },
+    { value: 'vendor', label: 'Vendor', count: 0 },
+    { value: 'customer', label: 'Customer', count: 0 }
   ];
 
 
@@ -511,51 +477,7 @@ export class AdminDashboardUserManagementComponent {
   }
   
   private showToast(message: string, type: 'success' | 'info' | 'warning' | 'error'): void {
-    // Create and show a temporary toast notification
-    const toast = document.createElement('div');
-    toast.className = `filter-toast filter-toast-${type}`;
-    toast.textContent = message;
-    
-    // Style the toast
-    Object.assign(toast.style, {
-      position: 'fixed',
-      top: '20px',
-      right: '20px',
-      background: type === 'success' ? '#10b981' : 
-                  type === 'info' ? '#3b82f6' :
-                  type === 'warning' ? '#f59e0b' : '#ef4444',
-      color: 'white',
-      padding: '12px 20px',
-      borderRadius: '8px',
-      fontSize: '14px',
-      fontWeight: '500',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-      zIndex: '9999',
-      opacity: '0',
-      transform: 'translateY(-20px)',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      fontFamily: 'Inter, sans-serif'
-    });
-    
-    document.body.appendChild(toast);
-    
-    // Animate in
-    setTimeout(() => {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translateY(0)';
-    }, 10);
-    
-    // Remove after delay
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(-20px)';
-      
-      setTimeout(() => {
-        if (document.body.contains(toast)) {
-          document.body.removeChild(toast);
-        }
-      }, 300);
-    }, 3000);
+    this.snackBar.open(message, 'Close', { duration: 2500 });
   }
   
   // Keyboard navigation and accessibility
@@ -669,6 +591,10 @@ export class AdminDashboardUserManagementComponent {
 
     let filtered = [...this.allUsers];
 
+    if (this.selectedRole !== 'all') {
+      filtered = filtered.filter(user => user.role === this.selectedRole);
+    }
+
     // 🔍 Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -707,11 +633,6 @@ export class AdminDashboardUserManagementComponent {
     this.updatePaginatedUsers();
   }
 
-
-
-  headers = ['name', 'email', 'role'];
-  rows = this.filteredUsers.map(user => [user.name, user.email, user.role]);
-
   // download csv
   exportToCSV() {
     const csvRows = [];
@@ -743,14 +664,14 @@ export class AdminDashboardUserManagementComponent {
 
 
   // change status of the user
-  onStatusChange(user: any, event: Event) {
+  onStatusChange(user: User, event: Event) {
     const target = event.target as HTMLInputElement;
     const isChecked = target.checked;
     const status = isChecked ? 'active' : 'inactive';
     const role = user.role.toLowerCase(); // "admin", "customer", "vendor"
-    const id = user.id;
+    const id = user.backendId;
 
-    let service;
+    let service: any;
     switch (role) {
       case 'admin':
         service = this.adminService;
@@ -768,11 +689,21 @@ export class AdminDashboardUserManagementComponent {
 
     (service.updateStatus(id, status === 'active') as any).subscribe({
       next: () => {
-        alert(`${role} status updated.`);
-        this.startFetchingUsers(); // Refresh users after status change
+        user.status = status;
+        this.snackBar.open(`${role} status updated`, 'Close', { duration: 2000 });
       },
-      error: (err: any) => alert(err)
+      error: () => {
+        target.checked = !isChecked;
+        this.snackBar.open(`Failed to update ${role} status`, 'Close', { duration: 3000 });
+      }
     });
+  }
+
+  private updateRoleCounts(): void {
+    this.roles = this.roles.map(role => ({
+      ...role,
+      count: this.allUsers.filter(user => user.role === role.value).length
+    }));
   }
 
 }

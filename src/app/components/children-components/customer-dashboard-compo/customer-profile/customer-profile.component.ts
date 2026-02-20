@@ -854,7 +854,7 @@ export class CustomerProfileComponent implements OnInit, OnDestroy {
         this.editProfileClicked();
         return;
       } else if(key === 'cart') {
-        this.router.navigate(['/cart']);
+        this.router.navigate(['/shopping_cart']);
         return;
       } else {
         // Default: navigate to orders
@@ -873,3 +873,4 @@ export class CustomerProfileComponent implements OnInit, OnDestroy {
         });
     }
 }
+

@@ -736,7 +736,7 @@ export class ProductsComponentComponent implements OnInit, OnDestroy, AfterViewI
           });
           
           snackRef.onAction().subscribe(() => {
-            this.router.navigate(['/cart']);
+            this.router.navigate(['/shopping_cart']);
           });
           
           // Reset "added" state after animation

@@ -172,27 +172,100 @@ export class CheckoutPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (carts: Cart[]) => {
-          this.cartItems = carts.map(cart => {
-            const product = typeof cart.productId === 'object' ? cart.productId : null;
-            const vendorInfo = (product as any)?.vendorId;
-            const vendorName = typeof vendorInfo === 'object' ? vendorInfo?.shopName : undefined;
-            return {
-              cart,
-              productName: product?.productName || 'Product',
-              productPrice: (product as any)?.price || 0,
-              productImage: (product as any)?.productImageURL || '',
-              quantity: cart.quantity || 1,
-              vendorName: vendorName || 'Vendor'
-            };
-          });
+          this.cartItems = carts.map(cart => this.mapCartToCheckoutItem(cart));
           this.calculateTotals();
-          this.isLoadingCart = false;
+
+          const missingProductIds = this.cartItems
+            .filter(item =>
+              !!item.productId &&
+              (item.productPrice <= 0 || item.productName === '' || item.vendorName === '')
+            )
+            .map(item => item.productId as string);
+
+          if (missingProductIds.length === 0) {
+            this.isLoadingCart = false;
+            return;
+          }
+
+          this.productService.getProductsByIds(Array.from(new Set(missingProductIds)))
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (products: Product[]) => {
+                const byId = new Map(products.map(product => [product.productId, product]));
+
+                this.cartItems = this.cartItems.map(item => {
+                  const product = item.productId ? byId.get(item.productId) : undefined;
+                  if (!product) {
+                    return item;
+                  }
+
+                  const productData: any = product;
+                  const vendorInfo = productData.vendorId;
+                  const vendorName = productData.vendorName || (typeof vendorInfo === 'object' ? vendorInfo?.shopName : '');
+                  const vendorIdValue = typeof vendorInfo === 'object' ? vendorInfo?.vendorId : vendorInfo;
+
+                  return {
+                    ...item,
+                    productName: productData.productName || item.productName,
+                    productPrice: productData.price ?? item.productPrice,
+                    productImage: productData.productImageURL || item.productImage,
+                    vendorName: vendorName || item.vendorName,
+                    vendorId: vendorIdValue || item.vendorId
+                  };
+                });
+
+                this.calculateTotals();
+                this.isLoadingCart = false;
+              },
+              error: () => {
+                this.isLoadingCart = false;
+              }
+            });
         },
         error: () => {
           this.snackBar.open('Failed to load cart items', 'Close', { duration: 3000 });
           this.isLoadingCart = false;
         }
       });
+  }
+
+  private mapCartToCheckoutItem(cart: Cart): CartItem {
+    const product = this.extractProductFromCart(cart);
+    const vendorInfo = product?.vendorId as any;
+    const vendorName = product?.vendorName || (typeof vendorInfo === 'object' ? vendorInfo?.shopName : '');
+    const vendorIdValue = typeof vendorInfo === 'object' ? vendorInfo?.vendorId : vendorInfo;
+    const productId = this.extractProductId(cart);
+
+    return {
+      cart,
+      productName: product?.productName || product?.name || '',
+      productPrice: product?.price ?? product?.productPrice ?? 0,
+      productImage: product?.productImageURL || product?.productImage || '',
+      quantity: cart.quantity || 1,
+      vendorName: vendorName || '',
+      productId: productId || undefined,
+      vendorId: vendorIdValue || cart.vendorId
+    };
+  }
+
+  private extractProductFromCart(cart: Cart): any {
+    if ((cart as any).product) {
+      return (cart as any).product;
+    }
+    if (cart.productId && typeof cart.productId === 'object') {
+      return cart.productId;
+    }
+    return null;
+  }
+
+  private extractProductId(cart: Cart): string {
+    if (typeof cart.productId === 'string') {
+      return cart.productId;
+    }
+    if (cart.productId && typeof cart.productId === 'object') {
+      return (cart.productId as any).productId || '';
+    }
+    return '';
   }
 
   private loadBuyNowProduct(): void {
@@ -676,7 +749,5 @@ export class CheckoutPageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/shopping_cart']);
   }
 }
-
-
 
 

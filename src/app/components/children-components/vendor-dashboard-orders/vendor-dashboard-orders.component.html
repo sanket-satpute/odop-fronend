@@ -18,7 +18,7 @@
       
       <!-- Stats Cards -->
       <div class="stats-grid">
-        <div class="stat-card" [class.active]="selectedStat === 'total'">
+        <div class="stat-card" [class.active]="selectedStat === 'total'" (click)="onStatCardClick('total')">
           <div class="stat-icon total">
             <i class="fas fa-shopping-cart"></i>
           </div>
@@ -28,7 +28,7 @@
           </div>
         </div>
         
-        <div class="stat-card" [class.active]="selectedStat === 'pending'">
+        <div class="stat-card" [class.active]="selectedStat === 'pending'" (click)="onStatCardClick('pending')">
           <div class="stat-icon pending">
             <i class="fas fa-clock"></i>
           </div>
@@ -38,7 +38,7 @@
           </div>
         </div>
         
-        <div class="stat-card" [class.active]="selectedStat === 'delivered'">
+        <div class="stat-card" [class.active]="selectedStat === 'delivered'" (click)="onStatCardClick('delivered')">
           <div class="stat-icon delivered">
             <i class="fas fa-check-circle"></i>
           </div>
@@ -48,7 +48,7 @@
           </div>
         </div>
         
-        <div class="stat-card" [class.active]="selectedStat === 'cancelled'">
+        <div class="stat-card" [class.active]="selectedStat === 'cancelled'" (click)="onStatCardClick('cancelled')">
           <div class="stat-icon cancelled">
             <i class="fas fa-times-circle"></i>
           </div>
@@ -123,7 +123,7 @@
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngFor="let order of filteredOrders; trackBy: trackByOrderId">
+          <ng-container *ngFor="let order of pagedOrders; trackBy: trackByOrderId">
             <tr 
               class="order-row"
               [class.expanded]="expandedOrderId === order.id"
@@ -267,7 +267,7 @@
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="filteredOrders.length === 0" class="empty-state">
+  <div *ngIf="!isLoading && !error && filteredOrders.length === 0" class="empty-state">
     <div class="empty-icon">
       <i class="fas fa-shopping-cart"></i>
     </div>
@@ -276,7 +276,7 @@
   </div>
 
   <!-- Pagination -->
-  <div class="pagination-section" *ngIf="filteredOrders.length > 0">
+  <div class="pagination-section" *ngIf="!isLoading && !error && filteredOrders.length > 0">
     <div class="pagination-info">
       Showing {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, totalItems) }} of {{ totalItems }} orders
     </div>

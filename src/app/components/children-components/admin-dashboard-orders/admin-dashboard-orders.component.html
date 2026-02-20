@@ -140,7 +140,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of filteredOrders; let i = index" 
+          <tr *ngFor="let order of getCurrentPageOrders(); let i = index" 
               class="table-row"
               [class.selected]="isOrderSelected(order.id)">
             <td class="checkbox-col">

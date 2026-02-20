@@ -1,9 +1,9 @@
 // Development environment configuration
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:50982/odop/',
-  apiUrl: 'http://localhost:50982',  // Base API URL without path
-  authUrl: 'http://localhost:50982/authenticate',
+  apiBaseUrl: 'https://odop-backend.onrender.com/odop/',
+  apiUrl: 'https://odop-backend.onrender.com',  // Base API URL without path
+  authUrl: 'https://odop-backend.onrender.com/authenticate',
   
   // Feature flags
   enableDebugMode: true,
@@ -68,3 +68,4 @@ export const environment = {
   // Cache settings
   cacheTimeout: 5 * 60 * 1000 // 5 minutes
 };
+

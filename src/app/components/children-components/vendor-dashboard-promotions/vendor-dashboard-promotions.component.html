@@ -196,25 +196,25 @@
       <div class="quick-create-card">
         <h3>Quick Create</h3>
         <div class="quick-options">
-          <button class="quick-option">
+          <button class="quick-option" (click)="createPromotionByType('PERCENTAGE')">
             <div class="option-icon discount">
               <i class="fas fa-percent"></i>
             </div>
             <span>Percentage Discount</span>
           </button>
-          <button class="quick-option">
+          <button class="quick-option" (click)="createPromotionByType('FREE_SHIPPING')">
             <div class="option-icon flash">
               <i class="fas fa-bolt"></i>
             </div>
             <span>Flash Sale</span>
           </button>
-          <button class="quick-option">
+          <button class="quick-option" (click)="createPromotionByType('FIXED_AMOUNT')">
             <div class="option-icon coupon">
               <i class="fas fa-ticket-alt"></i>
             </div>
             <span>Coupon Code</span>
           </button>
-          <button class="quick-option">
+          <button class="quick-option" (click)="createPromotionByType('FIXED_AMOUNT')">
             <div class="option-icon bundle">
               <i class="fas fa-box-open"></i>
             </div>

@@ -1,43 +1,49 @@
-import { Component } from '@angular/core';
-import { AppComponent } from 'src/app/app.component';
+import { Component, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Cart } from 'src/app/project/models/cart';
 import { CartObj } from 'src/app/project/models/cart_obj';
 import { Product } from 'src/app/project/models/product';
 import { CartServiceService } from 'src/app/project/services/cart-service.service';
 import { ProductServiceService } from 'src/app/project/services/product-service.service';
+import { UserStateService } from 'src/app/project/services/user-state.service';
 
 @Component({
   selector: 'app-customer-cart',
   templateUrl: './customer-cart.component.html',
   styleUrls: ['./customer-cart.component.css']
 })
-export class CustomerCartComponent {
+export class CustomerCartComponent implements OnInit {
 
   constructor(
     private prod_service: ProductServiceService,
     private cart_service: CartServiceService,
-    private ap: AppComponent
+    private userState: UserStateService,
+    private snackBar: MatSnackBar
   ) {}
 
 
 
   carts?: Cart[];
-  products?: Product[];
+  products: Product[] = [];
 
   objs: CartObj[] = [];
 
   ngOnInit(): void {
-    this.cart_service.getCartByIdCustomer("this.ap.GLOBAL_CUSTOMER?.customerId").subscribe(
+    const customerId = this.userState.customer?.customerId;
+    if (!customerId) {
+      this.objs = [];
+      return;
+    }
+
+    this.cart_service.getCartByIdCustomer(customerId).subscribe(
       (response) => {
-        console.log(response);
         this.carts = response;
         for(let item of this.carts) {
           const productId = typeof item.productId === 'string' ? item.productId : item.productId?.productId;
           if (!productId) continue;
           this.prod_service.getProductById(productId).subscribe(
             (response) => {
-              console.log(response);
-              this.products?.push(response);
+              this.products.push(response);
               const obj = new CartObj();
               obj.cartId = item.cartId;
               obj.cutomerId = item.customerId
@@ -59,7 +65,7 @@ export class CustomerCartComponent {
       },
       (error) => {
         console.log(error);
-        alert("Failed to load cart : " + error);
+        this.snackBar.open('Failed to load cart', 'Close', { duration: 2500 });
       }
     )
   }
@@ -68,7 +74,6 @@ export class CustomerCartComponent {
     if(url === null)
       return 'https://www.freshone.com.pk/content/images/thumbs/default-image_550.png'
     if(url != null) {
-      console.log("hhh")
       return url;
     } else {
       return 'https://www.freshone.com.pk/content/images/thumbs/default-image_550.png'
@@ -81,17 +86,16 @@ export class CustomerCartComponent {
         if(response) {
           this.objs = this.objs.filter(item => item.cartId !== cartId);
         } else {
-          alert("Failed to remove item from cart")
+          this.snackBar.open('Failed to remove item from cart', 'Close', { duration: 2500 });
         }
       }, 
       (error) => {
-        alert("Failed to remove item from cart " + error)
+        this.snackBar.open('Failed to remove item from cart', 'Close', { duration: 2500 });
       }
     )
   }
 
   showProductStatus(cartId: string | undefined) {
-    console.log("Not implemented")
-    alert("Not implemented")
+    this.snackBar.open('Product status is not available for this view', 'Close', { duration: 2500 });
   }
 }

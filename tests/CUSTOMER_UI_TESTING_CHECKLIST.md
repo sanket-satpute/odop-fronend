@@ -5,8 +5,8 @@
 
 ## Test Environment
 - **Frontend URL**: http://localhost:4200
-- **Backend API**: http://localhost:50982/odop
-- **Auth API**: http://localhost:50982/authenticate
+- **Backend API**: https://odop-backend.onrender.com/odop
+- **Auth API**: https://odop-backend.onrender.com/authenticate
 
 ---
 
@@ -411,3 +411,4 @@ Created via automated test:
 | Cart | | | | |
 | Vendor Shop | | | | |
 | Responsive | | | | |
+

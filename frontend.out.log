@@ -1,0 +1,33 @@
+
+> odop-project@0.0.0 start
+> ng serve --host 0.0.0.0 --port 4200
+
+
+Initial Chunk Files                                                   | Names                                                   |  Raw Size
+main.js                                                               | main                                                    |   9.51 MB |
+vendor.js                                                             | vendor                                                  |   6.40 MB |
+styles.css, styles.js                                                 | styles                                                  | 267.13 kB |
+polyfills.js                                                          | polyfills                                               | 252.60 kB |
+runtime.js                                                            | runtime                                                 |  14.14 kB |
+
+| Initial Total                                           |  16.44 MB
+
+Lazy Chunk Files                                                      | Names                                                   |  Raw Size
+node_modules_canvg_lib_index_es_js.js                                 | canvg                                                   | 434.23 kB |
+src_app_components_government-schemes_government-schemes_module_ts.js | components-government-schemes-government-schemes-module | 410.10 kB |
+node_modules_html2canvas_dist_html2canvas_js.js                       | html2canvas                                             | 377.67 kB |
+src_app_components_artisan-stories_artisan-stories_module_ts.js       | components-artisan-stories-artisan-stories-module       | 304.50 kB |
+src_app_components_festivals_festivals_module_ts.js                   | components-festivals-festivals-module                   | 302.89 kB |
+src_app_components_returns_returns_module_ts.js                       | components-returns-returns-module                       | 186.15 kB |
+src_app_components_bulk-upload_bulk-upload_module_ts.js               | components-bulk-upload-bulk-upload-module               | 177.99 kB |
+src_app_components_district-map_district-map_module_ts.js             | components-district-map-district-map-module             | 166.79 kB |
+src_app_components_reports_reports_module_ts.js                       | components-reports-reports-module                       | 145.16 kB |
+src_app_components_craft-categories_craft-categories_module_ts.js     | components-craft-categories-craft-categories-module     | 112.83 kB |
+node_modules_dompurify_dist_purify_es_mjs.js                          | dompurify                                               |  63.27 kB |
+
+Build at: 2026-02-15T05:31:33.360Z - Hash: 2ec1d6b2e730ed54 - Time: 44992ms
+
+** Angular Live Development Server is listening on 0.0.0.0:4200, open your browser on http://localhost:4200/ **
+
+
+√ Compiled successfully.

@@ -9,8 +9,8 @@ $Global:PassCount = 0
 $Global:FailCount = 0
 
 # Configuration
-$API_BASE_URL = "http://localhost:50982/odop"
-$AUTH_URL = "http://localhost:50982/authenticate"
+$API_BASE_URL = "https://odop-backend.onrender.com/odop"
+$AUTH_URL = "https://odop-backend.onrender.com/authenticate"
 $FRONTEND_URL = "http://localhost:4200"
 
 # Test Customer Data
@@ -628,3 +628,4 @@ Cleanup-TestData
 Generate-TestReport
 
 Write-Host "`nTest Completed: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor Gray
+

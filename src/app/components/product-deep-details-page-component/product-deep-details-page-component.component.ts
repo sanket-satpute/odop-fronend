@@ -733,7 +733,7 @@ export class ProductDeepDetailsPageComponentComponent implements OnInit, AfterVi
         });
         
         snackRef.onAction().subscribe(() => {
-          this.router.navigate(['/cart']);
+          this.router.navigate(['/shopping_cart']);
         });
         
         // Keep button in "Added" state - no reset needed since isInCart handles the UI
@@ -873,7 +873,7 @@ export class ProductDeepDetailsPageComponentComponent implements OnInit, AfterVi
 
   // View cart
   viewCart(): void {
-    this.router.navigate(['/cart']);
+    this.router.navigate(['/shopping_cart']);
   }
 
   // Scroll to top
@@ -1061,4 +1061,5 @@ export class ProductDeepDetailsPageComponentComponent implements OnInit, AfterVi
     }
   }
 }
+
 

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
-import { CouponService, Coupon, CouponDto } from '../../../project/services/coupon.service';
+import { CouponService, Coupon, CouponDto, DiscountType } from '../../../project/services/coupon.service';
 import { UserStateService } from '../../../project/services/user-state.service';
 import { VendorDto as Vendor } from '../../../project/models/vendor';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -57,7 +57,6 @@ export class VendorDashboardPromotionsComponent implements OnInit, OnDestroy {
   conversionRate: number = 0;
 
   filterStatus: string = 'all';
-  showCreateModal: boolean = false;
 
   constructor(
     private couponService: CouponService,
@@ -237,12 +236,15 @@ export class VendorDashboardPromotionsComponent implements OnInit, OnDestroy {
   }
 
   createPromotion(): void {
-    this.showCreateModal = true;
+    this.openPromotionForm();
   }
 
   editPromotion(promo: Promotion): void {
-    console.log('Edit promotion:', promo);
-    // TODO: Implement edit modal with couponService.updateCoupon()
+    if (!promo.original) {
+      this.snackBar.open('Cannot edit this promotion', 'Close', { duration: 2500 });
+      return;
+    }
+    this.openPromotionForm(promo);
   }
 
   duplicatePromotion(promo: Promotion): void {
@@ -299,5 +301,111 @@ export class VendorDashboardPromotionsComponent implements OnInit, OnDestroy {
 
   refreshPromotions(): void {
     this.loadPromotions();
+  }
+
+  createPromotionByType(type: DiscountType): void {
+    this.openPromotionForm(undefined, type);
+  }
+
+  private openPromotionForm(promo?: Promotion, typeHint?: DiscountType): void {
+    const original = promo?.original;
+    const defaultCode = promo ? promo.code : '';
+    const codeInput = prompt('Enter coupon code (A-Z, 0-9, underscore):', defaultCode);
+    if (codeInput === null) return;
+    const code = codeInput.trim().toUpperCase();
+    if (!code) {
+      this.snackBar.open('Coupon code is required', 'Close', { duration: 2500 });
+      return;
+    }
+
+    const discountTypeDefault = original?.discountType || typeHint || 'PERCENTAGE';
+    const discountTypeInput = prompt('Discount type: PERCENTAGE, FIXED_AMOUNT, FREE_SHIPPING', discountTypeDefault);
+    if (discountTypeInput === null) return;
+    const discountType = discountTypeInput.trim().toUpperCase() as DiscountType;
+    if (!['PERCENTAGE', 'FIXED_AMOUNT', 'FREE_SHIPPING'].includes(discountType)) {
+      this.snackBar.open('Invalid discount type', 'Close', { duration: 2500 });
+      return;
+    }
+
+    const discountDefault = original?.discountValue ?? 10;
+    const discountInput = prompt('Discount value (number):', String(discountDefault));
+    if (discountInput === null) return;
+    const discountValue = Number(discountInput);
+    if (!Number.isFinite(discountValue) || discountValue < 0) {
+      this.snackBar.open('Discount value must be a valid number', 'Close', { duration: 2500 });
+      return;
+    }
+
+    const usageLimitDefault = original?.usageLimit ?? 100;
+    const usageLimitInput = prompt('Usage limit:', String(usageLimitDefault));
+    if (usageLimitInput === null) return;
+    const usageLimit = Number(usageLimitInput);
+    if (!Number.isFinite(usageLimit) || usageLimit < 1) {
+      this.snackBar.open('Usage limit must be at least 1', 'Close', { duration: 2500 });
+      return;
+    }
+
+    const minOrderDefault = original?.minimumOrderAmount ?? 0;
+    const minOrderInput = prompt('Minimum order amount (0 for none):', String(minOrderDefault));
+    if (minOrderInput === null) return;
+    const minimumOrderAmount = Number(minOrderInput);
+    if (!Number.isFinite(minimumOrderAmount) || minimumOrderAmount < 0) {
+      this.snackBar.open('Minimum order amount must be 0 or more', 'Close', { duration: 2500 });
+      return;
+    }
+
+    const maxDiscountDefault = original?.maximumDiscount ?? 0;
+    const maxDiscountInput = prompt('Maximum discount amount (0 for none):', String(maxDiscountDefault));
+    if (maxDiscountInput === null) return;
+    const maxDiscountRaw = Number(maxDiscountInput);
+    if (!Number.isFinite(maxDiscountRaw) || maxDiscountRaw < 0) {
+      this.snackBar.open('Maximum discount amount must be 0 or more', 'Close', { duration: 2500 });
+      return;
+    }
+
+    const validDaysDefault = promo ? Math.max(1, Math.ceil((promo.endDate.getTime() - Date.now()) / 86400000)) : 30;
+    const validDaysInput = prompt('Valid for how many days from today?', String(validDaysDefault));
+    if (validDaysInput === null) return;
+    const validDays = Number(validDaysInput);
+    if (!Number.isFinite(validDays) || validDays < 1) {
+      this.snackBar.open('Validity days must be at least 1', 'Close', { duration: 2500 });
+      return;
+    }
+
+    const now = new Date();
+    const validUntil = new Date();
+    validUntil.setDate(now.getDate() + validDays);
+    const activeByDefault = original?.isActive ?? true;
+    const isActive = confirm(`Set coupon "${code}" as active now? ${activeByDefault ? '(Recommended: OK)' : '(Click Cancel to keep inactive)'}`);
+
+    const payload: CouponDto = {
+      code,
+      description: promo?.name || code,
+      discountType,
+      discountValue,
+      minimumOrderAmount,
+      maximumDiscount: maxDiscountRaw || undefined,
+      validFrom: now.toISOString(),
+      validUntil: validUntil.toISOString(),
+      usageLimit,
+      isActive
+    };
+
+    const request$ = promo
+      ? this.couponService.updateCoupon(promo.code, payload)
+      : this.couponService.createCoupon(payload);
+
+    request$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.snackBar.open(promo ? 'Promotion updated successfully' : 'Promotion created successfully', 'Close', {
+          duration: 3000
+        });
+        this.loadPromotions();
+      },
+      error: (error) => {
+        const message = error?.error?.message || (promo ? 'Failed to update promotion' : 'Failed to create promotion');
+        this.snackBar.open(message, 'Close', { duration: 3000 });
+      }
+    });
   }
 }

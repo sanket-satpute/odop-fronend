@@ -410,7 +410,7 @@ export class CustomerOrdersComponent implements OnInit, OnDestroy {
         duration: 3000,
         panelClass: ['success-snackbar']
       }).onAction().subscribe(() => {
-        this.router.navigate(['/cart']);
+        this.router.navigate(['/shopping_cart']);
       });
     }
   }
@@ -750,4 +750,5 @@ export class CustomerOrdersComponent implements OnInit, OnDestroy {
     return order.orderId;
   }
 }
+
 
